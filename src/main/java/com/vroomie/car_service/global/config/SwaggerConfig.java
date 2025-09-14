@@ -1,0 +1,27 @@
+package com.vroomie.car_service.global.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .servers(List.of(new Server().url("/api/v1").description("Car Service API")))
+                .info(new Info()
+                        .title("Car Service API")
+                        .version("1.0.0")
+                        .description("차량 서비스 관리 시스템 API 문서")
+                        .contact(new Contact()
+                                .name("Car Service Team")
+                                .email("contact@vroomie.com")));
+    }
+}

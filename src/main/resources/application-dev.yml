@@ -1,0 +1,48 @@
+# 개발 환경 설정
+spring:
+  # 데이터소스 설정
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+
+  # Flyway 설정
+  flyway:
+    enabled: false
+
+  # 개발도구 설정
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+# 서버 설정
+server:
+  port: ${SERVER_PORT:8080}
+
+# Swagger 설정 
+springdoc:
+  swagger-ui:
+    display-request-duration: true
+    groups-order: DESC
+    operations-sorter: method
+    tags-sorter: alpha
+    enabled: true
+  api-docs:
+    enabled: true
+
+# 액추에이터 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+  security:
+    enabled: false
