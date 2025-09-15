@@ -1,4 +1,4 @@
-package com.vroomie.car_service.controller;
+package com.vroomie.car_service.global.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
