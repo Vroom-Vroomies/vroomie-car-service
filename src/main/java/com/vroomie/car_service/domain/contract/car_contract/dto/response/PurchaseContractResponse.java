@@ -18,8 +18,19 @@ public class PurchaseContractResponse extends CarContractResponse{
     private BigDecimal loanAmount;
     private BigDecimal interestRate;
     private Integer loanTerm;
-    private BigDecimal monthlyRepayment;
-//    private BigDecimal totalRepayment;
-//    private BigDecimal totalPurchaseCose;
-//    private BigDecimal intestConst;
+    private BigDecimal monthlyRepayment;  //
+    private BigDecimal totalRepayment;   // 총 상환금액 = monthlyRepayment * loanTerm
+    private BigDecimal totalPurchaseCost;  // totalRepayment + downPayment
+    private BigDecimal intestCost;  //  totalRepayment - loanAmount
+
+    public void calculateAmounts() {
+        if(monthlyRepayment != null && loanTerm != null){
+            this.totalRepayment = monthlyRepayment.multiply(new BigDecimal(loanTerm));
+        }
+
+        if(totalRepayment != null && downPayment != null){
+            this.totalPurchaseCost = totalRepayment.add(downPayment);
+            this.intestCost = totalPurchaseCost;
+        }
+    }
 }

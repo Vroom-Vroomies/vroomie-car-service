@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Getter
+@ToString
 public class LeaseContract extends CarContract{
 
     @Id

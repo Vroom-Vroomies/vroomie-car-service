@@ -1,5 +1,8 @@
 package com.vroomie.car_service.domain.contract.car_contract.service;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.response.LeaseContractResponse;
+import com.vroomie.car_service.domain.contract.car_contract.dto.response.PurchaseContractResponse;
+import com.vroomie.car_service.domain.contract.car_contract.dto.response.RentContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
 import com.vroomie.car_service.domain.contract.car_contract.entity.LeaseContract;
 import com.vroomie.car_service.domain.contract.car_contract.entity.PurchaseContract;
@@ -26,16 +29,22 @@ public class CarContractService {
         log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}",contractId);
 
         CarContract contract = contractRepository.findById(contractId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
+        System.out.println("😀😀😀contract = " + contract);
 
         if(contract instanceof LeaseContract){
-            return carContractMapper.toLeaseContractResponse((LeaseContract) contract);
+            LeaseContractResponse leaseDTO = carContractMapper.toLeaseContractResponse((LeaseContract) contract);
+            leaseDTO.calculateAmounts();  // 매퍼가 채운 값 기준으로 계산
+            return leaseDTO;
         } else if(contract instanceof RentContract){
-            return carContractMapper.toRentContractResponse((RentContract) contract);
+            RentContractResponse rentDTO = carContractMapper.toRentContractResponse((RentContract) contract);
+            rentDTO.calculateAmounts();
+            return rentDTO;
         } else if (contract instanceof PurchaseContract) {
-            return carContractMapper.toPurchaseContractResponse((PurchaseContract) contract);
+            PurchaseContractResponse purchaseDTO = carContractMapper.toPurchaseContractResponse((PurchaseContract) contract);
+            purchaseDTO.calculateAmounts();
+            return purchaseDTO;
         } else {
             throw new BusinessException(ErrorCode.CONTRACT_TYPE_NOT_FOUND);
         }
     }
 }
-

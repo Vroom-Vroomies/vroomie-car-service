@@ -31,6 +31,7 @@ import java.sql.Timestamp;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
+@ToString
 public abstract class CarContract {
 
     @Id
