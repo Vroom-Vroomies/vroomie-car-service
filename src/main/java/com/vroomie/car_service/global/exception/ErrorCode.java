@@ -10,7 +10,12 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다", 500, HttpStatus.INTERNAL_SERVER_ERROR),
 
     // ========== 차량 정보보 관련 (1000~1999) ==========
-    CAR_NOT_FOUND("차량을 찾을 수 없습니다", 1000, HttpStatus.NOT_FOUND);
+    CAR_NOT_FOUND("차량을 찾을 수 없습니다", 1000, HttpStatus.NOT_FOUND),
+
+    // ========== 사고 관련 (1300~1399) ==========
+    ACCIDENT_NOT_FOUND("사고 정보를 찾을 수 없습니다", 1300, HttpStatus.NOT_FOUND),
+    CANT_FINALIZE_FALSE("최종 확정 요청은 False일 수 없습니다", 1301, HttpStatus.BAD_REQUEST),
+    ACCIDENT_ALREADY_FINALIZED("이미 제출된 사고 정보는 수정할 수 없습니다", 1302, HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final int statusCode;

@@ -7,6 +7,8 @@ import com.vroomie.car_service.domain.fleet.accident.dto.AccidentListResponseDTO
 import com.vroomie.car_service.domain.fleet.accident.entity.AccidentEntity;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
 import com.vroomie.car_service.domain.fleet.accident.repository.AccidentRepository;
+import com.vroomie.car_service.global.exception.BusinessException;
+import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +43,7 @@ public class AccidentService {
 
     public AccidentDetailDTO getAccidentById(Long id) {
         AccidentEntity accident = accidentRepository.findById(id)
-                .orElseThrow(); // TODO. exception 추가
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCIDENT_NOT_FOUND));
 
         checkFinalized(accident);
 
@@ -57,7 +59,7 @@ public class AccidentService {
 
     public AccidentDetailDTO updateAccident(Long id, AccidentCreateRequestDTO req) {
         AccidentEntity accident = accidentRepository.findById(id)
-                .orElseThrow(); // TODO. exception 추가
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCIDENT_NOT_FOUND));
 
         checkFinalized(accident);
 
@@ -69,7 +71,7 @@ public class AccidentService {
     public AccidentDetailDTO finalizeAccident(Long id, boolean save) {
 
         if (!save) {
-            // 예외 처리
+            throw new BusinessException(ErrorCode.CANT_FINALIZE_FALSE);
         }
 
         AccidentEntity accident = accidentRepository.findById(id)
@@ -83,7 +85,7 @@ public class AccidentService {
     // 최종 저장 여부 확인
     private void checkFinalized(AccidentEntity accident) {
         if (accident.isSaved()) {
-            throw null; // TODO. exception 추가
+            throw new BusinessException(ErrorCode.ACCIDENT_ALREADY_FINALIZED);
         }
     }
 }
