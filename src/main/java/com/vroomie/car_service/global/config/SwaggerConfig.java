@@ -15,7 +15,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url("/api/v1").description("Car Service API")))
+                .servers(List.of(new Server().url("/api").description("Car Service API")))
                 .info(new Info()
                         .title("Car Service API")
                         .version("1.0.0")
