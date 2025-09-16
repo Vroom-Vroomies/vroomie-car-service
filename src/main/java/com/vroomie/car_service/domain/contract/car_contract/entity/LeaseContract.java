@@ -1,10 +1,7 @@
-package com.vroomie.car_service.domain.contract.entity;
+package com.vroomie.car_service.domain.contract.car_contract.entity;
 
-import com.vroomie.car_service.domain.contract.enums.LeaseType;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.vroomie.car_service.domain.contract.car_contract.enums.LeaseType;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +10,15 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Entity
-@Table(name = "tbl_lease_details")
+@Table(name = "tbl_lease_detail")
 @DiscriminatorValue("LEASE")
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Getter
-@SuperBuilder
 public class LeaseContract extends CarContract{
+
+    @Id
+    private Long id;
 
     private BigDecimal monthlyLease;
 
@@ -34,6 +33,7 @@ public class LeaseContract extends CarContract{
     private Long mileageLimit;
     private BigDecimal excessMileageRate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private LeaseType leaseType;
 }

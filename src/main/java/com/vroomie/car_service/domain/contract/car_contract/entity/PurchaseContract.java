@@ -1,9 +1,6 @@
-package com.vroomie.car_service.domain.contract.entity;
+package com.vroomie.car_service.domain.contract.car_contract.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +9,15 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Entity
-@Table(name = "tbl_purchase_details")
+@Table(name = "tbl_purchase_detail")
 @DiscriminatorValue("PURCHASE")
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Getter
-@SuperBuilder
 public class PurchaseContract extends CarContract{
 
+    @Id
+    private Long id;
     private BigDecimal purchasePrice;
     private BigDecimal downPayment;  // 계약금
     private BigDecimal loanAmount;  // 대출금액

@@ -1,4 +1,4 @@
-package com.vroomie.car_service.domain.contract.enums;
+package com.vroomie.car_service.domain.contract.car_contract.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum RentType {
 
-    SHORT("단기렌탈"),
-    LONG("장기렌탈");
+    SHORT_RENT("단기렌탈"),
+    LONG_RENT("장기렌탈");
 
     private final String rentType;
 }
