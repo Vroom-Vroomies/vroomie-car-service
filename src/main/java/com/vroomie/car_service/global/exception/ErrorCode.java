@@ -26,8 +26,11 @@ public enum ErrorCode {
 
     // ========== 파일 관련 (1500~1599) ==========
     FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", 1500, HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_COUNT_EXCEEDED("이미지는 최대 10개까지 업로드할 수 있습니다.", 1501, HttpStatus.BAD_REQUEST);
+    FILE_COUNT_EXCEEDED("이미지는 최대 10개까지 업로드할 수 있습니다.", 1501, HttpStatus.BAD_REQUEST),
 
+    // ========== 계약 정보 관련 (1700~1799) ==========
+    CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
+    CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final int statusCode;

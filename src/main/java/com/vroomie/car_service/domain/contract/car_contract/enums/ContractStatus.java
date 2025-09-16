@@ -1,4 +1,4 @@
-package com.vroomie.car_service.domain.contract.enums;
+package com.vroomie.car_service.domain.contract.car_contract.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
