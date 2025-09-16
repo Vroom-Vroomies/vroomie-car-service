@@ -2,7 +2,6 @@ package com.vroomie.car_service.domain.contract.car_contract.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.service.annotation.GetExchange;
 
 @RequiredArgsConstructor
 @Getter

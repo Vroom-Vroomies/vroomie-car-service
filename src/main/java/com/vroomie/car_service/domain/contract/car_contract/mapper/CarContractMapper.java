@@ -11,9 +11,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CarContractMapper {
-    //    LeaseContractResponse toLeaseContractResponse(LeaseContract entity);
-    //    RentContractResponse toRentContractResponse(RentContract entity);
-    //    PurchaseContractResponse toPurchaseContractResponse(PurchaseContract entity);
 
     @Mapping(source = "id", target = "contractId")
     @Mapping(source = "car.id", target = "carId")

@@ -1,6 +1,5 @@
 package com.vroomie.car_service.domain.contract.car_contract.dto.response;
 
-import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
 import com.vroomie.car_service.domain.contract.car_contract.enums.RentType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
