@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Getter
+@ToString
 public class PurchaseContract extends CarContract{
 
     @Id
