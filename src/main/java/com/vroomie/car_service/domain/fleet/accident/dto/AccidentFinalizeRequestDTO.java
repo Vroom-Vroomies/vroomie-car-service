@@ -1,5 +1,5 @@
 package com.vroomie.car_service.domain.fleet.accident.dto;
 
-public class AccidentConfirmSaveRequestDTO {
+public class AccidentFinalizeRequestDTO {
     private boolean save;
 }
