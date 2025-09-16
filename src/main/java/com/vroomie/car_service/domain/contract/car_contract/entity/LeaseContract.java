@@ -3,7 +3,6 @@ package com.vroomie.car_service.domain.contract.car_contract.entity;
 import com.vroomie.car_service.domain.contract.car_contract.enums.LeaseType;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
