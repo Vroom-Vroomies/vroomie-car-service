@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.accident.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
+import com.vroomie.car_service.domain.fleet.accident.dto.AccidentCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import jakarta.persistence.*;
@@ -46,5 +47,13 @@ public class AccidentEntity {
         this.occurredAt = occurredAt;
         this.cost = cost;
         this.isSaved = isSaved;
+    }
+
+    public void update(AccidentCreateRequestDTO req) {
+        // 업데이트 메소드 추가
+    }
+
+    public void finalize() {
+        this.isSaved = true;
     }
 }

@@ -1,10 +1,15 @@
 package com.vroomie.car_service.domain.fleet.accident.service;
 
+import com.vroomie.car_service.domain.fleet.accident.dto.AccidentCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.accident.dto.AccidentDetailDTO;
+import com.vroomie.car_service.domain.fleet.accident.dto.AccidentFinalizeRequestDTO;
+import com.vroomie.car_service.domain.fleet.accident.dto.AccidentListResponseDTO;
 import com.vroomie.car_service.domain.fleet.accident.entity.AccidentEntity;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
 import com.vroomie.car_service.domain.fleet.accident.repository.AccidentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +23,7 @@ public class AccidentService {
     // private final EmployeeRepository employeeRepository;
 
     @Transactional
-    public AccidentDetailDTO createAccident(AccidentDetailDTO req) {
+    public AccidentDetailDTO createAccident(AccidentCreateRequestDTO req) {
         AccidentEntity accident = AccidentEntity.builder()
                 .car(null) // carRepository.findById(dto.getCarId()).orElseThrow()
                 .employee(null) // employeeRepository.findById(dto.getEmpEmail()).orElseThrow())
@@ -31,6 +36,54 @@ public class AccidentService {
                 .build();
 
         AccidentEntity savedAccident = accidentRepository.save(accident);
+        return null; // TODO. map construct 연결
+    }
+
+    public AccidentDetailDTO getAccidentById(Long id) {
+        AccidentEntity accident = accidentRepository.findById(id)
+                .orElseThrow(); // TODO. exception 추가
+
+        checkFinalized(accident);
+
         return null;
+    }
+
+    public Page<AccidentListResponseDTO> getAllAccidents(Long carId, boolean save, Pageable pageable) {
+        Page<AccidentEntity> accidents = accidentRepository.findAll(pageable);
+        // TODO. 필터 처리 추가
+
+        return null;
+    }
+
+    public AccidentDetailDTO updateAccident(Long id, AccidentCreateRequestDTO req) {
+        AccidentEntity accident = accidentRepository.findById(id)
+                .orElseThrow(); // TODO. exception 추가
+
+        checkFinalized(accident);
+
+        accident.update(req);
+
+        return null; // TODO. map construct 연결
+    }
+
+    public AccidentDetailDTO finalizeAccident(Long id, boolean save) {
+
+        if (!save) {
+            // 예외 처리
+        }
+
+        AccidentEntity accident = accidentRepository.findById(id)
+                .orElseThrow();
+        checkFinalized(accident);
+
+        accident.finalize();
+        return null; // TODO. map construct 연결
+    }
+
+    // 최종 저장 여부 확인
+    private void checkFinalized(AccidentEntity accident) {
+        if (accident.isSaved()) {
+            throw null; // TODO. exception 추가
+        }
     }
 }
