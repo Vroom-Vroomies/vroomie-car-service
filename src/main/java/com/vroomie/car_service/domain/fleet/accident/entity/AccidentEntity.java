@@ -49,10 +49,6 @@ public class AccidentEntity {
         this.isSaved = isSaved;
     }
 
-    public void update(AccidentCreateRequestDTO req) {
-        // 업데이트 메소드 추가
-    }
-
     public void finalize() {
         this.isSaved = true;
     }

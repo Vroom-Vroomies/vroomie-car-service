@@ -22,6 +22,8 @@ public class AccidentController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> createAccident(@RequestBody AccidentCreateRequestDTO req) {
+        req.setEmpEmail("user02@wemade.com");
+
         AccidentDetailDTO data = accidentService.createAccident(req);
 
         return ResponseEntity.ok(ApiResponse.success(data, "신규 사고 내역이 등록 되었습니다."));
