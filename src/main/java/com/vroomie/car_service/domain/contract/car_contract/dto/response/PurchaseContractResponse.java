@@ -21,7 +21,7 @@ public class PurchaseContractResponse extends CarContractResponse{
     private BigDecimal monthlyRepayment;  //
     private BigDecimal totalRepayment;   // 총 상환금액 = monthlyRepayment * loanTerm
     private BigDecimal totalPurchaseCost;  // totalRepayment + downPayment
-    private BigDecimal intestCost;  //  totalRepayment - loanAmount
+    private BigDecimal interestCost;  //  totalRepayment - loanAmount
 
     public void calculateAmounts() {
         if(monthlyRepayment != null && loanTerm != null){
@@ -30,7 +30,7 @@ public class PurchaseContractResponse extends CarContractResponse{
 
         if(totalRepayment != null && downPayment != null){
             this.totalPurchaseCost = totalRepayment.add(downPayment);
-            this.intestCost = totalPurchaseCost;
+            this.interestCost = totalPurchaseCost;
         }
     }
 }

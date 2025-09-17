@@ -15,8 +15,8 @@ public enum ErrorCode {
     // ========== 유저 관련 (1200~1299) ==========
     EMPLOYEE_NOT_FOUND("존재하지 않는 직원입니다.", 1200, HttpStatus.NOT_FOUND),
 
-    // ========== 운행기록 관련 (1300~1399) ==========
-    DRIVING_LOG_ALREADY_EXSITS("운행 기록이 이미 존재합니다. 기존 운행기록을 이어서 작성해주세요.", 1300, HttpStatus.BAD_REQUEST),
+    // ========== 운행기록 관련 (1200~1299) ==========
+    DRIVING_LOG_ALREADY_EXSITS("운행 기록이 이미 존재합니다. 기존 운행기록을 이어서 작성해주세요.", 1200, HttpStatus.BAD_REQUEST),
 
     // ========== 사고 관련 (1400~1499) ==========
     ACCIDENT_NOT_FOUND("사고 정보를 찾을 수 없습니다", 1400, HttpStatus.NOT_FOUND),

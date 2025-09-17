@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/contract")
+@RequestMapping("/contract")
 public class CarContractController {
 
     private final CarContractService contractService;
