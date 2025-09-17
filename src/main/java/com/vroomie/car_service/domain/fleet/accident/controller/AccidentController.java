@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/fleet/accidents")
@@ -21,10 +24,12 @@ public class AccidentController {
     private final AccidentService accidentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AccidentDetailDTO>> createAccident(@RequestBody AccidentCreateRequestDTO req) {
+    public ResponseEntity<ApiResponse<AccidentDetailDTO>> createAccident(
+            @RequestPart("req") AccidentCreateRequestDTO req,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         req.setEmpEmail("user02@wemade.com");
 
-        AccidentDetailDTO data = accidentService.createAccident(req);
+        AccidentDetailDTO data = accidentService.createAccident(req, images);
 
         return ResponseEntity.ok(ApiResponse.success(data, "신규 사고 내역이 등록 되었습니다."));
     }
@@ -48,8 +53,9 @@ public class AccidentController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> updateAccident(
             @PathVariable Long id,
-            @RequestBody AccidentCreateRequestDTO req){
-        AccidentDetailDTO data = accidentService.updateAccident(id, req);
+            @RequestPart("req") AccidentCreateRequestDTO req,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images){
+        AccidentDetailDTO data = accidentService.updateAccident(id, req, images);
         return ResponseEntity.ok(ApiResponse.success(data, "사고 정보 수정에 성공하였습니다."));
     }
 
