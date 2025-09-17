@@ -35,8 +35,19 @@ public class CarService {
     @Transactional(readOnly = true)
     public CarListResponse fetchCarList(Pageable pageable, String status, String usageType) {
 
-        CarStatus statusEnum = (status != null) ? CarStatus.valueOf(status.toUpperCase()) : null;
-        CarUsageType usageTypeEnum = (usageType != null) ? CarUsageType.valueOf(usageType.toUpperCase()) : null;
+        CarStatus statusEnum = null;
+        CarUsageType usageTypeEnum = null;
+
+        try {
+            if (status != null && !status.isBlank()) {
+                statusEnum = CarStatus.valueOf(status.toUpperCase());
+            }
+            if (usageType != null && !usageType.isBlank()) {
+                usageTypeEnum = CarUsageType.valueOf(usageType.toUpperCase());
+            }
+        } catch (IllegalArgumentException e) {
+            throw CarException.invalidSearchParameterException();
+        }
 
         Page<CarEntity> carPage;
 
