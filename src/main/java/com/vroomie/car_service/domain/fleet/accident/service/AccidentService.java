@@ -6,6 +6,7 @@ import com.vroomie.car_service.domain.fleet.accident.dto.AccidentFinalizeRequest
 import com.vroomie.car_service.domain.fleet.accident.dto.AccidentListResponseDTO;
 import com.vroomie.car_service.domain.fleet.accident.entity.AccidentEntity;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
+import com.vroomie.car_service.domain.fleet.accident.mapper.AccidentMapper;
 import com.vroomie.car_service.domain.fleet.accident.repository.AccidentRepository;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
@@ -23,6 +24,7 @@ public class AccidentService {
     private final AccidentRepository accidentRepository;
     // private final CarRepository carRepository;
     // private final EmployeeRepository employeeRepository;
+    private final AccidentMapper accidentMapper;
 
     @Transactional
     public AccidentDetailDTO createAccident(AccidentCreateRequestDTO req) {
@@ -37,8 +39,7 @@ public class AccidentService {
                 .isSaved(false) // 최초 생성 시 false -> 사용자 경험 개선 고민 필요
                 .build();
 
-        AccidentEntity savedAccident = accidentRepository.save(accident);
-        return null; // TODO. map construct 연결
+        return accidentMapper.toDetailResponse(accidentRepository.save(accident));
     }
 
     public AccidentDetailDTO getAccidentById(Long id) {
@@ -47,14 +48,14 @@ public class AccidentService {
 
         checkFinalized(accident);
 
-        return null;
+        return accidentMapper.toDetailResponse(accident);
     }
 
     public Page<AccidentListResponseDTO> getAllAccidents(Long carId, boolean save, Pageable pageable) {
         Page<AccidentEntity> accidents = accidentRepository.findAll(pageable);
         // TODO. 필터 처리 추가
 
-        return null;
+        return accidentMapper.toListResponse(accidents);
     }
 
     public AccidentDetailDTO updateAccident(Long id, AccidentCreateRequestDTO req) {
@@ -65,7 +66,7 @@ public class AccidentService {
 
         accident.update(req);
 
-        return null; // TODO. map construct 연결
+        return accidentMapper.toDetailResponse(accident);
     }
 
     public AccidentDetailDTO finalizeAccident(Long id, boolean save) {
@@ -79,7 +80,8 @@ public class AccidentService {
         checkFinalized(accident);
 
         accident.finalize();
-        return null; // TODO. map construct 연결
+
+        return accidentMapper.toDetailResponse(accident);
     }
 
     // 최종 저장 여부 확인
