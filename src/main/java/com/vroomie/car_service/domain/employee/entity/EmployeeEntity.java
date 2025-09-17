@@ -7,11 +7,14 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name="tbl_employee")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmployeeEntity {
 
     @Id
