@@ -9,7 +9,7 @@ public enum ErrorCode {
     FORBIDDEN("접근 권한이 없습니다", 403, HttpStatus.FORBIDDEN),
     INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다", 500, HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // ========== 차량 정보보 관련 (1000~1999) ==========
+    // ========== 차량 정보 관련 (1000~1999) ==========
     CAR_NOT_FOUND("차량을 찾을 수 없습니다", 1000, HttpStatus.NOT_FOUND),
 
     // ========== 사고 관련 (1300~1399) ==========
