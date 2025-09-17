@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.fleet.car.entity;
 
+import com.vroomie.car_service.domain.fleet.car.enums.CarFuelType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarGearType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
@@ -43,7 +44,9 @@ public class CarEntity {
     private LocalDate lastInspection;
     private Integer inspectionCycle;
     private Integer allowableCapacity;
-    private String fuelType;
+
+    @Enumerated(EnumType.STRING)
+    private CarFuelType fuelType;
 
     @Enumerated(EnumType.STRING)
     private CarUsageType usageType;
@@ -53,7 +56,7 @@ public class CarEntity {
 
     @Builder
     public CarEntity(Long companyId, String identification, String number, String image, String model, String type, Long totalMileage, String color, int year,
-               CarStatus status, LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle, Integer allowableCapacity, String fuelType,
+               CarStatus status, LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle, Integer allowableCapacity, CarFuelType fuelType,
                CarUsageType usageType, CarGearType gearType) {
         this.companyId = companyId;
         this.identification = identification;

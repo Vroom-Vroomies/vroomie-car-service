@@ -9,8 +9,14 @@ public enum ErrorCode {
     FORBIDDEN("접근 권한이 없습니다", 403, HttpStatus.FORBIDDEN),
     INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다", 500, HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // ========== 차량 정보 관련 (1000~1999) ==========
+    // ========== 차량 정보 관련 (1000~1099) ==========
     CAR_NOT_FOUND("차량을 찾을 수 없습니다", 1000, HttpStatus.NOT_FOUND),
+
+    // ========== 유저 관련 (1100~1199) ==========
+    EMPLOYEE_NOT_FOUND("존재하지 않는 직원입니다.", 1100, HttpStatus.NOT_FOUND),
+
+    // ========== 운행기록 관련 (1200~1299) ==========
+    DRIVING_LOG_ALREADY_EXSITS("운행 기록이 이미 존재합니다. 기존 운행기록을 이어서 작성해주세요.", 1200, HttpStatus.BAD_REQUEST),
 
     // ========== 사고 관련 (1300~1399) ==========
     ACCIDENT_NOT_FOUND("사고 정보를 찾을 수 없습니다", 1300, HttpStatus.NOT_FOUND),
