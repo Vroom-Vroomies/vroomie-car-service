@@ -18,6 +18,11 @@ public enum ErrorCode {
     // ========== 운행기록 관련 (1200~1299) ==========
     DRIVING_LOG_ALREADY_EXSITS("운행 기록이 이미 존재합니다. 기존 운행기록을 이어서 작성해주세요.", 1200, HttpStatus.BAD_REQUEST),
 
+    // ========== 예약 정보 관련 (1300~1399) ==========
+    RESERVATION_NOT_FOUND("예약 정보를 찾을 수 없습니다.", 1300, HttpStatus.NOT_FOUND),
+    INVALID_STATUS_CHANGE("예약 상태가 PENDING일 때만 상태 변경이 가능합니다.", 1301, HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_CHANGE_TYPE("PENDING 상태에서는 APPROVED 또는 REJECTED로만 변경할 수 있습니다.", 1302, HttpStatus.BAD_REQUEST),
+
     // ========== 계약 정보 관련 (1700~1799) ==========
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST);
