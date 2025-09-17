@@ -1,14 +1,18 @@
 package com.vroomie.car_service.domain.fleet.accident.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
-import com.vroomie.car_service.domain.fleet.accident.dto.AccidentCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_accident")
@@ -37,6 +41,9 @@ public class AccidentEntity {
     private BigDecimal cost;
     private boolean isSaved;
 
+    @OneToMany(mappedBy = "accident", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AccidentImageEntity> accidentImages = new ArrayList<>();
+
     @Builder
     public AccidentEntity(CarEntity car, EmployeeEntity employee, AccidentType type, String note, String detail, LocalDate occurredAt, BigDecimal cost, boolean isSaved) {
         this.car = car;
@@ -51,5 +58,10 @@ public class AccidentEntity {
 
     public void finalize() {
         this.isSaved = true;
+    }
+
+    public void addImage(AccidentImageEntity image) {
+        this.accidentImages.add(image);
+        image.setAccident(this);
     }
 }

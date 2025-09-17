@@ -27,4 +27,8 @@ public class AccidentImageEntity {
         this.accident = accident;
         this.image = image;
     }
+
+    public void setAccident(AccidentEntity accident) {
+        this.accident = accident;
+    }
 }
