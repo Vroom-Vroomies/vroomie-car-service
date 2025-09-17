@@ -2,12 +2,14 @@ package com.vroomie.car_service.domain.fleet.car.service;
 
 import com.vroomie.car_service.domain.contract.car_contract.repository.CarContractRepository;
 import com.vroomie.car_service.domain.contract.insurance_contract.repository.InsuContractRepository;
+import com.vroomie.car_service.domain.fleet.car.dto.response.CarDetailResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarListResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.PageInfoResponse;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
+import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import com.vroomie.car_service.domain.fleet.car.mapper.CarMapper;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservedLogRepository;
@@ -71,6 +73,15 @@ public class CarService {
                         .totalPages(carPage.getTotalPages())
                         .build())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public CarDetailResponse fetchCarDetail(Long carId) {
+
+        CarEntity carEntity = carRepository.findById(carId)
+                .orElseThrow(CarException::carNotFoundException);
+
+        return carMapper.toDetailResponse(carEntity);
     }
 }
 
