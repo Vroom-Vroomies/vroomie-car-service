@@ -16,9 +16,14 @@ public enum ErrorCode {
 
     // ========== 유저 관련 (1100~1199) ==========
     EMPLOYEE_NOT_FOUND("존재하지 않는 직원입니다.", 1100, HttpStatus.NOT_FOUND),
+    EMPLOYEE_NOT_MATCH("해당 운행일지의 작성자가 아닙니다.", 1101, HttpStatus.BAD_REQUEST),
+    EMPLOYEE_NOT_ENOUGH_ROLE("운행일지 조회 권한이 없습니다", 1102, HttpStatus.BAD_REQUEST),
 
     // ========== 운행기록 관련 (1200~1299) ==========
     DRIVING_LOG_ALREADY_EXSITS("운행 기록이 이미 존재합니다. 기존 운행기록을 이어서 작성해주세요.", 1200, HttpStatus.BAD_REQUEST),
+    DRIVING_LOG_NOT_FOUND("존재하지 않는 운행기록입니다.", 1201, HttpStatus.NOT_FOUND),
+    INVALID_END_ODOMETER("종료 주행 거리는 시작 주행거리보다 커야합니다.", 1202, HttpStatus.BAD_REQUEST),
+    DRIVING_LOG_ALREADY_SUBMITS("이미 제출된 운행일지입니다..", 1203, HttpStatus.BAD_REQUEST),
 
     // ========== 예약 정보 관련 (1300~1399) ==========
     RESERVATION_NOT_FOUND("예약 정보를 찾을 수 없습니다.", 1300, HttpStatus.NOT_FOUND),
