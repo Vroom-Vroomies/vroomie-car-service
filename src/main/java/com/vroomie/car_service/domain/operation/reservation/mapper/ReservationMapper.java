@@ -3,7 +3,7 @@ package com.vroomie.car_service.domain.operation.reservation.mapper;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
-import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarDetailResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -82,9 +82,11 @@ public interface ReservationMapper {
 
     List<AvailableCarListResponse> toAvailableCarListResponseList(List<CarEntity> cars);
 
+    @Mapping(source = "car.id", target = "id")
     @Mapping(target = "fuelType", expression = "java(car.getFuelType() != null ? car.getFuelType().toString() : null)")
     @Mapping(target = "gearType", expression = "java(car.getGearType() != null ? car.getGearType().toString() : null)")
     @Mapping(target = "usageType", expression = "java(car.getUsageType() != null ? car.getUsageType().toString() : null)")
     @Mapping(target = "status", expression = "java(car.getStatus() != null ? car.getStatus().toString() : null)")
-    AvailableCarDetailResponse toAvailableCarDetailResponse(CarEntity car);
+    @Mapping(target = "purpose", expression = "java(reservation != null && reservation.getPurpose() != null ? reservation.getPurpose() : null)")
+    MemberCarDetailResponse toMemberCarDetailResponse(CarEntity car, ReservationEntity reservation);
 }

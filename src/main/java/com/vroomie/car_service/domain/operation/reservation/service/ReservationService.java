@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
-import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarDetailResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservedLogEntity;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservationRepository;
@@ -19,6 +19,7 @@ import com.vroomie.car_service.domain.employee.repository.EmployeeRepository;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
+import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import org.springframework.data.domain.Page;
 import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.util.DateTimeUtil;
@@ -35,7 +36,7 @@ public class ReservationService {
 
         private final ReservationRepository reservationRepository;
         private final ReservedLogRepository reservedLogRepository;
-        private final EmployeeRepository employeeRepository;
+        private final EmployeeRepository employeeRepository;  
         private final CarRepository carRepository;
         private final ReservationMapper reservationMapper;
 
@@ -156,16 +157,25 @@ public class ReservationService {
                                 .build();
         }
 
-        // [사용자] 대여 가능한 차량 상세 조회
-        public AvailableCarDetailResponse getAvailableCarDetail(Long carId) {
+        // [사용자] 차량 상세 조회
+        public MemberCarDetailResponse getMemberCarDetail(Long carId) {
+
+                // String memberEmpEmail = getCurrentUserEmail();
+                // EmployeeEntity member = employeeRepository.findByEmail(memberEmpEmail)
+                // .orElseThrow(() ->
+                // AdminReservationException.employeeNotFound(memberEmpEmail));
+                // String memberEmpEmail = member.getEmail();
+
+                String memberEmpEmail = "user01@wemade.com";
 
                 CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
+                ReservationEntity reservation = reservationRepository.findLatestByCarAndMember(carId, memberEmpEmail);
 
                 if (car == null) {
-                        throw AdminReservationException.carNotAvailable(carId);
+                        throw CarException.carNotFoundException();
                 }
 
-                return reservationMapper.toAvailableCarDetailResponse(car);
+                return reservationMapper.toMemberCarDetailResponse(car, reservation);
         }
 
 }

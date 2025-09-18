@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
-import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarDetailResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.global.response.PageResponse;
@@ -64,11 +64,11 @@ public class ReservationController {
                 "특정 시간대 대여 가능한 차량 목록 조회 성공");
     }
 
-    // [사용자] 대여 가능한 차량 상세 조회
-    @Operation(summary = "[사용자]대여 가능한 차량 상세 조회", description = "대여 가능한 차량 상세를 조회합니다.")
-    @GetMapping("/member/available-cars/{carId}")
-    public ApiResponse<AvailableCarDetailResponse> getAvailableCarDetail(@PathVariable Long carId) {
-        return ApiResponse.success(reservationService.getAvailableCarDetail(carId), "대여 가능한 차량 상세 조회 성공");
+    // [사용자] 차량 상세 조회
+    @Operation(summary = "[사용자]차량 상세 조회", description = "차량 상세를 조회합니다.")
+    @GetMapping("/member/car/{carId}")
+    public ApiResponse<MemberCarDetailResponse> getMemberCarDetail(@PathVariable Long carId) {
+        return ApiResponse.success(reservationService.getMemberCarDetail(carId), "차량 상세 조회 성공");
     }
 
 }
