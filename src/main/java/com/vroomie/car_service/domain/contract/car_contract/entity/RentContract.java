@@ -3,6 +3,7 @@ package com.vroomie.car_service.domain.contract.car_contract.entity;
 import com.vroomie.car_service.domain.contract.car_contract.enums.RentType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -15,10 +16,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @ToString
+@SuperBuilder
 public class RentContract extends CarContract {
 
-    @Id
-    private Long id;
+//    @Id
+//    private Long id;
     private BigDecimal monthlyRent;
     private BigDecimal deposit;  // 보증금
 
@@ -31,4 +33,12 @@ public class RentContract extends CarContract {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private RentType rentType;
+
+//    public RentContract(BigDecimal monthlyRent, BigDecimal deposit, Integer paymentCycle, Boolean isAutoRenewal, RentType rentType){
+//        this.monthlyRent = monthlyRent;
+//        this.deposit = deposit;
+//        this.paymentCycle = paymentCycle;
+//        this.isAutoRenewal = isAutoRenewal;
+//        this.rentType = rentType;
+//    }
 }

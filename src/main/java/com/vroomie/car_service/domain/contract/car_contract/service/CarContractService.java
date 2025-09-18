@@ -1,5 +1,9 @@
 package com.vroomie.car_service.domain.contract.car_contract.service;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.PurchaseRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.RentRegistRequest;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.LeaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.PurchaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.RentContractResponse;
@@ -13,6 +17,7 @@ import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Contract;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,11 +29,11 @@ public class CarContractService {
     private final CarContractMapper carContractMapper;
     private final CarContractRepository contractRepository;
 
-    public Object getContractDetails(Long contractId) {
+    public Object getContractDetails(Long carId) {
 
-        log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}",contractId);
+        log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}",carId);
 
-        CarContract contract = contractRepository.findById(contractId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
+        CarContract contract = contractRepository.findByCarId(carId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
         System.out.println("😀😀😀contract = " + contract);
 
         if(contract instanceof LeaseContract){
@@ -46,5 +51,25 @@ public class CarContractService {
         } else {
             throw new BusinessException(ErrorCode.CONTRACT_TYPE_NOT_FOUND);
         }
+    }
+
+    public void registNewContract(ContractRegistRequest registDTO) {
+
+        System.out.println("✅✅✅contract = " + registDTO);
+        CarContract contract = null;
+        if(registDTO instanceof LeaseRegistRequest){
+            contract = carContractMapper.toLeaseContract((LeaseRegistRequest) registDTO);
+        } else if(registDTO instanceof RentRegistRequest){
+            contract = carContractMapper.toRentContract((RentRegistRequest) registDTO);
+        } else if(registDTO instanceof PurchaseRegistRequest){
+            contract = carContractMapper.toPurchaseContract((PurchaseRegistRequest) registDTO);
+        }
+
+        if(contract != null){
+            contractRepository.save(contract);
+        } else {
+            throw new BusinessException(ErrorCode.CONTRACT_TYPE_NOT_FOUND);
+        }
+
     }
 }

@@ -1,13 +1,16 @@
 package com.vroomie.car_service.domain.contract.car_contract.controller;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
+import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
 import com.vroomie.car_service.domain.contract.car_contract.service.CarContractService;
+import com.vroomie.car_service.global.exception.BusinessException;
+import com.vroomie.car_service.global.exception.ErrorCode;
 import com.vroomie.car_service.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -18,12 +21,28 @@ public class CarContractController {
     private final CarContractService contractService;
 
     /** 차량 계약 상세 조회 **/
-    @GetMapping("/{contractId}")
-    public ApiResponse<?> selectCarContractDetails(@PathVariable(value = "contractId") Long contractId){
+    @GetMapping("/{carId}")
+    public ApiResponse<?> selectCarContractDetails(@PathVariable(value = "carId") Long contractId){
 
-        log.info(">>>> [CarContractController] 차량 계약 상세 조회 시작 - contractId: {}", contractId);
+        log.info(">>>> [CarContractController] 차량 계약 상세 조회 시작 - carId: {}", contractId);
         Object contractDTO = contractService.getContractDetails(contractId);
 
         return ApiResponse.success(contractDTO);
+    }
+
+    /** 차량 계약 등록 **/
+    @PostMapping("")
+    public ApiResponse<?> insertCarContractDetails(@RequestBody ContractRegistRequest dto){
+
+        try {
+            contractService.registNewContract(dto);
+        } catch (BusinessException e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+        log.info(">>>> [CarContractController] 차량 계약 등록 시작 - carId: {}");
+//        Object contractDTO = contractService.registNewContract(contract);
+
+        return ApiResponse.success("차량 계약 등록 성공");
     }
 }

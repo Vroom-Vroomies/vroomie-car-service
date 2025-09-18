@@ -2,6 +2,7 @@ package com.vroomie.car_service.domain.contract.car_contract.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -14,10 +15,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @ToString
+@SuperBuilder
 public class PurchaseContract extends CarContract{
 
-    @Id
-    private Long id;
+//    @Id
+//    private Long id;
     private BigDecimal purchasePrice;
     private BigDecimal downPayment;  // 계약금
     private BigDecimal loanAmount;  // 대출금액
@@ -28,4 +30,13 @@ public class PurchaseContract extends CarContract{
 
     @Column(name = "monthly_payment")
     private BigDecimal monthlyRepayment;  // 월 상환금
+
+//    public PurchaseContract(BigDecimal purchasePrice, BigDecimal downPayment, BigDecimal loanAmount, BigDecimal interestRate, Integer loanTerm, BigDecimal monthlyRepayent){
+//        this.purchasePrice = purchasePrice;
+//        this.downPayment = downPayment;
+//        this.loanAmount = loanAmount;
+//        this.interestRate = interestRate;
+//        this.loanTerm = loanTerm;
+//        this.monthlyRepayment = monthlyRepayent;
+//    }
 }
