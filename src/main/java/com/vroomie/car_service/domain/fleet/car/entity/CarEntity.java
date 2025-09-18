@@ -1,6 +1,5 @@
 package com.vroomie.car_service.domain.fleet.car.entity;
 
-import com.vroomie.car_service.domain.fleet.car.dto.request.CarUpdateRequest;
 import com.vroomie.car_service.domain.fleet.car.enums.CarFuelType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarGearType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
@@ -37,7 +36,7 @@ public class CarEntity {
     private String type;
     private Long totalMileage;
     private String color;
-    private int year;
+    private Integer year;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
