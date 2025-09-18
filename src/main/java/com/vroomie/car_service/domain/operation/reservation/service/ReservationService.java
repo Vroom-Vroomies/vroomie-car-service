@@ -15,8 +15,6 @@ import com.vroomie.car_service.domain.operation.reservation.enums.ReservationSta
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.vroomie.car_service.domain.operation.reservation.exception.AdminReservationException;
 import com.vroomie.car_service.domain.employee.repository.EmployeeRepository;
-import com.vroomie.car_service.global.exception.BusinessException;
-import com.vroomie.car_service.global.exception.ErrorCode;
 import org.springframework.data.domain.Page;
 import com.vroomie.car_service.global.response.PageResponse;
 import org.springframework.data.domain.PageRequest;
