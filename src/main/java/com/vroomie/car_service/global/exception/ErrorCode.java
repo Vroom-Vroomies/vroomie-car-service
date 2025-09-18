@@ -11,6 +11,8 @@ public enum ErrorCode {
 
     // ========== 차량 정보 관련 (1000~1099) ==========
     CAR_NOT_FOUND("차량을 찾을 수 없습니다", 1000, HttpStatus.NOT_FOUND),
+    INVALID_CAR_SEARCH_PARAMETER("유효하지 않은 차량 검색 파라미터입니다.", 1001, HttpStatus.BAD_REQUEST),
+    CAR_ALREADY_EXISTS("이미 등록된 차량입니다.", 1002, HttpStatus.CONFLICT),
 
     // ========== 유저 관련 (1100~1199) ==========
     EMPLOYEE_NOT_FOUND("존재하지 않는 직원입니다.", 1100, HttpStatus.NOT_FOUND),
