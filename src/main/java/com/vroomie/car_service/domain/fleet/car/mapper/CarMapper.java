@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.fleet.car.mapper;
 
+import com.vroomie.car_service.domain.fleet.car.dto.request.CarRegistRequest;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarDetailResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.StatusAlertResponse;
@@ -11,6 +12,8 @@ import org.mapstruct.Mapping;
 public interface CarMapper {
 
     CarDetailResponse toDetailResponse(CarEntity car);
+
+    CarEntity toEntity(CarRegistRequest request);
 
     @Mapping(target = "statusAlert", expression = "java(toStatusAlert(isContractMissing, isInsuranceMissing))")
     @Mapping(source = "car.usageType", target = "usageType")

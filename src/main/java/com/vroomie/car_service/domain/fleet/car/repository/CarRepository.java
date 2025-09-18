@@ -15,4 +15,6 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
     Page<CarEntity> findAllByStatus(CarStatus status, Pageable pageable);
 
     Page<CarEntity> findAllByUsageType(CarUsageType usageType, Pageable pageable);
+
+    boolean existsByNumber(String number);
 }

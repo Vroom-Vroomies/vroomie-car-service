@@ -2,6 +2,7 @@ package com.vroomie.car_service.domain.fleet.car.service;
 
 import com.vroomie.car_service.domain.contract.car_contract.repository.CarContractRepository;
 import com.vroomie.car_service.domain.contract.insurance_contract.repository.InsuContractRepository;
+import com.vroomie.car_service.domain.fleet.car.dto.request.CarRegistRequest;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarDetailResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarListResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
@@ -93,6 +94,19 @@ public class CarService {
                 .orElseThrow(CarException::carNotFoundException);
 
         return carMapper.toDetailResponse(carEntity);
+    }
+
+    @Transactional
+    public CarDetailResponse createCar(CarRegistRequest request) {
+
+        if (carRepository.existsByNumber(request.getNumber())) {
+            throw CarException.carAlreadyExistsException();
+        }
+
+        CarEntity newCar = carMapper.toEntity(request);
+        CarEntity savedCar = carRepository.save(newCar);
+
+        return carMapper.toDetailResponse(savedCar);
     }
 }
 

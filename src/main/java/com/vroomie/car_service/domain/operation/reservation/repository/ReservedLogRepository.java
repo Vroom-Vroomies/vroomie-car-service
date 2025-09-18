@@ -12,6 +12,6 @@ public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, 
 
     @Query("SELECT  rl.car.id " +
             "FROM   ReservedLogEntity rl " +
-            "WHERE  rl.car.id IN :carIds AND rl.reservedStatus = 'RENTED'")
-    Set<Long> findRentedCarIdsIn(@Param("carIds") List<Long> carIds);}
+            "WHERE  rl.car.id IN :carIds AND rl.status = 'RENTED'")
+    Set<Long> findRentedCarIdsIn(@Param("carIds") List<Long> carIds);
 }

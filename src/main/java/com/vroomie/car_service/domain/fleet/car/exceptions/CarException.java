@@ -13,4 +13,6 @@ public class CarException extends BusinessException {
     }
 
     public static CarException invalidSearchParameterException() { return new CarException(ErrorCode.INVALID_CAR_SEARCH_PARAMETER); }
+
+    public static CarException carAlreadyExistsException() { return new CarException(ErrorCode.CAR_ALREADY_EXISTS); }
 }
