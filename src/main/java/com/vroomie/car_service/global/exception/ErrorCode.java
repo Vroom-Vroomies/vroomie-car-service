@@ -25,6 +25,16 @@ public enum ErrorCode {
     INVALID_STATUS_CHANGE("예약 상태가 PENDING일 때만 상태 변경이 가능합니다.", 1301, HttpStatus.BAD_REQUEST),
     INVALID_STATUS_CHANGE_TYPE("PENDING 상태에서는 APPROVED 또는 REJECTED로만 변경할 수 있습니다.", 1302, HttpStatus.BAD_REQUEST),
 
+    // ========== 사고 관련 (1400~1499) ==========
+    ACCIDENT_NOT_FOUND("사고 정보를 찾을 수 없습니다", 1400, HttpStatus.NOT_FOUND),
+    CANT_FINALIZE_FALSE("최종 확정 요청은 False일 수 없습니다", 1401, HttpStatus.BAD_REQUEST),
+    ACCIDENT_ALREADY_FINALIZED("이미 제출된 사고 정보는 수정할 수 없습니다", 1402, HttpStatus.BAD_REQUEST),
+    IMAGE_REQUIRED_FOR_FINALIZE("최종 제출을 위해서는 이미지가 최소 1장 이상 필요합니다.", 1403, HttpStatus.BAD_REQUEST),
+
+    // ========== 파일 관련 (1500~1599) ==========
+    FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", 1500, HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_COUNT_EXCEEDED("이미지는 최대 10개까지 업로드할 수 있습니다.", 1501, HttpStatus.BAD_REQUEST),
+
     // ========== 계약 정보 관련 (1700~1799) ==========
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST);
