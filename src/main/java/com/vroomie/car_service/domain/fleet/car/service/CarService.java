@@ -5,9 +5,7 @@ import com.vroomie.car_service.domain.contract.insurance_contract.repository.Ins
 import com.vroomie.car_service.domain.fleet.car.dto.request.CarRegistRequest;
 import com.vroomie.car_service.domain.fleet.car.dto.request.CarUpdateRequest;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarDetailResponse;
-import com.vroomie.car_service.domain.fleet.car.dto.response.CarListResponse;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
-import com.vroomie.car_service.domain.fleet.car.dto.response.PageInfoResponse;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
@@ -15,6 +13,7 @@ import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import com.vroomie.car_service.domain.fleet.car.mapper.CarMapper;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservedLogRepository;
+import com.vroomie.car_service.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,7 @@ public class CarService {
     private final CarMapper carMapper;
 
     @Transactional(readOnly = true)
-    public CarListResponse fetchCarList(Pageable pageable, String status, String usageType) {
+    public PageResponse<CarSimpleResponse> fetchCarList(Pageable pageable, String status, String usageType) {
 
         CarStatus statusEnum = null;
         CarUsageType usageTypeEnum = null;
@@ -77,15 +76,7 @@ public class CarService {
             return carMapper.toSimpleResponse(car, isContractMissing, isInsuranceMissing, isRented);
         });
 
-        return CarListResponse.builder()
-                .cars(carDtos.getContent())
-                .pageInfo(PageInfoResponse.builder()
-                        .page(carPage.getNumber())
-                        .size(carPage.getSize())
-                        .totalElements(carPage.getTotalElements())
-                        .totalPages(carPage.getTotalPages())
-                        .build())
-                .build();
+        return PageResponse.of(carDtos);
     }
 
     @Transactional(readOnly = true)
