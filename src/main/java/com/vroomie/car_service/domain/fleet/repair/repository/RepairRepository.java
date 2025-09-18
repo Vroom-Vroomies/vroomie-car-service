@@ -1,0 +1,42 @@
+package com.vroomie.car_service.domain.fleet.repair.repository;
+
+import com.vroomie.car_service.domain.fleet.repair.entity.RepairEntity;
+import com.vroomie.car_service.domain.fleet.repair.enums.RepairStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
+
+public interface RepairRepository extends JpaRepository<RepairEntity, Long> {
+
+    @Query("""
+           SELECT r
+           FROM RepairEntity r
+           LEFT JOIN fetch r.repairImages WHERE r.id = :id
+           """)
+    Optional<RepairEntity> findByIdWithImages(@Param("id") Long id);
+
+    @Query(value = """
+            SELECT r FROM RepairEntity r
+            LEFT JOIN FETCH r.car c
+            LEFT JOIN FETCH r.employee e
+            WHERE (:carId IS NULL OR r.car.id = :carId)
+            AND (:status IS NULL OR r.status = :status)
+            AND (:isSaved IS NULL OR r.isSaved = :isSaved)
+            """,
+            countQuery = """
+            SELECT count(r) FROM RepairEntity r
+            WHERE (:carId IS NULL OR r.car.id = :carId)
+            AND (:status IS NULL OR r.status = :status)
+            AND (:isSaved IS NULL OR r.isSaved = :isSaved)
+            """)
+    Page<RepairEntity> findWithFilters(
+            @Param("carId") Long carId,
+            @Param("status") RepairStatus status,
+            @Param("isSaved") Boolean isSaved,
+            Pageable pageable
+    );
+}
