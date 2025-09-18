@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.fleet.car.entity;
 
+import com.vroomie.car_service.domain.fleet.car.dto.request.CarUpdateRequest;
 import com.vroomie.car_service.domain.fleet.car.enums.CarFuelType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarGearType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
@@ -57,7 +58,7 @@ public class CarEntity {
     private CarGearType gearType;
 
     @Builder
-    public CarEntity(Long companyId, String identification, String number, String image, String model, String type, Long totalMileage, String color, int year,
+    public CarEntity(Long companyId, String identification, String number, String image, String model, String type, Long totalMileage, String color, Integer year,
                CarStatus status, LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle, Integer allowableCapacity, CarFuelType fuelType,
                CarUsageType usageType, CarGearType gearType) {
         this.companyId = companyId;
@@ -79,8 +80,8 @@ public class CarEntity {
         this.gearType = gearType;
     }
 
-// =================================================================
-    // 비즈니스 로직을 담은 메소드 (상태 변경 지점)
+    // =================================================================
+    // 비즈니스 로직을 담은 메소드
     // =================================================================
 
     /**
@@ -114,20 +115,17 @@ public class CarEntity {
 
     /**
      * 차량 기본 정보 업데이트
-     * @param request DTO
      */
-    /*
-    public void updateDetails(CarUpdateRequestDto request) {
-        // @DynamicUpdate와 함께 사용하면, null이 아닌 값만 UPDATE 쿼리에 포함
-
-        // 어떤 필드를 수정 가능하게 할 지
-        if (request.getModel() != null) {
-            this.model = request.getModel().trim();
-        }
-        if (request.getColor() != null) {
-            this.color = request.getColor().trim();
-        }
-        // ... 다른 수정 가능한 필드들 ...
+    // 차량 정보 업데이트 메서드
+    public void update(String image, String model, Long totalMileage, String color, CarStatus status,
+                       LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle) {
+        if (image != null) this.image = image;
+        if (model != null) this.model = model;
+        if (totalMileage != null) this.totalMileage = totalMileage;
+        if (color != null) this.color = color;
+        if (status != null) this.status = status;
+        if (insuExpiration != null) this.insuExpiration = insuExpiration;
+        if (lastInspection != null) this.lastInspection = lastInspection;
+        if (inspectionCycle != null) this.inspectionCycle = inspectionCycle;
     }
-     */
 }

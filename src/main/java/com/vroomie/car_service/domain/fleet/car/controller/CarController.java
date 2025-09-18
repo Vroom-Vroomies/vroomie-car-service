@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.car.controller;
 
 import com.vroomie.car_service.domain.fleet.car.dto.request.CarRegistRequest;
+import com.vroomie.car_service.domain.fleet.car.dto.request.CarUpdateRequest;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarListResponse;
 import com.vroomie.car_service.domain.fleet.car.service.CarService;
 import com.vroomie.car_service.domain.fleet.car.dto.response.CarDetailResponse;
@@ -12,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,5 +54,15 @@ public class CarController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "차량 등록이 성공적으로 완료되었습니다."));
     }
+
+    @PatchMapping("/{carId}")
+    public ResponseEntity<ApiResponse<CarDetailResponse>> updateCar(
+            @PathVariable Long carId,
+            @RequestBody CarUpdateRequest request) {
+
+        CarDetailResponse response = carService.updateCar(carId, request);
+        return ResponseEntity.ok(ApiResponse.success(response, "차량 정보 수정이 성공적으로 완료되었습니다."));
+    }
+
 }
 
