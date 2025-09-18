@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.PurchaseUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -31,12 +32,12 @@ public class PurchaseContract extends CarContract{
     @Column(name = "monthly_payment")
     private BigDecimal monthlyRepayment;  // 월 상환금
 
-//    public PurchaseContract(BigDecimal purchasePrice, BigDecimal downPayment, BigDecimal loanAmount, BigDecimal interestRate, Integer loanTerm, BigDecimal monthlyRepayent){
-//        this.purchasePrice = purchasePrice;
-//        this.downPayment = downPayment;
-//        this.loanAmount = loanAmount;
-//        this.interestRate = interestRate;
-//        this.loanTerm = loanTerm;
-//        this.monthlyRepayment = monthlyRepayent;
-//    }
+    public void updatePurchaseContract(PurchaseUpdateRequest updateDTO){
+        this.purchasePrice = updateDTO.getPurchasePrice();
+        this.downPayment = updateDTO.getDownPayment();
+        this.loanAmount = updateDTO.getLoanAmount();
+        this.interestRate = updateDTO.getInterestRate();
+        this.loanTerm = updateDTO.getLoanTerm();
+        this.monthlyRepayment = updateDTO.getMonthlyRepayment();
+    }
 }

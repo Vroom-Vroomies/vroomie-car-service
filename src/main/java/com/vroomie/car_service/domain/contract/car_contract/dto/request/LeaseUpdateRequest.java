@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LeaseRegistRequest extends ContractRegistRequest{
+public class LeaseUpdateRequest extends ContractUpdateRequest{
 
     @NotNull(message = "월 리스료는 필수 항목입니다.")
     private BigDecimal monthlyLease;
@@ -24,4 +24,5 @@ public class LeaseRegistRequest extends ContractRegistRequest{
     private Long mileageLimit;
     private BigDecimal excessMileageRate;
     private LeaseType leaseType;
+
 }

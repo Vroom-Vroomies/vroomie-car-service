@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.enums.LeaseType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,13 +37,14 @@ public class LeaseContract extends CarContract{
     @Column(name = "type")
     private LeaseType leaseType;
 
-//    public LeaseContract(BigDecimal monthlyLease, Integer leasePeriod, BigDecimal residualValue, BigDecimal optionPrice, Long mileageLimit, BigDecimal excessMileageRate, LeaseType leaseType){
-//        this.monthlyLease = monthlyLease;
-//        this.leasePeriod = leasePeriod;
-//        this.residualValue = residualValue;
-//        this.optionPrice = optionPrice;
-//        this.mileageLimit = mileageLimit;
-//        this.excessMileageRate = excessMileageRate;
-//        this.leaseType = leaseType;
-//    }
+    public void updateLeaseContract(LeaseUpdateRequest updateDTO){
+        super.updateContract(updateDTO);
+        this.monthlyLease = updateDTO.getMonthlyLease();
+        this.leasePeriod = updateDTO.getLeasePeriod();
+        this.residualValue = updateDTO.getResidualValue();
+        this.optionPrice = updateDTO.getOptionPrice();
+        this.mileageLimit = updateDTO.getMileageLimit();
+        this.excessMileageRate = updateDTO.getExcessMileageRate();
+        this.leaseType = updateDTO.getLeaseType();
+    }
 }

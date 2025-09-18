@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.RentUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.enums.RentType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,11 +35,11 @@ public class RentContract extends CarContract {
     @Column(name = "type")
     private RentType rentType;
 
-//    public RentContract(BigDecimal monthlyRent, BigDecimal deposit, Integer paymentCycle, Boolean isAutoRenewal, RentType rentType){
-//        this.monthlyRent = monthlyRent;
-//        this.deposit = deposit;
-//        this.paymentCycle = paymentCycle;
-//        this.isAutoRenewal = isAutoRenewal;
-//        this.rentType = rentType;
-//    }
+    public void updateRentContract(RentUpdateRequest updateDTO){
+        this.monthlyRent = updateDTO.getMonthlyRent();
+        this.deposit = updateDTO.getDeposit();
+        this.paymentCycle = updateDTO.getPaymentCycle();
+        this.isAutoRenewal = updateDTO.getIsAutoRenewal();
+        this.rentType = updateDTO.getRentType();
+    }
 }

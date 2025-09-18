@@ -1,8 +1,6 @@
 package com.vroomie.car_service.domain.contract.car_contract.mapper;
 
-import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseRegistRequest;
-import com.vroomie.car_service.domain.contract.car_contract.dto.request.PurchaseRegistRequest;
-import com.vroomie.car_service.domain.contract.car_contract.dto.request.RentRegistRequest;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.*;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.LeaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.PurchaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.RentContractResponse;
@@ -13,6 +11,7 @@ import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring")

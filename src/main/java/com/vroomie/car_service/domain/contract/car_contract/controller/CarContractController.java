@@ -1,9 +1,7 @@
 package com.vroomie.car_service.domain.contract.car_contract.controller;
 
 import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractRegistRequest;
-import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseRegistRequest;
-import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
-import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.service.CarContractService;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
@@ -34,15 +32,31 @@ public class CarContractController {
     @PostMapping("")
     public ApiResponse<?> insertCarContractDetails(@RequestBody ContractRegistRequest dto){
 
+        log.info(">>>> [CarContractController] 차량 계약 등록 시작 - carId: {}", dto.getCarId());
         try {
             contractService.registNewContract(dto);
         } catch (BusinessException e) {
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
-        log.info(">>>> [CarContractController] 차량 계약 등록 시작 - carId: {}");
 //        Object contractDTO = contractService.registNewContract(contract);
 
         return ApiResponse.success("차량 계약 등록 성공");
     }
+
+    /** 차량 계약 정보 수정 **/
+    @PutMapping("/{contractId}")
+    public ApiResponse<?> updateCarContractDetails(@RequestBody ContractUpdateRequest dto, @PathVariable("contractId") Long contractId){
+
+        log.info(">>>> [CarContractController] 차량 계약 수정 시작 - contractId: {}", contractId);
+
+        try{
+            contractService.modifyContractInfo(dto, contractId);
+        } catch(BusinessException e){
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+        return ApiResponse.success("차량 계약 정보 수정 성공");
+    }
+
 }
