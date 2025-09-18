@@ -1,6 +1,5 @@
 package com.vroomie.car_service.domain.fleet.car.repository;
 
-import com.vroomie.car_service.domain.fleet.car.dto.response.CarListResponse;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
