@@ -6,6 +6,7 @@ import com.vroomie.car_service.domain.fleet.car.enums.CarFuelType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarGearType;
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
+import com.vroomie.car_service.global.util.Trimmed;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -20,23 +21,28 @@ public class CarRegistRequest {
     @NotNull(message = "회사 ID는 필수입니다.")
     private Long companyId;
 
+    @Trimmed
     @NotBlank(message = "차대번호는 필수입니다.")
     private String identification;
 
+    @Trimmed
     @NotBlank(message = "차량번호는 필수입니다.")
     private String number;
 
     private String image;
 
+    @Trimmed
     @NotBlank(message = "모델명은 필수입니다.")
     private String model;
 
+    @Trimmed
     @NotBlank(message = "차종은 필수입니다.")
     private String type;
 
 //    @NotNull(message = "주행거리는 필수입니다.")
     private Long totalMileage;
 
+    @Trimmed
     @NotBlank(message = "색상은 필수입니다.")
     private String color;
 

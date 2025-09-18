@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.car.dto.request;
 
 import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
+import com.vroomie.car_service.global.util.Trimmed;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +12,14 @@ import java.time.LocalDate;
 public class CarUpdateRequest {
 
     private String image;
+
+    @Trimmed
     private String model;
     private Long totalMileage;
+
+    @Trimmed
     private String color;
+
     private CarStatus status;
     private LocalDate insuExpiration;
     private LocalDate lastInspection;
