@@ -23,6 +23,10 @@ public enum ErrorCode {
     INVALID_STATUS_CHANGE("예약 상태가 PENDING일 때만 상태 변경이 가능합니다.", 1301, HttpStatus.BAD_REQUEST),
     INVALID_STATUS_CHANGE_TYPE("PENDING 상태에서는 APPROVED 또는 REJECTED로만 변경할 수 있습니다.", 1302, HttpStatus.BAD_REQUEST),
 
+    // ========== 대여 이력 관련 (1400~1499) ==========
+    RESERVED_LOG_NOT_FOUND("대여 이력을 찾을 수 없습니다.", 1400, HttpStatus.NOT_FOUND),
+    RESERVED_LOG_ACCESS_DENIED("해당 대여 이력에 접근할 권한이 없습니다.", 1401, HttpStatus.FORBIDDEN),
+
     // ========== 계약 정보 관련 (1700~1799) ==========
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST);
