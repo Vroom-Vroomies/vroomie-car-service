@@ -55,3 +55,7 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 파일 업로드 경로
+file:
+  upload-dir: uploads/images/accidents
