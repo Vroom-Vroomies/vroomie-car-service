@@ -19,12 +19,22 @@ public class AdminReservationException {
     }
 
     public static BusinessException reservationNotFound(Long id) {
-        // 예약이 존재하지 않을 때 예외 발생
         return new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
     }
 
     public static BusinessException employeeNotFound(String adminEmail) {
-        // 직원(관리자) 정보가 존재하지 않을 때 예외 발생
         return new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND);
+    }
+
+    public static BusinessException carNotAvailable(Long carId) {
+        return new BusinessException(ErrorCode.CAR_NOT_AVAILABLE);
+    }
+
+    public static BusinessException invalidTimeSlot() {
+        return new BusinessException(ErrorCode.INVALID_TIME_SLOT);
+    }
+
+    public static BusinessException invalidDateTimeFormat() {
+        return new BusinessException(ErrorCode.INVALID_DATETIME_FORMAT);
     }
 }
