@@ -42,7 +42,7 @@ public class AccidentService {
     private final EmployeeRepository employeeRepository;
     private final AccidentMapper accidentMapper;
 
-    @Value("${file.upload-dir}")
+    @Value("${file.upload-dir.accidents}")
     private String uploadDir;
 
     // 생성

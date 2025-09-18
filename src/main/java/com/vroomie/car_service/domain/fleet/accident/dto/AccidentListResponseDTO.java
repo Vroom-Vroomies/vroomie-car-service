@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class AccidentListResponseDTO {
     private Long id;
     private Long carId;
-    private String empEmail;
+    private String empName;
     private String note;
     private LocalDate date;
     private boolean save;
