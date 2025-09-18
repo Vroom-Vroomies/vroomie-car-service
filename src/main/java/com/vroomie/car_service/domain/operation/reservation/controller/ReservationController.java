@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.global.response.PageResponse;
@@ -48,6 +50,25 @@ public class ReservationController {
         return ApiResponse.success(reservationService.updateAdminReservationStatus(id, request), "대여 신청 상태 변경 성공");
     }
 
+    // [사용자] 특정 시간대 대여 가능한 차량 목록 조회
+    @Operation(summary = "[사용자]특정 시간대 대여 가능한 차량 목록 조회", description = "선택한 시간대에 대여 가능한 차량 목록을 조회합니다.")
+    @GetMapping("/member/available-cars")
+    public ApiResponse<PageResponse<AvailableCarListResponse>> getAvailableCarsByTimeSlot(
+            @RequestParam String requestedStartTime,
+            @RequestParam String requestedEndTime,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.") int size) {
 
+        return ApiResponse.success(
+                reservationService.getAvailableCarsByTimeSlot(requestedStartTime, requestedEndTime, currentPage, size),
+                "특정 시간대 대여 가능한 차량 목록 조회 성공");
+    }
+
+    // [사용자] 대여 가능한 차량 상세 조회
+    @Operation(summary = "[사용자]대여 가능한 차량 상세 조회", description = "대여 가능한 차량 상세를 조회합니다.")
+    @GetMapping("/member/available-cars/{carId}")
+    public ApiResponse<AvailableCarDetailResponse> getAvailableCarDetail(@PathVariable Long carId) {
+        return ApiResponse.success(reservationService.getAvailableCarDetail(carId), "대여 가능한 차량 상세 조회 성공");
+    }
 
 }
