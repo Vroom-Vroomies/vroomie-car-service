@@ -1,4 +1,4 @@
-package com.vroomie.car_service.domain.fleet.accident.dto;
+package com.vroomie.car_service.domain.fleet.repair.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,15 +9,17 @@ import java.util.List;
 
 @Getter
 @Setter
-public class AccidentDetailDTO {
+public class RepairDetailDTO {
     private Long id;
     private Long carId;
     private String empName;
     private String type;
-    private String note;
     private String detail;
-    private LocalDate date;
+    private String status;
+    private LocalDate startedAt;
+    private LocalDate endedAt;
     private BigDecimal cost;
     private boolean save;
-    private List<String> accidentImages;
+    private List<String> beforeImages;
+    private List<String> afterImages;
 }

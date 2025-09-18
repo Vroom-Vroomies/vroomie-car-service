@@ -58,4 +58,6 @@ logging:
 
 # 파일 업로드 경로
 file:
-  upload-dir: uploads/images/accidents
+  upload-dir:
+    accidents: uploads/images/accidents
+    repairs: uploads/images/repairs

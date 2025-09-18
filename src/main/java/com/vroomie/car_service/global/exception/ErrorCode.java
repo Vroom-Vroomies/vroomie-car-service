@@ -40,6 +40,12 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", 1500, HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_COUNT_EXCEEDED("이미지는 최대 10개까지 업로드할 수 있습니다.", 1501, HttpStatus.BAD_REQUEST),
 
+    // ========== 수리 관련 (1600~1699) ==========
+    REPAIR_NOT_FOUND("수리 정보를 찾을 수 없습니다", 1600, HttpStatus.NOT_FOUND),
+    REPAIR_ALREADY_FINALIZED("이미 제출된 수리 정보는 수정할 수 없습니다", 1601, HttpStatus.BAD_REQUEST),
+    CANT_FINALIZE_REPAIR_FALSE("최종 확정 요청은 False일 수 없습니다", 1602, HttpStatus.BAD_REQUEST),
+    IMAGE_REQUIRED_FOR_REPAIR_FINALIZE("최종 제출을 위해서는 수리 전/후 이미지가 최소 1장씩 필요합니다.", 1603, HttpStatus.BAD_REQUEST),
+
     // ========== 계약 정보 관련 (1700~1799) ==========
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST);
