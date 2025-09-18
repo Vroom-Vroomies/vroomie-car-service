@@ -11,4 +11,12 @@ public class EmployeeException extends BusinessException {
     public static EmployeeException employeeNotFoundException() {
         return new EmployeeException(ErrorCode.EMPLOYEE_NOT_FOUND);
     }
+
+    public static EmployeeException employeeNotMatchException() {
+        return new EmployeeException(ErrorCode.EMPLOYEE_NOT_MATCH);
+    }
+
+    public static EmployeeException employeeNotEnoughRole() {
+        return new EmployeeException(ErrorCode.EMPLOYEE_NOT_ENOUGH_ROLE);
+    }
 }

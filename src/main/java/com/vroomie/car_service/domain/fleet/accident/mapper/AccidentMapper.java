@@ -16,7 +16,7 @@ public interface AccidentMapper {
 
     @Mappings({
             @Mapping(source = "car.id", target = "carId"),
-            @Mapping(source = "employee.email", target = "empEmail"),
+            @Mapping(source = "employee.name", target = "empName"),
             @Mapping(source = "occurredAt", target = "date"),
             @Mapping(source = "saved", target = "save"),
             @Mapping(source = "accidentImages", target = "accidentImages", qualifiedByName = "imagesToStrings")
@@ -25,13 +25,14 @@ public interface AccidentMapper {
 
     @Mappings({
             @Mapping(source = "car.id", target = "carId"),
-            @Mapping(source = "employee.email", target = "empEmail"),
+            @Mapping(source = "employee.name", target = "empName"),
             @Mapping(source = "occurredAt", target = "date"),
             @Mapping(source = "saved", target = "save")
     })
     AccidentListResponseDTO toListResponseDTO(AccidentEntity accident);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "accidentImages", ignore = true)
     void update(AccidentCreateRequestDTO req, @MappingTarget AccidentEntity accident);
 
     @Named("imagesToStrings")

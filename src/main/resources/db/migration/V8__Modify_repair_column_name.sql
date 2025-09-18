@@ -1,0 +1,1 @@
+ALTER TABLE tbl_repair CHANGE COLUMN ended_date ended_at DATE NULL;
