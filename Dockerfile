@@ -11,7 +11,6 @@ COPY build.gradle settings.gradle ./
 COPY src ./src
 
 # 실행 권한 부여
-RUN chmod +x gradlew
 RUN chmod +x ./gradlew
 
 EXPOSE 8080
