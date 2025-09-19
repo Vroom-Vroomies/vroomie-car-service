@@ -16,13 +16,18 @@ import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import java.time.LocalDateTime;
 import com.vroomie.car_service.domain.operation.reservation.enums.ReservationStatus;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 
 @Entity
 @Table(name = "tbl_reservation")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ReservationEntity {
 
     @Id
@@ -46,7 +51,10 @@ public class ReservationEntity {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    private String purpose;
+    @Enumerated(EnumType.STRING)
+    private Purpose purpose;
+    
+    private String detail;
     private LocalDateTime createdAt;
 
     public void updateStatus(ReservationStatus newStatus) {

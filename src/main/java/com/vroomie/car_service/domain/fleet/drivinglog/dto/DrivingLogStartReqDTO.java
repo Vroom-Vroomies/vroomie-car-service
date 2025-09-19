@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.drivinglog.dto;
 
-import com.vroomie.car_service.domain.fleet.drivinglog.enums.Purpose;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
