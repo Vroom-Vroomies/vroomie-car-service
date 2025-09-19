@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tbl_car")
@@ -126,5 +127,9 @@ public class CarEntity {
         if (insuExpiration != null) this.insuExpiration = insuExpiration;
         if (lastInspection != null) this.lastInspection = lastInspection;
         if (inspectionCycle != null) this.inspectionCycle = inspectionCycle;
+    }
+
+    public void updateLastInspection(LocalDateTime date){
+        if (date != null) this.lastInspection = date.toLocalDate();
     }
 }
