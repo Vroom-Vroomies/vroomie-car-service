@@ -10,6 +10,7 @@ import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
+import com.vroomie.car_service.global.exception.GlobalExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,18 @@ public class InsuranceService {
             return insuranceMapper.toInsuranceResponse(newInsurance);
         } catch (BusinessException e){
             throw new BusinessException(ErrorCode.CANNOT_REGIST_INSURANCE, e.getMessage());
+        }
+    }
+
+    @Transactional
+    public InsuranceDetailResponse modifyInsuranceInfo(InsuranceRegistRequest updateDTO, Long insuranceId) {
+        try{
+            log.info(">>>> [InsuranceService] 보험 수정 시작 - insuranceId: {}", insuranceId);
+            InsuContractEntity insurance = insuranceRepository.findById(insuranceId).orElseThrow(() -> new BusinessException(ErrorCode.INSURANCE_NOT_FOUND));
+            insurance.updateInsuranceInfo(updateDTO);
+            return insuranceMapper.toInsuranceResponse(insurance);
+        } catch(BusinessException e){
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }

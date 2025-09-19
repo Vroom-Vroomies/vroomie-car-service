@@ -50,10 +50,28 @@ public class InsuranceController {
     @PostMapping("")
     public ApiResponse<?> registNewInsurance(@RequestBody InsuranceRegistRequest registDTO){
         try{
+            log.info(">>>> [InsuranceController] 차량 보험 등록 시작");
             InsuranceDetailResponse insuranceDetail = insuranceService.registNewInsurance(registDTO);
             return ApiResponse.success(insuranceDetail);
         } catch (BusinessException e){
             throw new BusinessException(ErrorCode.CANNOT_REGIST_INSURANCE, e.getMessage());
+        }
+    }
+
+    /** 보험 수정 **/
+    @PutMapping("/{insuranceId}")
+    public ApiResponse<?> updateInsuranceInfo(@RequestBody InsuranceRegistRequest updateDTO, @PathVariable("insuranceId") Long insuranceId){
+        try{
+            log.info(">>>> [InsuranceController] 차량 보험 수정 시작 - insuranceId: {}", insuranceId);
+            InsuranceDetailResponse updatedInsurance = insuranceService.modifyInsuranceInfo(updateDTO, insuranceId);
+
+            if(updatedInsurance != null){
+                return ApiResponse.success(updatedInsurance);
+            } else {
+                throw new BusinessException(ErrorCode.INSURANCE_NOT_FOUND);
+            }
+        } catch (BusinessException e){
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }
