@@ -1,8 +1,10 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.LeaseUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.enums.LeaseType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -15,10 +17,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @ToString
+@SuperBuilder
 public class LeaseContract extends CarContract{
-
-    @Id
-    private Long id;
 
     private BigDecimal monthlyLease;
 
@@ -36,4 +36,15 @@ public class LeaseContract extends CarContract{
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private LeaseType leaseType;
+
+    public void updateLeaseContract(LeaseUpdateRequest updateDTO){
+        super.updateContract(updateDTO);
+        this.monthlyLease = updateDTO.getMonthlyLease();
+        this.leasePeriod = updateDTO.getLeasePeriod();
+        this.residualValue = updateDTO.getResidualValue();
+        this.optionPrice = updateDTO.getOptionPrice();
+        this.mileageLimit = updateDTO.getMileageLimit();
+        this.excessMileageRate = updateDTO.getExcessMileageRate();
+        this.leaseType = updateDTO.getLeaseType();
+    }
 }
