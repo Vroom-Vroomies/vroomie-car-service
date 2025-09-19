@@ -7,6 +7,7 @@ import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReser
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservedLogEntity;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservationRepository;
@@ -23,11 +24,13 @@ import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import org.springframework.data.domain.Page;
 import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.util.DateTimeUtil;
+import com.vroomie.car_service.global.util.UserUtil;
 import org.springframework.data.domain.PageRequest;
 // import org.springframework.security.core.Authentication;
 // import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class ReservationService {
 
         private final ReservationRepository reservationRepository;
         private final ReservedLogRepository reservedLogRepository;
-        private final EmployeeRepository employeeRepository;  
+        private final EmployeeRepository employeeRepository;
         private final CarRepository carRepository;
         private final ReservationMapper reservationMapper;
 
@@ -88,7 +91,7 @@ public class ReservationService {
         private void createReservedLog(ReservationEntity reservation) {
 
                 // 현재 인증된 사용자 정보 가져오기 (관리자)
-                String adminEmail = getCurrentUserEmail();
+                String adminEmail = UserUtil.getCurrentUserEmail();
 
                 // 관리자 정보 조회
                 var admin = employeeRepository.findByEmail(adminEmail)
@@ -106,15 +109,6 @@ public class ReservationService {
                                 .build();
 
                 reservedLogRepository.save(reservedLog);
-        }
-
-        private String getCurrentUserEmail() {
-                // Authentication authentication =
-                // SecurityContextHolder.getContext().getAuthentication();
-                // if (authentication != null && authentication.isAuthenticated()) {
-                // return authentication.getName();
-                // }
-                return "admin@wemade.com";
         }
 
         // [사용자] 특정 시간대 대여 가능한 차량 목록 조회
@@ -160,13 +154,7 @@ public class ReservationService {
         // [사용자] 차량 상세 조회
         public MemberCarDetailResponse getMemberCarDetail(Long carId) {
 
-                // String memberEmpEmail = getCurrentUserEmail();
-                // EmployeeEntity member = employeeRepository.findByEmail(memberEmpEmail)
-                // .orElseThrow(() ->
-                // AdminReservationException.employeeNotFound(memberEmpEmail));
-                // String memberEmpEmail = member.getEmail();
-
-                String memberEmpEmail = "user01@wemade.com";
+                String memberEmpEmail = UserUtil.getCurrentUserEmail();
 
                 CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
                 ReservationEntity reservation = reservationRepository.findLatestByCarAndMember(carId, memberEmpEmail);
@@ -176,6 +164,112 @@ public class ReservationService {
                 }
 
                 return reservationMapper.toMemberCarDetailResponse(car, reservation);
+        }
+
+        // [사용자] 차량 대여 신청하기
+        @Transactional
+        public MemberCarDetailResponse createMemberCarReservation(MemberCarReservationRequest request) {
+
+                String memberEmpEmail = UserUtil.getCurrentUserEmail();
+
+                // 차량 존재 여부 확인
+                CarEntity car = carRepository.findAvailableCarById(request.getCarId(), CarStatus.ACTIVE);
+                if (car == null) {
+                        throw CarException.carNotFoundException();
+                }
+
+                // 요청 시간 유효성 검증
+                if (request.getStartedAt().isBefore(LocalDateTime.now())) {
+                        throw AdminReservationException.invalidTimeSlot();
+                }
+
+                // 업무시간 체크 (9:00 ~ 18:00)
+                boolean isValidStartHour = DateTimeUtil.isValidBusinessHour(request.getStartedAt());
+                boolean isValidEndHour = DateTimeUtil.isValidBusinessHour(request.getEndedAt());
+
+                if (!isValidStartHour || !isValidEndHour) {
+                        throw AdminReservationException.invalidTimeSlot();
+                }
+
+                // 해당 차량이 요청 시간대에 이미 예약되어 있는지 확인
+                List<ReservationStatus> conflictStatuses = Arrays.asList(
+                                ReservationStatus.PENDING,
+                                ReservationStatus.APPROVED);
+
+                long conflictCount = reservationRepository.countConflictingReservations(
+                                request.getCarId(),
+                                request.getStartedAt(),
+                                request.getEndedAt(),
+                                conflictStatuses);
+
+                if (conflictCount > 0) {
+                        throw AdminReservationException.reservationTimeConflict();
+                }
+
+                // 사용자가 이미 반납하지 않은 대여가 있는지 확인
+                long activeRentalCount = reservedLogRepository.countActiveRentalsByMemberEmail(memberEmpEmail);
+                if (activeRentalCount > 0) {
+                        throw AdminReservationException.memberAlreadyHasActiveRental();
+                }
+
+                // 사용자가 이미 예약 중인 차량이 있는지 확인
+                long activeReservationCount = reservationRepository
+                                .countActiveReservationsByMemberEmail(memberEmpEmail);
+                if (activeReservationCount > 0) {
+                        throw AdminReservationException.memberAlreadyHasActiveReservation();
+                }
+
+                // 직원 조회
+                var member = employeeRepository.findByEmail(memberEmpEmail)
+                                .orElseThrow(() -> AdminReservationException.employeeNotFound(memberEmpEmail));
+
+                // 예약 생성
+                ReservationEntity reservation = ReservationEntity.builder()
+                                .car(car)
+                                .member(member)
+                                .startedAt(request.getStartedAt())
+                                .endedAt(request.getEndedAt())
+                                .purpose(request.getPurpose())
+                                .detail(request.getDetail())
+                                .status(ReservationStatus.PENDING)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+                ReservationEntity savedReservation = reservationRepository.save(reservation);
+
+                return reservationMapper.toMemberCarDetailResponse(car, savedReservation);
+        }
+
+        // [사용자] 차량 대여 취소하기
+        @Transactional
+        public MemberCarDetailResponse cancelMemberCarReservation(Long carId) {
+
+                String memberEmpEmail = UserUtil.getCurrentUserEmail();
+
+                // 차량 존재 여부 확인
+                CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
+                if (car == null) {
+                        throw CarException.carNotFoundException();
+                }
+
+                // 사용자의 해당 차량에 대한 PENDING 상태 예약 조회
+                ReservationEntity reservation = reservationRepository.findLatestByCarAndMemberAndStatus(
+                                carId, memberEmpEmail, ReservationStatus.PENDING);
+
+                if (reservation == null) {
+                        throw AdminReservationException.memberReservationNotFound();
+                }
+
+                // PENDING 상태에서만 취소 가능
+                if (reservation.getStatus() != ReservationStatus.PENDING) {
+                        throw AdminReservationException.reservationNotCancellable();
+                }
+
+                // 상태를 CANCELLED로 변경
+                reservation.updateStatus(ReservationStatus.CANCELLED);
+                ReservationEntity updatedReservation = reservationRepository.save(reservation);
+
+                return reservationMapper.toMemberCarDetailResponse(car, updatedReservation);
         }
 
 }
