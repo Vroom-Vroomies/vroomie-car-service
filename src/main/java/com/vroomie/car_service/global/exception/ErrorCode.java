@@ -58,6 +58,9 @@ public enum ErrorCode {
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST),
 
+    // ========== 점검 관련 (1800~1899) ==========
+    INSPECTION_NOT_FOUND("점검 내역을 찾을 수 없습니다.", 1800, HttpStatus.NOT_FOUND),
+
     // ========== 대여 이력 관련 (2100~2199) ==========
     RESERVED_LOG_NOT_FOUND("대여 이력을 찾을 수 없습니다.", 2100, HttpStatus.NOT_FOUND),
     RESERVED_LOG_ACCESS_DENIED("해당 대여 이력에 접근할 권한이 없습니다.", 2101, HttpStatus.FORBIDDEN),
