@@ -1,10 +1,9 @@
 package com.vroomie.car_service.domain.fleet.inspection.mapper;
 
+import com.vroomie.car_service.domain.fleet.inspection.dto.InspectionCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.inspection.dto.InspectionDetailDTO;
 import com.vroomie.car_service.domain.fleet.inspection.entity.InspectionEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface InspectionMapper {
@@ -15,4 +14,7 @@ public interface InspectionMapper {
             @Mapping(source = "employee.name", target = "createdBy")
             })
     InspectionDetailDTO toDetailDTO(InspectionEntity inspection);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateInspection(InspectionCreateRequestDTO req, @MappingTarget InspectionEntity inspection);
 }

@@ -25,6 +25,7 @@ public class InspectionService {
     private final EmployeeRepository employeeRepository;
     private final InspectionMapper inspectionMapper;
 
+    // 신규 점검 이력 생성
     @Transactional
     public InspectionDetailDTO createInspection(Long carId, InspectionCreateRequestDTO req) {
         CarEntity car = carRepository.findById(carId)
@@ -32,6 +33,7 @@ public class InspectionService {
         EmployeeEntity employee = employeeRepository.findByEmail(req.getCreatorEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND));
 
+        // 점검 이력 빌드
         InspectionEntity inspection = InspectionEntity.builder()
                 .car(car)
                 .date(req.getDate())
@@ -59,5 +61,33 @@ public class InspectionService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.INSPECTION_NOT_FOUND));
 
         return inspectionMapper.toDetailDTO(inspection);
+    }
+
+    // 점검 정보 수정
+    @Transactional
+    public InspectionDetailDTO updateInspection(Long id, InspectionCreateRequestDTO req) {
+        InspectionEntity inspection = inspectionRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INSPECTION_NOT_FOUND));
+
+        // 수정 시작
+        inspectionMapper.updateInspection(req, inspection);
+
+        // 수정 사항 저장
+        InspectionEntity updatedInspection = inspectionRepository.save(inspection);
+
+        // 차량 최종 점검일 저장
+        updatedInspection.getCar().updateLastInspection(updatedInspection.getDate());
+        carRepository.save(updatedInspection.getCar());
+
+        return inspectionMapper.toDetailDTO(updatedInspection);
+    }
+
+    // 점검 이력 삭제
+    @Transactional
+    public void deleteInspection(Long id) {
+        InspectionEntity inspection = inspectionRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INSPECTION_NOT_FOUND));
+
+        inspectionRepository.delete(inspection);
     }
 }
