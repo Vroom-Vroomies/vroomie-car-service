@@ -7,22 +7,21 @@ import com.vroomie.car_service.domain.employee.repository.EmployeeRepository;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogDetailResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogStartReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogStartResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogSubmitResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogSummaryResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogDetailResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogEndReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogEndResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogStartReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogStartResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogSubmitResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogSummaryResDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.entity.DrivingLogEntity;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
 import com.vroomie.car_service.domain.fleet.drivinglog.exception.DrivingLogException;
 import com.vroomie.car_service.domain.fleet.drivinglog.mapper.DrivingLogMapper;
 import com.vroomie.car_service.domain.fleet.drivinglog.repository.DrivingLogRepository;
 import com.vroomie.car_service.global.response.PageResponse;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -49,9 +48,10 @@ public class DrivingLogService {
 
     // 운행 기록 시작 시점 등록
     @Transactional
-    public DrivingLogStartResDTO createDrivingLogStart(DrivingLogStartReqDTO drivingLogStartReqDTO, String empEmail, Long carId) {
+    public DrivingLogStartResDTO createDrivingLogStart(DrivingLogStartReqDTO drivingLogStartReqDTO, Long carId) {
 
         // 직원 정보 조회
+        String empEmail = getCurrentUserEmail();
         EmployeeEntity employeeEntity = employeeRepository.findByEmail(empEmail)
                 .orElseThrow(EmployeeException::employeeNotFoundException);
 
@@ -78,11 +78,12 @@ public class DrivingLogService {
 
     // 운행 기록 종료 시점 업데이트
     @Transactional
-    public DrivingLogEndResDTO updateDrivingLogEnd(Long id, DrivingLogEndReqDTO drivingLogEndReqDTO, String empEmail) {
+    public DrivingLogEndResDTO updateDrivingLogEnd(Long id, DrivingLogEndReqDTO drivingLogEndReqDTO) {
         // 운행일지 조회
         DrivingLogEntity drivingLogEntity = drivingLogRepository.findById(id).orElseThrow(DrivingLogException::drivingLogNotFoundException);
 
         // 현재 종료 기록을 업데이트하는 직원 조회
+        String empEmail = getCurrentUserEmail();
         EmployeeEntity employeeEntity = employeeRepository.findByEmail(empEmail).orElseThrow(EmployeeException::employeeNotFoundException);
 
         // 종료 기록을 업데이트한 직원과 기존 작성자 비교
@@ -96,7 +97,7 @@ public class DrivingLogService {
         }
 
         // 운행일지 제출 상태 검증
-        if (Boolean.TRUE.equals(drivingLogEntity.getIsSaved()) || drivingLogEntity.getLogStatus().equals(LogStatus.WRITING)) {
+        if (Boolean.TRUE.equals(drivingLogEntity.getIsSaved()) || drivingLogEntity.getLogStatus().equals(LogStatus.COMPLETED)) {
             throw alreadySubmitsLogException();
         }
 
@@ -111,11 +112,12 @@ public class DrivingLogService {
 
     // 운행 기록 전체 수정
     @Transactional
-    public DrivingLogResDTO updateDrivingLogAll(Long id, DrivingLogReqDTO drivingLogReqDTO, String empEmail) {
+    public DrivingLogResDTO updateDrivingLogAll(Long id, DrivingLogReqDTO drivingLogReqDTO) {
         // 운행 일지 조회
         DrivingLogEntity drivingLogEntity = drivingLogRepository.findById(id).orElseThrow(DrivingLogException::drivingLogNotFoundException);
 
         // 현재 수정하려는 직원 권한조회 (관리자 권한 이상만 수정 가능)
+        String empEmail = getCurrentUserEmail();
         EmployeeEntity employeeEntity = employeeRepository.findByEmail(empEmail).orElseThrow(EmployeeException::employeeNotFoundException);
         if (employeeEntity.getRole().equals(Role.USER)) {
             throw employeeNotEnoughRole();
@@ -142,11 +144,12 @@ public class DrivingLogService {
 
     // 운행 기록 최종 제출
     @Transactional
-    public DrivingLogSubmitResDTO submitDrivingLog(Long id, String empEmail) {
+    public DrivingLogSubmitResDTO submitDrivingLog(Long id) {
         // 운행 일지 조회
         DrivingLogEntity drivingLogEntity = drivingLogRepository.findById(id).orElseThrow(DrivingLogException::drivingLogNotFoundException);
 
         // 작성자 본인만 제출 가능
+        String empEmail = getCurrentUserEmail();
         if (!drivingLogEntity.getEmployeeEntity().getEmail().equals(empEmail)) {
             throw employeeNotMatchException();
         }
@@ -216,11 +219,12 @@ public class DrivingLogService {
 
     // 운행 일지 상세 조회
     @Transactional(readOnly = true)
-    public DrivingLogDetailResDTO getDrivingLogDetail(Long id, String empEmail) {
+    public DrivingLogDetailResDTO getDrivingLogDetail(Long id) {
         // 운행일지 조회
         DrivingLogEntity drivingLogEntity = drivingLogRepository.findById(id).orElseThrow(DrivingLogException::drivingLogNotFoundException);
 
         // 임직원 권한 조회
+        String empEmail = getCurrentUserEmail();
         EmployeeEntity employeeEntity = employeeRepository.findByEmail(empEmail).orElseThrow(EmployeeException::employeeNotFoundException);
         Role role = employeeEntity.getRole();
 
@@ -233,6 +237,11 @@ public class DrivingLogService {
         DrivingLogDetailResDTO drivingLogDetailResDTO = drivingLogMapper.toDrivingLogDetailResDTO(drivingLogEntity);
 
         return drivingLogDetailResDTO;
+    }
+
+    // 임시 유저
+    private String getCurrentUserEmail() {
+        return "admin@wemade.com";
     }
 
 }

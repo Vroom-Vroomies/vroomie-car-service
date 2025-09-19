@@ -1,9 +1,11 @@
-package com.vroomie.car_service.domain.fleet.drivinglog.dto;
+package com.vroomie.car_service.domain.fleet.drivinglog.dto.req;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
@@ -15,5 +17,12 @@ public class DrivingLogEndReqDTO {
 
     @NotNull(message = "주행 후 계기판 사진은 필수입니다.")
     private String endOdometerImage;
+
+    // 프론트에서 GPS API로 수집
+    private BigDecimal endLat;
+    private BigDecimal endLng;
+
+    // 프론트에서 역지오코딩으로 수집
+    private String endLocation;
 
 }
