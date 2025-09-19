@@ -14,4 +14,6 @@ public class InsuContractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
     private CarEntity car;
+
+
 }
