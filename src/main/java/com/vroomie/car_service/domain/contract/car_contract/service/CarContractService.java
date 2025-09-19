@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.contract.car_contract.service;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.*;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.LeaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.PurchaseContractResponse;
 import com.vroomie.car_service.domain.contract.car_contract.dto.response.RentContractResponse;
@@ -14,6 +15,7 @@ import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -24,18 +26,18 @@ public class CarContractService {
     private final CarContractMapper carContractMapper;
     private final CarContractRepository contractRepository;
 
-    public Object getContractDetails(Long contractId) {
+    public Object getContractDetails(Long carId) {
 
-        log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}",contractId);
+        log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}", carId);
 
-        CarContract contract = contractRepository.findById(contractId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
+        CarContract contract = contractRepository.findByCarId(carId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
         System.out.println("😀😀😀contract = " + contract);
 
-        if(contract instanceof LeaseContract){
+        if (contract instanceof LeaseContract) {
             LeaseContractResponse leaseDTO = carContractMapper.toLeaseContractResponse((LeaseContract) contract);
             leaseDTO.calculateAmounts();  // 매퍼가 채운 값 기준으로 계산
             return leaseDTO;
-        } else if(contract instanceof RentContract){
+        } else if (contract instanceof RentContract) {
             RentContractResponse rentDTO = carContractMapper.toRentContractResponse((RentContract) contract);
             rentDTO.calculateAmounts();
             return rentDTO;
@@ -47,4 +49,49 @@ public class CarContractService {
             throw new BusinessException(ErrorCode.CONTRACT_TYPE_NOT_FOUND);
         }
     }
+
+    public void registNewContract(ContractRegistRequest registDTO) {
+
+        System.out.println("✅✅✅contract = " + registDTO);
+        CarContract contract = null;
+        if (registDTO instanceof LeaseRegistRequest) {
+            contract = carContractMapper.toLeaseContract((LeaseRegistRequest) registDTO);
+        } else if (registDTO instanceof RentRegistRequest) {
+            contract = carContractMapper.toRentContract((RentRegistRequest) registDTO);
+        } else if (registDTO instanceof PurchaseRegistRequest) {
+            contract = carContractMapper.toPurchaseContract((PurchaseRegistRequest) registDTO);
+        }
+
+        if (contract != null) {
+            contractRepository.save(contract);
+        } else {
+            throw new BusinessException(ErrorCode.CONTRACT_TYPE_NOT_FOUND);
+        }
+
+    }
+
+    @Transactional
+    public void modifyContractInfo(ContractUpdateRequest updateDTO, Long contractId) {
+
+        /** 프론트에서 contract에 따라 입력하는 값이 달라지기때문에 애초에 contractType을 잘못입력할 일이 없으니 contractType 수정 안함. **/
+
+        // 1. contractId로 기존 계약 엔티티를 조회합니다.
+        CarContract existingContract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        if (existingContract instanceof LeaseContract && updateDTO instanceof LeaseUpdateRequest) {
+            ((LeaseContract) existingContract).updateLeaseContract((LeaseUpdateRequest) updateDTO);
+        } else if (existingContract instanceof RentContract && updateDTO instanceof RentUpdateRequest) {
+            // RentContract에도 유사한 updateRentContract 메서드가 있다고 가정
+            ((RentContract) existingContract).updateRentContract((RentUpdateRequest) updateDTO);
+        } else if (existingContract instanceof PurchaseContract && updateDTO instanceof PurchaseUpdateRequest) {
+            // PurchaseContract에도 유사한 updatePurchaseContract 메서드가 있다고 가정
+            ((PurchaseContract) existingContract).updatePurchaseContract((PurchaseUpdateRequest) updateDTO);
+        } else {
+            log.warn("계약 ID {} 에 대한 업데이트 DTO 타입 불일치 또는 예상치 못한 계약 타입: existingContract type = {}, updateDTO type = {}",
+                    contractId, existingContract.getClass().getSimpleName(), updateDTO.getClass().getSimpleName());
+        }
+    }
+
+    /** 계약 삭제 시 차량 유지비용에 영향을 미치기 때문에 삭제 불가. **/
 }

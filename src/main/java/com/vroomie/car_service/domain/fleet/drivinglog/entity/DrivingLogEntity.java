@@ -5,7 +5,8 @@ import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndReqDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogReqDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
-import com.vroomie.car_service.domain.fleet.drivinglog.enums.Purpose;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

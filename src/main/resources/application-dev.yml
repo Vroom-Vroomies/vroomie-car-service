@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
-
+      
   # Flyway 설정
   flyway:
     enabled: true
@@ -47,3 +47,10 @@ management:
       show-details: always
   security:
     enabled: false
+
+# 로깅 설정
+logging:
+  level:
+    com.vroomie.car_service.domain.operation.reservation: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

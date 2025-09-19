@@ -267,35 +267,41 @@ pipeline {
             
             steps {
                 script {
-                    input message: "Production에 배포하시겠습니까?", ok: "Deploy"
-
+                    input message: 'Production에 배포하시겠습니까?'
                     echo "🚀 Starting production deployment..."
-                    echo "👤 Deployed by: ${env.DEPLOYER}"
                     
-                    sshagent(credentials: ['prod-server-ssh-key']) {
-                        withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', 
-                                                        usernameVariable: 'DOCKER_USER', 
-                                                        passwordVariable: 'DOCKER_PASS')]) {
-                            sh '''
-                                ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no ubuntu@193.123.232.148 << 'EOF'
-                                    echo "🏠 Starting deployment on production server..."
-                                    cd /home/ubuntu
-                                    
-                                    # 기존 디렉토리 정리
-                                    if [ -d "car-service" ]; then
-                                        echo "🧹 Cleaning up existing directory..."
-                                        sudo chown -R ubuntu:ubuntu car-service || true
-                                        rm -rf car-service || true
-                                    fi
-                                    
-                                    # 소스코드 클론
-                                    echo "📥 Cloning source code..."
-                                    git clone https://gitlab.com/vroomie/car-service.git
-                                    cd car-service
-                                    
-                                    # 환경변수 파일 생성
-                                    echo "⚙️ Creating environment file..."
-                                    cat > .env << 'ENVEOF'
+                    withCredentials([
+                        sshUserPrivateKey(credentialsId: 'prod-server-ssh-key', keyFileVariable: 'SSH_KEY_FILE'),
+                        usernamePassword(credentialsId: 'docker-registry-credentials', 
+                                        usernameVariable: 'DOCKER_USER', 
+                                        passwordVariable: 'DOCKER_PASS')
+                    ]) {
+                        sh '''
+                            # SSH 키 권한 설정
+                            chmod 600 $SSH_KEY_FILE
+                            
+                            # 운영서버에서 배포 실행
+                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                                -i $SSH_KEY_FILE ubuntu@193.123.232.148 << 'EOF'
+                                
+                                echo "🏠 Starting deployment on production server..."
+                                cd /home/ubuntu
+                                
+                                # 기존 디렉토리 정리
+                                if [ -d "car-service" ]; then
+                                    echo "🧹 Cleaning up existing directory..."
+                                    sudo chown -R ubuntu:ubuntu car-service || true
+                                    rm -rf car-service || true
+                                fi
+                                
+                                # 소스코드 클론
+                                echo "📥 Cloning source code..."
+                                git clone https://gitlab.com/vroomie/car-service.git
+                                cd car-service
+                                
+                                # 환경변수 파일 생성
+                                echo "⚙️ Creating environment file..."
+                                cat > .env << 'ENVEOF'
 DB_URL=''' + env.DB_URL + '''
 DB_USERNAME=''' + env.DB_USERNAME + '''
 DB_PASSWORD=''' + env.DB_PASSWORD + '''
@@ -304,37 +310,36 @@ MYSQL_DATABASE=''' + env.MYSQL_DATABASE + '''
 SERVER_PORT=''' + env.SERVER_PORT + '''
 JAVA_OPTS=''' + env.JAVA_OPTS + '''
 ENVEOF
-                                    
-                                    # 기존 컨테이너 정리
-                                    echo "🛑 Stopping existing containers..."
-                                    docker-compose -f docker-compose.prod.yml down -v --remove-orphans || true
-                                    docker ps -a | grep -E "(car-service|mysql)" | awk '{print $1}' | xargs -r docker rm -f || true
-                                    docker volume rm car-service_mysql_prod_data || true
-                                    docker system prune -f || true
-                                    
-                                    # Docker 로그인 및 이미지 pull
-                                    echo "🔐 Logging into Docker registry..."
-                                    echo "''' + env.DOCKER_PASS + '''" | docker login -u "''' + env.DOCKER_USER + '''" --password-stdin registry.gitlab.com
-                                    
-                                    echo "📥 Pulling latest image..."
-                                    docker pull ''' + env.DOCKER_IMAGE_NAME + ':' + env.IMAGE_TAG + '''
-                                    docker tag ''' + env.DOCKER_IMAGE_NAME + ':' + env.IMAGE_TAG + ''' car-service:latest
-                                    
-                                    # 서비스 시작
-                                    echo "🚀 Starting services..."
-                                    docker-compose -f docker-compose.prod.yml up -d
-                                    
-                                    # 서비스 상태 확인
-                                    echo "⏳ Waiting for services to be ready..."
-                                    sleep 20
-                                    
-                                    echo "📊 Service status:"
-                                    docker-compose -f docker-compose.prod.yml ps -a
-                                    
-                                    echo "✅ Deployment completed successfully!"
+                                
+                                # 기존 컨테이너 정리
+                                echo "🛑 Stopping existing containers..."
+                                docker-compose -f docker-compose.prod.yml down -v --remove-orphans || true
+                                docker ps -a | grep -E "(car-service|mysql)" | awk '{print $1}' | xargs -r docker rm -f || true
+                                docker volume rm car-service_mysql_prod_data || true
+                                docker system prune -f || true
+                                
+                                # Docker 로그인 및 이미지 pull
+                                echo "🔐 Logging into Docker registry..."
+                                echo "''' + env.DOCKER_PASS + '''" | docker login -u "''' + env.DOCKER_USER + '''" --password-stdin registry.gitlab.com
+                                
+                                echo "📥 Pulling latest image..."
+                                docker pull ''' + env.DOCKER_IMAGE_NAME + ':' + env.IMAGE_TAG + '''
+                                docker tag ''' + env.DOCKER_IMAGE_NAME + ':' + env.IMAGE_TAG + ''' car-service:latest
+                                
+                                # 서비스 시작
+                                echo "🚀 Starting services..."
+                                docker-compose -f docker-compose.prod.yml up -d
+                                
+                                # 서비스 상태 확인
+                                echo "⏳ Waiting for services to be ready..."
+                                sleep 20
+                                
+                                echo "📊 Service status:"
+                                docker-compose -f docker-compose.prod.yml ps -a
+                                
+                                echo "✅ Deployment completed successfully!"
 EOF
-                            '''
-                        }
+                        '''
                     }
                     
                     echo "🎉 Production deployment completed!"
