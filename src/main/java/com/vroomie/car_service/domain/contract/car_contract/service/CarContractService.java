@@ -73,6 +73,8 @@ public class CarContractService {
     @Transactional
     public void modifyContractInfo(ContractUpdateRequest updateDTO, Long contractId) {
 
+        /** 프론트에서 contract에 따라 입력하는 값이 달라지기때문에 애초에 contractType을 잘못입력할 일이 없으니 contractType 수정 안함. **/
+
         // 1. contractId로 기존 계약 엔티티를 조회합니다.
         CarContract existingContract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
@@ -90,4 +92,6 @@ public class CarContractService {
                     contractId, existingContract.getClass().getSimpleName(), updateDTO.getClass().getSimpleName());
         }
     }
+
+    /** 계약 삭제 시 차량 유지비용에 영향을 미치기 때문에 삭제 불가. **/
 }
