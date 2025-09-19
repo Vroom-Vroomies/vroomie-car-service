@@ -25,8 +25,8 @@ public class RentContract extends CarContract {
     private BigDecimal monthlyRent;
     private BigDecimal deposit;  // 보증금
 
-    @Column(name = "payment_cycle")
-    private Integer paymentCycle;  // 지불주기
+//    @Column(name = "payment_cycle")
+//    private Integer paymentCycle;  // 지불주기
 
     @Column(name = "auto_renewal")
     private Boolean isAutoRenewal;  // 자동 갱신 여부
@@ -38,7 +38,7 @@ public class RentContract extends CarContract {
     public void updateRentContract(RentUpdateRequest updateDTO){
         this.monthlyRent = updateDTO.getMonthlyRent();
         this.deposit = updateDTO.getDeposit();
-        this.paymentCycle = updateDTO.getPaymentCycle();
+//        this.paymentCycle = updateDTO.getPaymentCycle();
         this.isAutoRenewal = updateDTO.getIsAutoRenewal();
         this.rentType = updateDTO.getRentType();
     }

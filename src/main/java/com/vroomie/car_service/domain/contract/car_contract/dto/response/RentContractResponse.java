@@ -20,7 +20,7 @@ public class RentContractResponse extends CarContractResponse {
 
     private BigDecimal monthlyRent;
     private BigDecimal deposit;
-    private Integer paymentCycle;
+//    private Integer paymentCycle;
     private Boolean isAutoRenewal;
     private RentType rentType;
     private BigDecimal annualCost;   // monthlyRent * 12
