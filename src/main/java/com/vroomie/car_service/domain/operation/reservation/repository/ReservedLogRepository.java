@@ -7,7 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.Set;
+
 public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, Long> {
+
+    @Query("SELECT  rl.car.id " +
+            "FROM   ReservedLogEntity rl " +
+            "WHERE  rl.car.id IN :carIds AND rl.status = 'RENTED'")
+    Set<Long> findRentedCarIdsIn(@Param("carIds") List<Long> carIds);
 
        @Query("SELECT rl FROM ReservedLogEntity rl " +
                      "JOIN FETCH rl.car c " +

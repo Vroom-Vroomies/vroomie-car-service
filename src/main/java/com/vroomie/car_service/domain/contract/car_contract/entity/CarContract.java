@@ -1,10 +1,12 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -32,6 +34,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @ToString
+@SuperBuilder
 public abstract class CarContract {
 
     @Id
@@ -72,5 +75,24 @@ public abstract class CarContract {
     @Column(name = "status")
     private ContractStatus contractStatus;
 
+    public CarContract(CarEntity car, String provider, BigDecimal monthlyFee, boolean isInsured, Date startAt, Date endAt, Date renewalDate, ContractStatus contractStatus){
+        this.car = car;
+        this.provider = provider;
+        this.monthlyFee = monthlyFee;
+        this.isInsured = isInsured;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.renewalDate = renewalDate;
+        this.contractStatus = contractStatus;
+    }
 
+    public void updateContract(ContractUpdateRequest updateDTO){
+        this.provider = updateDTO.getProvider();
+        this.monthlyFee = updateDTO.getMonthlyFee();
+        this.isInsured = updateDTO.isInsured();
+        this.startAt = updateDTO.getStartAt();
+        this.endAt = updateDTO.getEndAt();
+        this.renewalDate = updateDTO.getRenewalDate();
+        this.contractStatus = updateDTO.getContractStatus();
+    }
 }

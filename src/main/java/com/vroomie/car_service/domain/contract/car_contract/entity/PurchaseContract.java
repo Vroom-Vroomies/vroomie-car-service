@@ -1,7 +1,9 @@
 package com.vroomie.car_service.domain.contract.car_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.dto.request.PurchaseUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -14,10 +16,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @ToString
+@SuperBuilder
 public class PurchaseContract extends CarContract{
 
-    @Id
-    private Long id;
+//    @Id
+//    private Long id;
     private BigDecimal purchasePrice;
     private BigDecimal downPayment;  // 계약금
     private BigDecimal loanAmount;  // 대출금액
@@ -28,4 +31,13 @@ public class PurchaseContract extends CarContract{
 
     @Column(name = "monthly_payment")
     private BigDecimal monthlyRepayment;  // 월 상환금
+
+    public void updatePurchaseContract(PurchaseUpdateRequest updateDTO){
+        this.purchasePrice = updateDTO.getPurchasePrice();
+        this.downPayment = updateDTO.getDownPayment();
+        this.loanAmount = updateDTO.getLoanAmount();
+        this.interestRate = updateDTO.getInterestRate();
+        this.loanTerm = updateDTO.getLoanTerm();
+        this.monthlyRepayment = updateDTO.getMonthlyRepayment();
+    }
 }
