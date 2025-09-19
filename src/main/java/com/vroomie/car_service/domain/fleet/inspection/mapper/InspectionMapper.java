@@ -12,7 +12,7 @@ public interface InspectionMapper {
     @Mappings({
             @Mapping(source = "car.id", target = "carId"),
             @Mapping(source = "car.number", target = "carNumber"),
-            @Mapping(source = "createdBy.name", target = "createdByName")
+            @Mapping(source = "employee.name", target = "createdBy")
             })
     InspectionDetailDTO toDetailDTO(InspectionEntity inspection);
 }

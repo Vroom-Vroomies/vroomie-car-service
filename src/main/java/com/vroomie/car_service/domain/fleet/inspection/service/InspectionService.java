@@ -55,9 +55,9 @@ public class InspectionService {
     }
 
     public InspectionDetailDTO getInspectionById(Long inspectionId) {
-        InspectionEntity entity = inspectionRepository.findById(inspectionId)
+        InspectionEntity inspection = inspectionRepository.findById(inspectionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INSPECTION_NOT_FOUND));
 
-        return null;
+        return inspectionMapper.toDetailDTO(inspection);
     }
 }
