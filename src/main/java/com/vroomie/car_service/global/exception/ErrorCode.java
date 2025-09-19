@@ -32,6 +32,11 @@ public enum ErrorCode {
     INVALID_STATUS_CHANGE_TYPE("PENDING 상태에서는 APPROVED 또는 REJECTED로만 변경할 수 있습니다.", 1302, HttpStatus.BAD_REQUEST),
     INVALID_TIME_SLOT("업무시간(9:00~18:00) 및 30분 단위 시간대만 예약 가능합니다.", 1303, HttpStatus.BAD_REQUEST),
     INVALID_DATETIME_FORMAT("날짜/시간 형식이 올바르지 않습니다.", 1304, HttpStatus.BAD_REQUEST),
+    RESERVATION_TIME_CONFLICT("선택한 시간대에 이미 예약이 있어 대여가 불가능합니다.", 1305, HttpStatus.CONFLICT),
+    RESERVATION_NOT_CANCELLABLE("취소 가능한 예약이 아닙니다.", 1306, HttpStatus.BAD_REQUEST),
+    MEMBER_RESERVATION_NOT_FOUND("취소할 예약을 찾을 수 없습니다.", 1307, HttpStatus.NOT_FOUND),
+    MEMBER_ALREADY_HAS_ACTIVE_RENTAL("반납이 완료되지 않은 대여가 있어 새로운 대여가 불가능합니다.", 1308, HttpStatus.CONFLICT),
+    MEMBER_ALREADY_HAS_ACTIVE_RESERVATION("이미 예약 중인 차량이 있어 새로운 예약이 불가능합니다.", 1309, HttpStatus.CONFLICT),
 
     // ========== 사고 관련 (1400~1499) ==========
     ACCIDENT_NOT_FOUND("사고 정보를 찾을 수 없습니다", 1400, HttpStatus.NOT_FOUND),
