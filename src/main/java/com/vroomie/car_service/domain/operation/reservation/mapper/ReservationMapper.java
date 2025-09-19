@@ -88,5 +88,6 @@ public interface ReservationMapper {
     @Mapping(target = "usageType", expression = "java(car.getUsageType() != null ? car.getUsageType().toString() : null)")
     @Mapping(target = "status", expression = "java(car.getStatus() != null ? car.getStatus().toString() : null)")
     @Mapping(target = "purpose", expression = "java(reservation != null && reservation.getPurpose() != null ? reservation.getPurpose() : null)")
+    @Mapping(target = "detail", expression = "java(reservation != null && reservation.getDetail() != null ? reservation.getDetail() : null)")
     MemberCarDetailResponse toMemberCarDetailResponse(CarEntity car, ReservationEntity reservation);
 }

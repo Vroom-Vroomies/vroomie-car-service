@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 
 @Getter
 @AllArgsConstructor
@@ -21,5 +22,6 @@ public class MemberCarDetailResponse {
     private String usageType;
     private Integer allowableCapacity;
 
-    private String purpose;
+    private Purpose purpose;
+    private String detail;
 }

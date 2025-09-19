@@ -2,6 +2,8 @@ package com.vroomie.car_service.domain.operation.reservation.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReser
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.global.response.PageResponse;
@@ -71,4 +74,17 @@ public class ReservationController {
         return ApiResponse.success(reservationService.getMemberCarDetail(carId), "차량 상세 조회 성공");
     }
 
+    // 차량 대여 신청하기
+    @Operation(summary = "[사용자]차량 대여 신청하기", description = "차량 대여 신청을 합니다.")
+    @PostMapping("/member/car/{carId}")
+    public ApiResponse<MemberCarDetailResponse> createMemberCarReservation(@RequestBody MemberCarReservationRequest request) {
+        return ApiResponse.success(reservationService.createMemberCarReservation(request), "차량 대여 신청 성공");
+    }
+
+    // 차량 대여 취소하기
+    @Operation(summary = "[사용자]차량 대여 취소하기", description = "차량 대여 취소를 합니다.")
+    @DeleteMapping("/member/car/{carId}")
+    public ApiResponse<MemberCarDetailResponse> cancelMemberCarReservation(@PathVariable Long carId) {
+        return ApiResponse.success(reservationService.cancelMemberCarReservation(carId), "차량 대여 취소 성공");
+    }
 }
