@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.accident.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
+import com.vroomie.car_service.domain.fleet.accident.dto.AccidentCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.accident.enums.AccidentType;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import jakarta.persistence.*;
@@ -54,6 +55,14 @@ public class AccidentEntity {
         this.occurredAt = occurredAt;
         this.cost = cost;
         this.isSaved = isSaved;
+    }
+
+    public void update(AccidentCreateRequestDTO dto) {
+        if (dto.getType() != null) this.type = AccidentType.valueOf(dto.getType());
+        if (dto.getNote() != null) this.note = dto.getNote();
+        if (dto.getDetail() != null) this.detail = dto.getDetail();
+        if (dto.getDate() != null) this.occurredAt = dto.getDate();
+        if (dto.getCost() != null) this.cost = dto.getCost();
     }
 
     public void finalize() {

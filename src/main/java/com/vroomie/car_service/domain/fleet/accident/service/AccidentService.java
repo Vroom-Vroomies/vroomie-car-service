@@ -116,7 +116,7 @@ public class AccidentService {
         accidentImageRepository.deleteByAccidentId(id);
 
         // 2. 텍스트 정보 업데이트
-        accidentMapper.update(req, accident);
+        accident.update(req);
 
         // 3. 새로운 이미지 추가
         if (images != null && !images.isEmpty()) {

@@ -50,7 +50,7 @@ public class AccidentController {
         return ResponseEntity.ok(ApiResponse.success(data, "사고 내역 상세 조회에 성공하였습니다."));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> updateAccident(
             @PathVariable Long id,
             @RequestPart("req") AccidentCreateRequestDTO req,

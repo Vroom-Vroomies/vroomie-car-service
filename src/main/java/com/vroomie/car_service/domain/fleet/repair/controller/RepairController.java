@@ -56,7 +56,7 @@ public class RepairController {
         return ResponseEntity.ok(ApiResponse.success(data, "수리 내역 상세 조회에 성공하였습니다."));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RepairDetailDTO>> updateRepair(
             @PathVariable Long id,
             @RequestPart("req") RepairCreateRequestDTO req,
