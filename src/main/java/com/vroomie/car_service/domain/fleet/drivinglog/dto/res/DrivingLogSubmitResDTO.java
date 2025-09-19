@@ -1,4 +1,4 @@
-package com.vroomie.car_service.domain.fleet.drivinglog.dto;
+package com.vroomie.car_service.domain.fleet.drivinglog.dto.res;
 
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
 import lombok.AllArgsConstructor;
