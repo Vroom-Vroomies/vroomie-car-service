@@ -1,1 +1,0 @@
-ALTER TABLE tbl_car DROP COLUMN fuel_type_varchar;

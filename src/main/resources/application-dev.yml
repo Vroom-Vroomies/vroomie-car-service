@@ -11,8 +11,7 @@ spring:
 
   # Flyway 설정
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: false
 
   # 개발도구 설정
   devtools:

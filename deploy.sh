@@ -125,7 +125,7 @@ ln -sf "$ENV_FILE" ".env"
 log_info "환경 설정 파일 연결 완료"
 
 # Gradle 빌드
-log_info "애플리케이션 빌드 중..."
+log_info "애플리케이션 빌드 중..."sudo service docker restart
 if command -v ./gradlew &> /dev/null; then
     ./gradlew clean build -x test
 elif command -v gradle &> /dev/null; then
