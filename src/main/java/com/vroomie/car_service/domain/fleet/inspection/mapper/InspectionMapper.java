@@ -1,6 +1,5 @@
 package com.vroomie.car_service.domain.fleet.inspection.mapper;
 
-import com.vroomie.car_service.domain.fleet.inspection.dto.InspectionCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.inspection.dto.InspectionDetailDTO;
 import com.vroomie.car_service.domain.fleet.inspection.entity.InspectionEntity;
 import org.mapstruct.*;
