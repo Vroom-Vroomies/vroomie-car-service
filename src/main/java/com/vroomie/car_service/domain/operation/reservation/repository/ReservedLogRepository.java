@@ -32,4 +32,11 @@ public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, 
                      "JOIN FETCH r.member m " +
                      "WHERE rl.id = :id AND m.email = :memberEmail")
        ReservedLogEntity findByIdAndMemberEmail(@Param("id") Long id, @Param("memberEmail") String memberEmail);
+
+       @Query("SELECT COUNT(rl) FROM ReservedLogEntity rl " +
+                     "JOIN rl.reservation r " +
+                     "JOIN r.member m " +
+                     "WHERE m.email = :memberEmail " +
+                     "AND rl.status IN ('RENTED', 'OVERDUE')")
+       long countActiveRentalsByMemberEmail(@Param("memberEmail") String memberEmail);
 }
