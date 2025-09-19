@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/fleet/accidents")
 @RequiredArgsConstructor
-@Tag(name = "수리 기록", description = "수리 기록 관련 API")
+@Tag(name = "사고 기록", description = "사고 기록 관련 API")
 public class AccidentController {
 
     private final AccidentService accidentService;
