@@ -2,6 +2,9 @@ package com.vroomie.car_service.domain.operation.reservation.mapper;
 
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
+import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -29,21 +32,21 @@ public interface ReservationMapper {
         if (reservation.getStatus() == ReservationStatus.APPROVED) {
             // 대여이력이 있는 경우
             if (reservation.getReservedLog() != null) {
-                
+
                 // 연체 여부 확인: returnDate가 endedAt보다 늦은 경우
                 LocalDateTime endedAt = reservation.getReservedLog().getEndedAt();
                 LocalDateTime returnDate = reservation.getReservedLog().getReturnDate();
-                
+
                 if (returnDate != null && endedAt != null && returnDate.isAfter(endedAt)) {
                     return RentStatus.OVERDUE;
                 }
-                
+
                 // 현재 시간이 반납 예정일보다 늦고, 아직 반납하지 않은 경우도 연체
-                if (endedAt != null && LocalDateTime.now().isAfter(endedAt) 
-                    && reservation.getReservedLog().getStatus() == RentStatus.RENTED) {
+                if (endedAt != null && LocalDateTime.now().isAfter(endedAt)
+                        && reservation.getReservedLog().getStatus() == RentStatus.RENTED) {
                     return RentStatus.OVERDUE;
                 }
-                
+
                 // 대여이력의 상태가 있는 경우 해당 상태 반환
                 if (reservation.getReservedLog().getStatus() != null) {
                     return reservation.getReservedLog().getStatus();
@@ -61,19 +64,30 @@ public interface ReservationMapper {
         if (reservation.getStatus() == ReservationStatus.APPROVED) {
             return "PREPARING";
         }
-        
+
         // REJECTED나 다른 상태는 NULL
         return null;
     }
 
     default String getAdminName(ReservationEntity reservation) {
         // 예약 상태가 APPROVED이고 대여이력이 있는 경우 담당자 이름 반환
-        if (reservation.getStatus() == ReservationStatus.APPROVED 
-            && reservation.getReservedLog() != null 
-            && reservation.getReservedLog().getAdmin() != null 
-            && reservation.getReservedLog().getAdmin().getName() != null) {
+        if (reservation.getStatus() == ReservationStatus.APPROVED
+                && reservation.getReservedLog() != null
+                && reservation.getReservedLog().getAdmin() != null
+                && reservation.getReservedLog().getAdmin().getName() != null) {
             return reservation.getReservedLog().getAdmin().getName();
         }
         return null;
     }
+
+    List<AvailableCarListResponse> toAvailableCarListResponseList(List<CarEntity> cars);
+
+    @Mapping(source = "car.id", target = "id")
+    @Mapping(target = "fuelType", expression = "java(car.getFuelType() != null ? car.getFuelType().toString() : null)")
+    @Mapping(target = "gearType", expression = "java(car.getGearType() != null ? car.getGearType().toString() : null)")
+    @Mapping(target = "usageType", expression = "java(car.getUsageType() != null ? car.getUsageType().toString() : null)")
+    @Mapping(target = "status", expression = "java(car.getStatus() != null ? car.getStatus().toString() : null)")
+    @Mapping(target = "purpose", expression = "java(reservation != null && reservation.getPurpose() != null ? reservation.getPurpose() : null)")
+    @Mapping(target = "detail", expression = "java(reservation != null && reservation.getDetail() != null ? reservation.getDetail() : null)")
+    MemberCarDetailResponse toMemberCarDetailResponse(CarEntity car, ReservationEntity reservation);
 }
