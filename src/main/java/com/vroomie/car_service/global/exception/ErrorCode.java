@@ -60,7 +60,11 @@ public enum ErrorCode {
 
     // ========== 대여 이력 관련 (2100~2199) ==========
     RESERVED_LOG_NOT_FOUND("대여 이력을 찾을 수 없습니다.", 2100, HttpStatus.NOT_FOUND),
-    RESERVED_LOG_ACCESS_DENIED("해당 대여 이력에 접근할 권한이 없습니다.", 2101, HttpStatus.FORBIDDEN);
+    RESERVED_LOG_ACCESS_DENIED("해당 대여 이력에 접근할 권한이 없습니다.", 2101, HttpStatus.FORBIDDEN),
+
+    // ========== 보험 정보 관련 (2200~2299) ==========
+    INSURANCE_NOT_FOUND("보험 정보를 찾을 수 없습니다.", 2200, HttpStatus.NOT_FOUND);
+
 
     private final String message;
     private final int statusCode;
