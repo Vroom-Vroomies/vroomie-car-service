@@ -2,11 +2,9 @@ package com.vroomie.car_service.domain.fleet.drivinglog.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogEndReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogReqDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
-import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,7 +15,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import static com.vroomie.car_service.domain.fleet.drivinglog.util.GpsDistanceCalculator.calculateDistance;
 
 @Entity
 @Table(name = "tbl_driving_log")
@@ -39,16 +40,20 @@ public class DrivingLogEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
     private CarEntity carEntity;
-
-    @Enumerated(EnumType.STRING)
-    private Purpose purpose;
-    private String detail;
     private Long startOdometer;
     private String startOdometerImage;
     private Long endOdometer;
     private String endOdometerImage;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
+    private BigDecimal startLat;
+    private BigDecimal startLng;
+    private BigDecimal endLat;
+    private BigDecimal endLng;
+    private String startLocation;
+    private String endLocation;
+    private BigDecimal gpsDistance;
+    private BigDecimal odometerDistance;
 
     @Enumerated(EnumType.STRING)
     private LogStatus logStatus;
@@ -67,20 +72,34 @@ public class DrivingLogEntity {
         if (drivingLogEndReqDTO.getEndOdometer() != null) this.endOdometer = drivingLogEndReqDTO.getEndOdometer();
         if (drivingLogEndReqDTO.getEndOdometerImage() != null) this.endOdometerImage = drivingLogEndReqDTO.getEndOdometerImage();
         this.endedAt = LocalDateTime.now();
+        if (drivingLogEndReqDTO.getEndLat() != null) this.endLat = drivingLogEndReqDTO.getEndLat();
+        if (drivingLogEndReqDTO.getEndLng() != null) this.endLng = drivingLogEndReqDTO.getEndLng();
+        if (drivingLogEndReqDTO.getEndLocation() != null) this.endLocation = drivingLogEndReqDTO.getEndLocation();
+        // 거리 계산 (GPS 기반)
+        if (this.startLat != null && this.endLat != null && this.startLng != null && this.endLng != null) {
+            this.gpsDistance = calculateDistance(this.startLat, this.startLng, this.endLat, this.endLng);
+        }
+        // 거리 계산 (계기판 기반)
+        if (this.startOdometer != null && this.endOdometer != null) {
+            this.odometerDistance = BigDecimal.valueOf(this.endOdometer - this.startOdometer);
+        }
         this.logStatus = LogStatus.PENDING;
     }
 
     // 제출 전 운행일지 전체 업데이트 가능 메소드(관리자 기능)
     public void updateDrivingLogAll(DrivingLogReqDTO drivingLogReqDTO, EmployeeEntity employeeEntity) {
         if (employeeEntity != null) this.employeeEntity = employeeEntity;
-        if (drivingLogReqDTO.getPurpose() != null) this.purpose = drivingLogReqDTO.getPurpose();
-        if (drivingLogReqDTO.getDetail() != null) this.detail = drivingLogReqDTO.getDetail();
         if (drivingLogReqDTO.getStartOdometer() != null) this.startOdometer = drivingLogReqDTO.getStartOdometer();
         if (drivingLogReqDTO.getStartOdometerImage() != null) this.startOdometerImage = drivingLogReqDTO.getStartOdometerImage();
         if (drivingLogReqDTO.getEndOdometer() != null) this.endOdometer = drivingLogReqDTO.getEndOdometer();
         if (drivingLogReqDTO.getEndOdometerImage() != null) this.endOdometerImage = drivingLogReqDTO.getEndOdometerImage();
         if (drivingLogReqDTO.getStartedAt() != null) this.startedAt = drivingLogReqDTO.getStartedAt();
         if (drivingLogReqDTO.getEndedAt() != null) this.endedAt = drivingLogReqDTO.getEndedAt();
+
+        // 거리 계산 (수정된 계기판 기반)
+        if (this.startOdometer != null && this.endOdometer != null) {
+            this.odometerDistance = BigDecimal.valueOf(this.endOdometer - this.startOdometer);
+        }
     }
 
     // 운행일지 최종제출

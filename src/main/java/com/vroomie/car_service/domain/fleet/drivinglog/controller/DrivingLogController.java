@@ -1,14 +1,14 @@
 package com.vroomie.car_service.domain.fleet.drivinglog.controller;
 
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogDetailResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogEndResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogStartReqDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogStartResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogSubmitResDTO;
-import com.vroomie.car_service.domain.fleet.drivinglog.dto.DrivingLogSummaryResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogDetailResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogEndReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogEndResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogStartReqDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogStartResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogSubmitResDTO;
+import com.vroomie.car_service.domain.fleet.drivinglog.dto.res.DrivingLogSummaryResDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
 import com.vroomie.car_service.domain.fleet.drivinglog.service.DrivingLogService;
 import com.vroomie.car_service.global.response.ApiResponse;
@@ -16,7 +16,6 @@ import com.vroomie.car_service.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +42,7 @@ public class DrivingLogController {
     @PostMapping("/cars/{carId}/driving-logs")
     @Operation(summary = "운행 기록 시작 시점 등록", description = "차량 운행을 시작하기 전에 필요한 정보를 등록합니다.")
     public ResponseEntity<ApiResponse<DrivingLogStartResDTO>> createDrivingLogStart(@PathVariable Long carId, @Valid @RequestBody DrivingLogStartReqDTO drivingLogStartReqDTO) {
-        String empEmail = "admin@wemade.com";
-        DrivingLogStartResDTO drivingLogStartResDTO = drivingLogService.createDrivingLogStart(drivingLogStartReqDTO, empEmail, carId);
+        DrivingLogStartResDTO drivingLogStartResDTO = drivingLogService.createDrivingLogStart(drivingLogStartReqDTO, carId);
 
         ApiResponse<DrivingLogStartResDTO> apiResponse = ApiResponse.success(drivingLogStartResDTO, "운행 일지 등록에 성공했습니다.");
 
@@ -54,8 +52,7 @@ public class DrivingLogController {
     @PatchMapping("/driving-logs/{id}")
     @Operation(summary = "운행 기록 종료 시점 등록", description = "차량 운행 종료 후 필요한 정보를 등록합니다.")
     public ResponseEntity<ApiResponse<DrivingLogEndResDTO>> updateDrivingLogEnd(@PathVariable Long id, @Valid @RequestBody DrivingLogEndReqDTO drivingLogEndReqDTO) {
-        String empEmail = "admin@wemade.com";
-        DrivingLogEndResDTO drivingLogEndResDTO = drivingLogService.updateDrivingLogEnd(id, drivingLogEndReqDTO, empEmail);
+        DrivingLogEndResDTO drivingLogEndResDTO = drivingLogService.updateDrivingLogEnd(id, drivingLogEndReqDTO);
 
         ApiResponse<DrivingLogEndResDTO> apiResponse = ApiResponse.success(drivingLogEndResDTO, "운행 일지 종료 정보 등록에 성공했습니다.");
 
@@ -65,8 +62,7 @@ public class DrivingLogController {
     @PutMapping("/driving-logs/{id}")
     @Operation(summary = "운행 기록 전체 수정", description = "차량 운행 기록을 전체 수정합니다. 관리자 권한만 가능한 기능입니다.")
     public ResponseEntity<ApiResponse<DrivingLogResDTO>> updateDrivingLogAll(@PathVariable Long id, @Valid @RequestBody DrivingLogReqDTO drivingLogReqDTO) {
-        String empEmail = "superadmin@wemade.com";
-        DrivingLogResDTO drivingLogResDTO = drivingLogService.updateDrivingLogAll(id, drivingLogReqDTO, empEmail);
+        DrivingLogResDTO drivingLogResDTO = drivingLogService.updateDrivingLogAll(id, drivingLogReqDTO);
 
         ApiResponse<DrivingLogResDTO> apiResponse = ApiResponse.success(drivingLogResDTO, "운행 일지 수정에 성공했습니다.");
 
@@ -76,8 +72,7 @@ public class DrivingLogController {
     @PatchMapping("/driving-logs/{id}/submit")
     @Operation(summary = "운행 기록 최종 제출", description = "차량 운행 기록을 최종 제출합니다. 작성자만 제출 가능하며, 제출 후에는 수정이 불가능합니다.")
     public ResponseEntity<ApiResponse<DrivingLogSubmitResDTO>> submitDrivingLog(@PathVariable Long id) {
-        String empEmail = "admin@wemade.com";
-        DrivingLogSubmitResDTO drivingLogSubmitResDTO = drivingLogService.submitDrivingLog(id, empEmail);
+        DrivingLogSubmitResDTO drivingLogSubmitResDTO = drivingLogService.submitDrivingLog(id);
 
         ApiResponse<DrivingLogSubmitResDTO> apiResponse = ApiResponse.success(drivingLogSubmitResDTO, "운행 일지가 최종 제출되었습니다.");
 
@@ -106,8 +101,7 @@ public class DrivingLogController {
     @GetMapping("/driving-logs/{id}")
     @Operation(summary = "상세 운행 기록 조회", description = "상세 운행 기록으로 조회합니다.")
     public ResponseEntity<ApiResponse<DrivingLogDetailResDTO>> getDrivingLog(@PathVariable Long id) {
-        String empEmail = "user01@wemade.com";
-        DrivingLogDetailResDTO drivingLogDetailResDTO = drivingLogService.getDrivingLogDetail(id, empEmail);
+        DrivingLogDetailResDTO drivingLogDetailResDTO = drivingLogService.getDrivingLogDetail(id);
 
         ApiResponse<DrivingLogDetailResDTO> apiResponse = ApiResponse.success(drivingLogDetailResDTO, "운행일지 상세 조회에 성공했습니다.");
 

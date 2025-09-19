@@ -1,4 +1,4 @@
-package com.vroomie.car_service.domain.fleet.drivinglog.dto;
+package com.vroomie.car_service.domain.fleet.drivinglog.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +13,6 @@ import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 @AllArgsConstructor
 public class DrivingLogReqDTO {
 
-    private Purpose purpose;
-    private String detail;
     private Long startOdometer;
     private String startOdometerImage;
     private Long endOdometer;
