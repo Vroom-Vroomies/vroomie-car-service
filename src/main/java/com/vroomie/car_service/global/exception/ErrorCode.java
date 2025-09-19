@@ -66,8 +66,8 @@ public enum ErrorCode {
     RESERVED_LOG_ACCESS_DENIED("해당 대여 이력에 접근할 권한이 없습니다.", 2101, HttpStatus.FORBIDDEN),
 
     // ========== 보험 정보 관련 (2200~2299) ==========
-    INSURANCE_NOT_FOUND("보험 정보를 찾을 수 없습니다.", 2200, HttpStatus.NOT_FOUND);
-
+    INSURANCE_NOT_FOUND("보험 정보를 찾을 수 없습니다.", 2200, HttpStatus.NOT_FOUND),
+    CANNOT_REGIST_INSURANCE("보험 정보 등록 중 오류가 발생했습니다.", 2201, HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;
     private final int statusCode;

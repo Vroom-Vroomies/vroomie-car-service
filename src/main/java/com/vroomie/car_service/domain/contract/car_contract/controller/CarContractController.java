@@ -20,10 +20,10 @@ public class CarContractController {
 
     /** 차량 계약 상세 조회 **/
     @GetMapping("/{carId}")
-    public ApiResponse<?> selectCarContractDetails(@PathVariable(value = "carId") Long contractId){
+    public ApiResponse<?> selectCarContractDetails(@PathVariable(value = "carId") Long carId){
 
-        log.info(">>>> [CarContractController] 차량 계약 상세 조회 시작 - carId: {}", contractId);
-        Object contractDTO = contractService.getContractDetails(contractId);
+        log.info(">>>> [CarContractController] 차량 계약 상세 조회 시작 - carId: {}", carId);
+        Object contractDTO = contractService.getContractDetails(carId);
 
         return ApiResponse.success(contractDTO);
     }
