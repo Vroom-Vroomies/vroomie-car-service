@@ -2,6 +2,7 @@ package com.vroomie.car_service.domain.fleet.inspection.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
+import com.vroomie.car_service.domain.fleet.inspection.dto.InspectionCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.inspection.enums.InspectionType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -70,5 +71,18 @@ public class InspectionEntity {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.employee = employee;
+    }
+
+    public void update(InspectionCreateRequestDTO dto) {
+        if (dto.getDate() != null) this.date = dto.getDate();
+        if (dto.getCenterName() != null) this.centerName = dto.getCenterName();
+        if (dto.getCenterLocation() != null) this.centerLocation = dto.getCenterLocation();
+        if (dto.getInspectorName() != null) this.inspectorName = dto.getInspectorName();
+        if (dto.getInspectionType() != null) this.inspectionType = dto.getInspectionType();
+        if (dto.getFinalResult() != null) this.finalResult = dto.getFinalResult();
+        if (dto.getValidUntil() != null) this.validUntil = dto.getValidUntil();
+        if (dto.getFailureReason() != null) this.failureReason = dto.getFailureReason();
+        if (dto.getResult() != null) this.result = dto.getResult();
+        if (dto.getRemarks() != null) this.remarks = dto.getRemarks();
     }
 }

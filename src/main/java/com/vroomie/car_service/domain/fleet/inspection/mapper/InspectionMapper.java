@@ -14,7 +14,4 @@ public interface InspectionMapper {
             @Mapping(source = "employee.name", target = "createdBy")
             })
     InspectionDetailDTO toDetailDTO(InspectionEntity inspection);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateInspection(InspectionCreateRequestDTO req, @MappingTarget InspectionEntity inspection);
 }

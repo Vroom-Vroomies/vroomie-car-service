@@ -70,7 +70,7 @@ public class InspectionService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.INSPECTION_NOT_FOUND));
 
         // 수정 시작
-        inspectionMapper.updateInspection(req, inspection);
+        inspection.update(req);
 
         // 수정 사항 저장
         InspectionEntity updatedInspection = inspectionRepository.save(inspection);
