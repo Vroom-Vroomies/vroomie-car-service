@@ -1,11 +1,12 @@
 package com.vroomie.car_service.domain.fleet.drivinglog.dto;
 
-import com.vroomie.car_service.domain.fleet.drivinglog.enums.Purpose;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 
 @Getter
 @NoArgsConstructor

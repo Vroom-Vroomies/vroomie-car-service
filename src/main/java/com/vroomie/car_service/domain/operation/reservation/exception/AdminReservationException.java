@@ -19,12 +19,42 @@ public class AdminReservationException {
     }
 
     public static BusinessException reservationNotFound(Long id) {
-        // 예약이 존재하지 않을 때 예외 발생
         return new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
     }
 
     public static BusinessException employeeNotFound(String adminEmail) {
-        // 직원(관리자) 정보가 존재하지 않을 때 예외 발생
         return new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND);
+    }
+
+    public static BusinessException carNotAvailable(Long carId) {
+        return new BusinessException(ErrorCode.CAR_NOT_AVAILABLE);
+    }
+
+    public static BusinessException invalidTimeSlot() {
+        return new BusinessException(ErrorCode.INVALID_TIME_SLOT);
+    }
+
+    public static BusinessException invalidDateTimeFormat() {
+        return new BusinessException(ErrorCode.INVALID_DATETIME_FORMAT);
+    }
+
+    public static BusinessException reservationTimeConflict() {
+        return new BusinessException(ErrorCode.RESERVATION_TIME_CONFLICT);
+    }
+
+    public static BusinessException reservationNotCancellable() {
+        return new BusinessException(ErrorCode.RESERVATION_NOT_CANCELLABLE);
+    }
+
+    public static BusinessException memberReservationNotFound() {
+        return new BusinessException(ErrorCode.MEMBER_RESERVATION_NOT_FOUND);
+    }
+
+    public static BusinessException memberAlreadyHasActiveRental() {
+        return new BusinessException(ErrorCode.MEMBER_ALREADY_HAS_ACTIVE_RENTAL);
+    }
+
+    public static BusinessException memberAlreadyHasActiveReservation() {
+        return new BusinessException(ErrorCode.MEMBER_ALREADY_HAS_ACTIVE_RESERVATION);
     }
 }
