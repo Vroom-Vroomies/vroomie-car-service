@@ -37,4 +37,24 @@ public class AdminReservationException {
     public static BusinessException invalidDateTimeFormat() {
         return new BusinessException(ErrorCode.INVALID_DATETIME_FORMAT);
     }
+
+    public static BusinessException reservationTimeConflict() {
+        return new BusinessException(ErrorCode.RESERVATION_TIME_CONFLICT);
+    }
+
+    public static BusinessException reservationNotCancellable() {
+        return new BusinessException(ErrorCode.RESERVATION_NOT_CANCELLABLE);
+    }
+
+    public static BusinessException memberReservationNotFound() {
+        return new BusinessException(ErrorCode.MEMBER_RESERVATION_NOT_FOUND);
+    }
+
+    public static BusinessException memberAlreadyHasActiveRental() {
+        return new BusinessException(ErrorCode.MEMBER_ALREADY_HAS_ACTIVE_RENTAL);
+    }
+
+    public static BusinessException memberAlreadyHasActiveReservation() {
+        return new BusinessException(ErrorCode.MEMBER_ALREADY_HAS_ACTIVE_RESERVATION);
+    }
 }
