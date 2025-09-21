@@ -4,9 +4,12 @@ import com.vroomie.car_service.domain.contract.insurance_contract.dto.request.In
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceDetailResponse;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceSimpleResponse;
 import com.vroomie.car_service.domain.contract.insurance_contract.entity.InsuContractEntity;
+import com.vroomie.car_service.domain.contract.insurance_contract.enums.InsuranceStatus;
 import com.vroomie.car_service.domain.contract.insurance_contract.mapper.InsuranceMapper;
 import com.vroomie.car_service.domain.contract.insurance_contract.repository.InsuContractRepository;
+import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
+import com.vroomie.car_service.domain.fleet.car.mapper.CarMapper;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
@@ -25,6 +28,7 @@ public class InsuranceService {
     private final InsuContractRepository insuranceRepository;
     private final InsuranceMapper insuranceMapper;
     private final CarRepository carRepository;
+    private final CarMapper carMapper;
 
     public List<InsuranceSimpleResponse> getAllInsuranceList(Long carId){
         try{
@@ -46,8 +50,40 @@ public class InsuranceService {
         }
     }
 
+    public List<CarSimpleResponse> findCarListInsurable() {
+        try{
+            log.info(">>>> [InsuranceService] 보험 등록 가능 차량 조회");
+            List<CarEntity> carList = carRepository.getCarListInsurable();
+            return carMapper.toSimpleResponseList(carList);
+        }catch(BusinessException e){
+            throw new BusinessException(ErrorCode.NOT_EXIST_CAR_INSURABLE, e.getMessage());
+        }
+    }
+
+    public void validateRequestRequest(InsuranceRegistRequest requestDTO, List<InsuContractEntity> insuranceList){
+
+        if(!requestDTO.getStartDate().before(requestDTO.getEndDate())){
+            throw new BusinessException(ErrorCode.INVALID_INSURANCE_PERIOD);
+        }
+
+        if(requestDTO.getPremium().signum() < 0){
+            throw new BusinessException(ErrorCode.INVALID_PREMIUM_AMOUNT);
+        }
+
+        for(InsuContractEntity insurance: insuranceList){
+            if(insurance.getInsuranceName().equals(requestDTO.getInsuranceName()) && insurance.getStartDate() == requestDTO.getStartDate() && insurance.getEndDate() == requestDTO.getEndDate()){
+                throw new BusinessException(ErrorCode.DUPLICATED_INSURANCE);
+            }
+        }
+    }
+
     @Transactional
     public InsuranceDetailResponse registNewInsurance(InsuranceRegistRequest registDTO) {
+
+        List<InsuContractEntity> insuranceList = insuranceRepository.findAllByCarId(registDTO.getCarId());
+
+        validateRequestRequest(registDTO, insuranceList);
+
         try{
             log.info(">>>> [InsuranceService] 보험 등록 시작");
             CarEntity car = carRepository.findById(registDTO.getCarId()).orElseThrow(() -> new BusinessException(ErrorCode.CAR_NOT_FOUND));
@@ -70,15 +106,38 @@ public class InsuranceService {
         }
     }
 
+    public void validateUpdateRequest(InsuranceRegistRequest requestDTO, InsuContractEntity insurance){
+
+        if(insurance.getInsuranceStatus() == InsuranceStatus.EXPIRED){
+            throw new BusinessException(ErrorCode.INSURANCE_EXPIRED);
+        }
+
+        if(!requestDTO.getStartDate().before(requestDTO.getEndDate())){
+            throw new BusinessException(ErrorCode.INVALID_INSURANCE_PERIOD);
+        }
+
+        if(requestDTO.getPremium().signum() < 0){
+            throw new BusinessException(ErrorCode.INVALID_PREMIUM_AMOUNT);
+        }
+
+        if(insurance.getInsuranceName().equals(requestDTO.getInsuranceName()) && insurance.getStartDate() == requestDTO.getStartDate() && insurance.getEndDate() == requestDTO.getEndDate()){
+            throw new BusinessException(ErrorCode.DUPLICATED_INSURANCE);
+        }
+
+    }
+
     @Transactional
     public InsuranceDetailResponse modifyInsuranceInfo(InsuranceRegistRequest updateDTO, Long insuranceId) {
         try{
             log.info(">>>> [InsuranceService] 보험 수정 시작 - insuranceId: {}", insuranceId);
+
             InsuContractEntity insurance = insuranceRepository.findById(insuranceId).orElseThrow(() -> new BusinessException(ErrorCode.INSURANCE_NOT_FOUND));
+            validateUpdateRequest(updateDTO, insurance);
             insurance.updateInsuranceInfo(updateDTO);
             return insuranceMapper.toInsuranceResponse(insurance);
         } catch(BusinessException e){
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

@@ -58,7 +58,16 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
           FROM CarEntity c
           LEFT JOIN CarContract cc ON c.id = cc.car.id
          WHERE cc.car.id IS NULL
-           AND c.status IN ('ACTIVE','CONTRACT_ENDED')
+           AND c.status IN ('ACTIVE')
     """)
     List<CarEntity> findAllCarsContractable();
+
+    @Query("""
+        SELECT c
+          FROM CarEntity c
+          LEFT JOIN InsuContractEntity ic ON ic.car.id = c.id
+         WHERE c.status = 'ACTIVE'
+           AND ic.car.id IS NULL
+    """)
+    List<CarEntity> getCarListInsurable();
 }
