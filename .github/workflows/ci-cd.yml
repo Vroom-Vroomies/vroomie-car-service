@@ -19,7 +19,6 @@ env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   SERVICE_NAME: "car-service"
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   test:
@@ -136,6 +135,10 @@ jobs:
     - name: Set environment and image tag
       id: set-env
       run: |
+        # Docker 이미지 이름은 소문자여야 함
+        IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+        
         if [ "${{ github.ref_name }}" = "main" ]; then
           echo "IMAGE_TAG=prod-${{ github.sha }}" >> $GITHUB_ENV
           echo "environment=production" >> $GITHUB_OUTPUT
@@ -149,6 +152,8 @@ jobs:
           echo "environment=test" >> $GITHUB_OUTPUT
           echo "🏷️  기타 브랜치 - 테스트 환경 태그 설정: branch-${{ github.sha }}"
         fi
+        
+        echo "🐳 이미지 이름: $IMAGE_NAME"
     
     - name: Log in to Container Registry
       uses: docker/login-action@v3
@@ -189,11 +194,12 @@ jobs:
         echo "🔍 빌드된 이미지 태그들:"
         echo "${{ steps.meta.outputs.tags }}"
         echo "📦 이미지 다이제스트: ${{ steps.build.outputs.digest }}"
+        echo "🐳 사용할 이미지 이름: ${{ env.IMAGE_NAME }}"
         
         # GitHub Container Registry에서 이미지 확인
         echo "✅ 푸시된 이미지 확인:"
         docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-        docker images | grep "${{ env.IMAGE_NAME }}"
+        docker images | grep $(echo "${{ env.IMAGE_NAME }}" | cut -d'/' -f2)
 
   deploy-prod:
     needs: build
@@ -318,7 +324,8 @@ jobs:
           
           echo "📥 새로운 Docker 이미지 다운로드 중..."
           IMAGE_TAG="prod-${{ github.sha }}"
-          FULL_IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          FULL_IMAGE_NAME="${{ env.REGISTRY }}/$IMAGE_NAME:$IMAGE_TAG"
           
           echo "다운로드할 이미지: $FULL_IMAGE_NAME"
           
@@ -391,10 +398,10 @@ jobs:
           fi
           
           echo "✅ 배포된 이미지 정보:"
-          if docker images | grep -q "${{ env.IMAGE_NAME }}"; then
-            docker images | grep "${{ env.IMAGE_NAME }}"
+          if docker images | grep -q "vroomie-car-service"; then
+            docker images | grep "vroomie-car-service"
           else
-            echo "${{ env.IMAGE_NAME }} 이미지를 찾을 수 없습니다"
+            echo "vroomie-car-service 이미지를 찾을 수 없습니다"
             echo "현재 사용 가능한 이미지:"
             docker images | head -5
           fi
