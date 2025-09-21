@@ -8,6 +8,12 @@ on:
   pull_request:
     branches: [ main, develop, test ]
 
+permissions:
+  contents: read
+  packages: write
+  checks: write
+  pull-requests: write
+
 env:
   DOCKER_BUILDKIT: 1
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
@@ -77,22 +83,18 @@ jobs:
         DB_URL: jdbc:mysql://localhost:3306/car_service_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
         DB_USERNAME: testuser
         DB_PASSWORD: testpass
-      run: ./gradlew clean test --info
+      run: |
+        ./gradlew clean test --info
+        echo "Tests completed with exit code: $?"
     
-    - name: Publish Test Results
-      uses: dorny/test-reporter@v1
-      if: always()
-      with:
-        name: Test Results
-        path: build/test-results/test/*.xml
-        reporter: java-junit
-    
-    - name: Upload test reports
+    - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-reports
-        path: build/reports/tests/test/
+        name: test-results
+        path: |
+          build/test-results/test/*.xml
+          build/reports/tests/test/
         retention-days: 7
 
   build:
