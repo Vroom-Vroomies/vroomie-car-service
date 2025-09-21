@@ -6,6 +6,11 @@ spring:
   application:
     name: car-service
 
+  # Spring Boot 기본 정적 리소스 비활성화
+  web:
+    resources:
+      add-mappings: false
+
   # Jackson 공통 설정
   jackson:
     serialization:
