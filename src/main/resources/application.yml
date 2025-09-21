@@ -6,6 +6,10 @@ spring:
   application:
     name: car-service
 
+  web:
+    resources:
+      add-mappings: false
+
   # Jackson 공통 설정
   jackson:
     serialization:
