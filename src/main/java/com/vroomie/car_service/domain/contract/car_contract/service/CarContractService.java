@@ -8,14 +8,21 @@ import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
 import com.vroomie.car_service.domain.contract.car_contract.entity.LeaseContract;
 import com.vroomie.car_service.domain.contract.car_contract.entity.PurchaseContract;
 import com.vroomie.car_service.domain.contract.car_contract.entity.RentContract;
+import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.car_contract.mapper.CarContractMapper;
 import com.vroomie.car_service.domain.contract.car_contract.repository.CarContractRepository;
+import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
+import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
+import com.vroomie.car_service.domain.fleet.car.mapper.CarMapper;
+import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -25,6 +32,8 @@ public class CarContractService {
 
     private final CarContractMapper carContractMapper;
     private final CarContractRepository contractRepository;
+    private final CarRepository carRepository;
+    private final CarMapper carMapper;
 
     public Object getContractDetails(Long carId) {
 
@@ -50,10 +59,74 @@ public class CarContractService {
         }
     }
 
+    public void validateContractRequest(ContractRegistRequest registDTO){
+
+        // 계약 기간 검증
+        if(!registDTO.getStartAt().before(registDTO.getEndAt())){
+            throw new BusinessException(ErrorCode.INVALID_CONTRACT_PERIOD);
+        }
+
+        // 월 사용료 검증
+        if(registDTO.getMonthlyFee() == null || registDTO.getMonthlyFee().signum() < 0){
+            throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+        }
+
+        if (registDTO instanceof LeaseRegistRequest) {
+            if(((LeaseRegistRequest) registDTO).getMonthlyLease() == null || ((LeaseRegistRequest) registDTO).getMonthlyLease().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseRegistRequest) registDTO).getLeasePeriod() == null || ((LeaseRegistRequest) registDTO).getLeasePeriod() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseRegistRequest) registDTO).getExcessMileageRate().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseRegistRequest) registDTO).getOptionPrice().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseRegistRequest) registDTO).getMileageLimit() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+        }
+
+        if (registDTO instanceof RentRegistRequest) {
+            if(((RentRegistRequest) registDTO).getMonthlyRent() == null || ((RentRegistRequest) registDTO).getMonthlyRent().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((RentRegistRequest) registDTO).getDeposit().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+        }
+
+        if (registDTO instanceof PurchaseRegistRequest) {
+            if(((PurchaseRegistRequest) registDTO).getPurchasePrice() == null || ((PurchaseRegistRequest) registDTO).getPurchasePrice().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseRegistRequest) registDTO).getDownPayment().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseRegistRequest) registDTO).getLoanAmount().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseRegistRequest) registDTO).getLoanTerm() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseRegistRequest) registDTO).getInterestRate().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseRegistRequest) registDTO).getMonthlyRepayment().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+        }
+    }
+
     public void registNewContract(ContractRegistRequest registDTO) {
 
         System.out.println("✅✅✅contract = " + registDTO);
+        // 입력값 검증
+        validateContractRequest(registDTO);
         CarContract contract = null;
+        // 계약 시작 일자가 계약 종료 일자보다 빠른지/느린지 판단
         if (registDTO instanceof LeaseRegistRequest) {
             contract = carContractMapper.toLeaseContract((LeaseRegistRequest) registDTO);
         } else if (registDTO instanceof RentRegistRequest) {
@@ -70,6 +143,66 @@ public class CarContractService {
 
     }
 
+    public void validUpdateRequest(ContractUpdateRequest updateDTO, CarContract existingContract){
+
+        if(existingContract.getContractStatus().equals(ContractStatus.EXPIRED)){
+            throw new BusinessException(ErrorCode.CONTRACT_EXPIRED);
+        }
+
+        if(updateDTO.getMonthlyFee() == null || updateDTO.getMonthlyFee().signum() < 0){
+            throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+        }
+
+        if (existingContract instanceof LeaseContract && updateDTO instanceof LeaseUpdateRequest) {
+            if(((LeaseUpdateRequest) updateDTO).getMonthlyLease() == null || ((LeaseUpdateRequest) updateDTO).getMonthlyLease().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseUpdateRequest) updateDTO).getLeasePeriod() == null || ((LeaseUpdateRequest) updateDTO).getLeasePeriod() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseUpdateRequest) updateDTO).getExcessMileageRate().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseUpdateRequest) updateDTO).getOptionPrice().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((LeaseUpdateRequest) updateDTO).getMileageLimit() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+        }
+
+        if (existingContract instanceof RentContract && updateDTO instanceof RentUpdateRequest) {
+            if(((RentUpdateRequest) updateDTO).getMonthlyRent() == null || ((RentUpdateRequest) updateDTO).getMonthlyRent().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((RentUpdateRequest) updateDTO).getDeposit().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+        }
+
+        if (existingContract instanceof PurchaseContract && updateDTO instanceof PurchaseUpdateRequest) {
+            if(((PurchaseUpdateRequest) updateDTO).getPurchasePrice() == null || ((PurchaseUpdateRequest) updateDTO).getPurchasePrice().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseUpdateRequest) updateDTO).getDownPayment().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseUpdateRequest) updateDTO).getLoanAmount().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseUpdateRequest) updateDTO).getLoanTerm() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseUpdateRequest) updateDTO).getInterestRate().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+            if(((PurchaseUpdateRequest) updateDTO).getMonthlyRepayment().signum() < 0){
+                throw new BusinessException(ErrorCode.INVALID_CONTRACT_AMOUNT);
+            }
+
+        }
+    }
+
     @Transactional
     public void modifyContractInfo(ContractUpdateRequest updateDTO, Long contractId) {
 
@@ -78,6 +211,9 @@ public class CarContractService {
         // 1. contractId로 기존 계약 엔티티를 조회합니다.
         CarContract existingContract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // 업데이트 데이터 유효성 검증
+        validUpdateRequest(updateDTO, existingContract);
 
         if (existingContract instanceof LeaseContract && updateDTO instanceof LeaseUpdateRequest) {
             ((LeaseContract) existingContract).updateLeaseContract((LeaseUpdateRequest) updateDTO);
@@ -90,6 +226,16 @@ public class CarContractService {
         } else {
             log.warn("계약 ID {} 에 대한 업데이트 DTO 타입 불일치 또는 예상치 못한 계약 타입: existingContract type = {}, updateDTO type = {}",
                     contractId, existingContract.getClass().getSimpleName(), updateDTO.getClass().getSimpleName());
+        }
+    }
+
+    public List<CarSimpleResponse> findAllCarsContractable() {
+        try{
+            log.info(">>>> [CarContractService] 계약 가능한 차량 조회 시작");
+            List<CarEntity> carList = carRepository.findAllCarsContractable();
+            return carMapper.toSimpleResponseList(carList);
+        } catch (BusinessException e) {
+            throw new BusinessException(ErrorCode.NOT_EXIST_CAR_CONTRACTABLE);
         }
     }
 

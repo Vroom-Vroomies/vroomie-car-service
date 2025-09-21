@@ -10,14 +10,12 @@ import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
-import com.vroomie.car_service.global.exception.GlobalExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service

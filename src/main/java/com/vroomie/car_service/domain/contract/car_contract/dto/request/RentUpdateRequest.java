@@ -20,9 +20,6 @@ public class RentUpdateRequest extends ContractUpdateRequest{
     private BigDecimal monthlyRent;
     private BigDecimal deposit;
 
-//    @NotNull(message = "지불 주기는 필수 항목입니다.")
-//    private Integer paymentCycle;
-
     @Builder.Default
     private Boolean isAutoRenewal = false;
 

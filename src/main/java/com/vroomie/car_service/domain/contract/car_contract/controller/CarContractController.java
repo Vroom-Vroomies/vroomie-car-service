@@ -3,12 +3,15 @@ package com.vroomie.car_service.domain.contract.car_contract.controller;
 import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractRegistRequest;
 import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.service.CarContractService;
+import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import com.vroomie.car_service.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,6 +31,18 @@ public class CarContractController {
         return ApiResponse.success(contractDTO);
     }
 
+    /** 계약 등록 가능한 차량 조회 **/
+    @GetMapping("")
+    public ApiResponse<?> selectAllCarsContractable(){
+        try{
+            log.info(">>>> [CarContractController] 계약 가능한 차량 조회 시작");
+            List<CarSimpleResponse> carList = contractService.findAllCarsContractable();
+            return ApiResponse.success(carList);
+        } catch (BusinessException e){
+            throw e;
+        }
+    }
+
     /** 차량 계약 등록 **/
     @PostMapping("")
     public ApiResponse<?> insertCarContractDetails(@RequestBody ContractRegistRequest dto){
@@ -36,10 +51,8 @@ public class CarContractController {
         try {
             contractService.registNewContract(dto);
         } catch (BusinessException e) {
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw e;
         }
-
-//        Object contractDTO = contractService.registNewContract(contract);
 
         return ApiResponse.success("차량 계약 등록 성공");
     }
