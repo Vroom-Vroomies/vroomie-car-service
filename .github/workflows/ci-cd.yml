@@ -139,12 +139,15 @@ jobs:
         if [ "${{ github.ref_name }}" = "main" ]; then
           echo "IMAGE_TAG=prod-${{ github.sha }}" >> $GITHUB_ENV
           echo "environment=production" >> $GITHUB_OUTPUT
+          echo "🏷️  Main 브랜치 - 운영 환경 태그 설정: prod-${{ github.sha }}"
         elif [ "${{ github.ref_name }}" = "develop" ]; then
           echo "IMAGE_TAG=test-${{ github.sha }}" >> $GITHUB_ENV
           echo "environment=test" >> $GITHUB_OUTPUT
+          echo "🏷️  Develop 브랜치 - 테스트 환경 태그 설정: test-${{ github.sha }}"
         else
           echo "IMAGE_TAG=branch-${{ github.sha }}" >> $GITHUB_ENV
           echo "environment=test" >> $GITHUB_OUTPUT
+          echo "🏷️  기타 브랜치 - 테스트 환경 태그 설정: branch-${{ github.sha }}"
         fi
     
     - name: Log in to Container Registry
@@ -180,6 +183,17 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64
+    
+    - name: Verify pushed image
+      run: |
+        echo "🔍 빌드된 이미지 태그들:"
+        echo "${{ steps.meta.outputs.tags }}"
+        echo "📦 이미지 다이제스트: ${{ steps.build.outputs.digest }}"
+        
+        # GitHub Container Registry에서 이미지 확인
+        echo "✅ 푸시된 이미지 확인:"
+        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        docker images | grep "${{ env.IMAGE_NAME }}"
 
   deploy-prod:
     needs: build
@@ -303,11 +317,23 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           echo "📥 새로운 Docker 이미지 다운로드 중..."
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-${{ github.sha }}
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-${{ github.sha }} car-service:latest
+          IMAGE_TAG="prod-${{ github.sha }}"
+          FULL_IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
           
-          echo "🏷️  이미지 태그 확인:"
-          docker images | grep car-service
+          echo "다운로드할 이미지: $FULL_IMAGE_NAME"
+          
+          if docker pull "$FULL_IMAGE_NAME"; then
+            echo "✅ 이미지 다운로드 성공"
+            docker tag "$FULL_IMAGE_NAME" car-service:latest
+            echo "✅ 이미지 태그 변경 완료"
+          else
+            echo "❌ 이미지 다운로드 실패! 사용 가능한 이미지 확인 중..."
+            docker images | grep "${{ env.IMAGE_NAME }}" || echo "관련 이미지가 없습니다"
+            exit 1
+          fi
+          
+          echo "🏷️  현재 이미지 목록:"
+          docker images | head -10
           
           # Create environment file
           echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" > .env
@@ -318,10 +344,25 @@ jobs:
           echo "SERVER_PORT=$SERVER_PORT" >> .env
           echo "JAVA_OPTS=$JAVA_OPTS" >> .env
           
+          # Verify docker-compose file exists
+          if [ ! -f "docker-compose.prod.yml" ]; then
+            echo "❌ docker-compose.prod.yml 파일이 없습니다!"
+            exit 1
+          fi
+          
           # Deploy with docker-compose
           echo "🚀 새로운 컨테이너 시작 중..."
           sleep 5
-          docker-compose -f docker-compose.prod.yml up -d
+          
+          if docker-compose -f docker-compose.prod.yml up -d; then
+            echo "✅ Docker Compose 실행 성공"
+          else
+            echo "❌ Docker Compose 실행 실패!"
+            echo "Docker Compose 파일 내용:"
+            cat docker-compose.prod.yml
+            exit 1
+          fi
+          
           sleep 15
           
           # Wait for services to be ready and verify deployment
@@ -331,11 +372,24 @@ jobs:
           echo "📊 컨테이너 상태 확인:"
           docker-compose -f docker-compose.prod.yml ps -a
           
-          echo "🔍 car-service 컨테이너 로그 (최신 10줄):"
-          docker logs car-service-prod --tail 10
+          echo "🐳 전체 컨테이너 상태:"
+          docker ps -a | head -5
+          
+          echo "🔍 car-service 컨테이너 로그 (최신 20줄):"
+          if docker ps | grep -q "car-service-prod"; then
+            docker logs car-service-prod --tail 20
+          else
+            echo "car-service-prod 컨테이너가 실행되지 않았습니다"
+            echo "실행 중인 컨테이너 목록:"
+            docker ps
+          fi
           
           echo "✅ 배포된 이미지 정보:"
-          docker inspect car-service:latest | grep -A 5 "Created\|RepoTags"
+          if docker images | grep -q "car-service"; then
+            docker images | grep car-service
+          else
+            echo "car-service 이미지를 찾을 수 없습니다"
+          fi
         EOF
     
     - name: Deployment completed
