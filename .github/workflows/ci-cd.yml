@@ -324,8 +324,7 @@ jobs:
           
           if docker pull "$FULL_IMAGE_NAME"; then
             echo "✅ 이미지 다운로드 성공"
-            docker tag "$FULL_IMAGE_NAME" car-service:latest
-            echo "✅ 이미지 태그 변경 완료"
+            echo "CAR_SERVICE_IMAGE=$FULL_IMAGE_NAME" >> /tmp/image_env
           else
             echo "❌ 이미지 다운로드 실패! 사용 가능한 이미지 확인 중..."
             docker images | grep "${{ env.IMAGE_NAME }}" || echo "관련 이미지가 없습니다"
@@ -343,6 +342,13 @@ jobs:
           echo "PROD_DB_PASSWORD=$PROD_DB_PASSWORD" >> .env
           echo "SERVER_PORT=$SERVER_PORT" >> .env
           echo "JAVA_OPTS=$JAVA_OPTS" >> .env
+          
+          # 이미지 정보 추가
+          if [ -f "/tmp/image_env" ]; then
+            cat /tmp/image_env >> .env
+          else
+            echo "CAR_SERVICE_IMAGE=car-service:latest" >> .env
+          fi
           
           # Verify docker-compose file exists
           if [ ! -f "docker-compose.prod.yml" ]; then
@@ -385,10 +391,12 @@ jobs:
           fi
           
           echo "✅ 배포된 이미지 정보:"
-          if docker images | grep -q "car-service"; then
-            docker images | grep car-service
+          if docker images | grep -q "${{ env.IMAGE_NAME }}"; then
+            docker images | grep "${{ env.IMAGE_NAME }}"
           else
-            echo "car-service 이미지를 찾을 수 없습니다"
+            echo "${{ env.IMAGE_NAME }} 이미지를 찾을 수 없습니다"
+            echo "현재 사용 가능한 이미지:"
+            docker images | head -5
           fi
         EOF
     
