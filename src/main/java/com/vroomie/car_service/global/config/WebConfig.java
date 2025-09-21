@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:5173")
+                .allowedOriginPatterns("http://localhost:5173", "https://vroomie-frontend.vercel.app")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true)
@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 정적 리소스는 /static/** 경로에서만 처리
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
-        
+
         // 업로드된 이미지 파일 경로
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");
