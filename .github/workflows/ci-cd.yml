@@ -273,12 +273,16 @@ jobs:
             rm -rf .git ./* ./.* 2>/dev/null || true
           fi
           
-          git clone https://github.com/${{ github.repository }}.git .
+          git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git .
           
           if [ $? -ne 0 ]; then
             echo "❌ Git clone 실패!"
             exit 1
           fi
+          
+          echo "✅ 현재 브랜치: ${{ github.ref_name }}"
+          echo "✅ 현재 커밋: ${{ github.sha }}"
+          git log -1 --oneline
           
           if [ ! -f "docker-compose.prod.yml" ]; then
             echo "❌ docker-compose.prod.yml 파일을 찾을 수 없습니다!"
@@ -287,16 +291,23 @@ jobs:
           
           # Stop existing containers and clean up
           cd /home/ubuntu/car-service
-          docker-compose -f docker-compose.prod.yml down -v --remove-orphans || true
-          docker ps -a | grep -E "(car-service|mysql)" | awk '{print $1}' | xargs -r docker rm -f || true
-          docker volume rm car-service_mysql_prod_data || true
-          docker volume ls | grep mysql | awk '{print $2}' | xargs -r docker volume rm || true
-          docker system prune -f || true
+          echo "🛑 기존 컨테이너 중지 중..."
+          docker-compose -f docker-compose.prod.yml down --remove-orphans || true
           
-          # Login to GitHub Container Registry and pull image
+          # 기존 car-service 이미지 제거 (MySQL 데이터는 보존)
+          docker rmi car-service:latest || true
+          docker image prune -f || true
+          
+          # Login to GitHub Container Registry and pull latest image
+          echo "🔐 GitHub Container Registry 로그인..."
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          echo "📥 새로운 Docker 이미지 다운로드 중..."
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-${{ github.sha }}
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod-${{ github.sha }} car-service:latest
+          
+          echo "🏷️  이미지 태그 확인:"
+          docker images | grep car-service
           
           # Create environment file
           echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" > .env
@@ -308,13 +319,23 @@ jobs:
           echo "JAVA_OPTS=$JAVA_OPTS" >> .env
           
           # Deploy with docker-compose
+          echo "🚀 새로운 컨테이너 시작 중..."
           sleep 5
           docker-compose -f docker-compose.prod.yml up -d
-          sleep 10
+          sleep 15
           
-          # Wait for services to be ready
+          # Wait for services to be ready and verify deployment
+          echo "⏳ 서비스 준비 대기 중..."
           sleep 20
+          
+          echo "📊 컨테이너 상태 확인:"
           docker-compose -f docker-compose.prod.yml ps -a
+          
+          echo "🔍 car-service 컨테이너 로그 (최신 10줄):"
+          docker logs car-service-prod --tail 10
+          
+          echo "✅ 배포된 이미지 정보:"
+          docker inspect car-service:latest | grep -A 5 "Created\|RepoTags"
         EOF
     
     - name: Deployment completed
