@@ -16,6 +16,7 @@ import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
 import com.vroomie.car_service.domain.fleet.drivinglog.entity.DrivingLogEntity;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
 import com.vroomie.car_service.domain.fleet.drivinglog.repository.DrivingLogRepository;
+import com.vroomie.car_service.domain.fleet.repair.repository.RepairRepository;
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservedLogRepository;
 import com.vroomie.car_service.global.response.PageResponse;
@@ -44,6 +45,7 @@ public class CarService {
     private final InsuContractRepository insuContractRepository;
     private final ReservedLogRepository reservedLogRepository;
     private final DrivingLogRepository drivingLogRepository;
+    private final RepairRepository repairRepository;
     private final CarMapper carMapper;
 
     @Transactional(readOnly = true)
@@ -80,13 +82,15 @@ public class CarService {
         Set<Long> contractCarIds = carContractRepository.findCarIdsWithContractIn(carIds);
         Set<Long> insuranceCarIds = insuContractRepository.findCarIdsWithInsuranceIn(carIds);
         Set<Long> rentedCarIds = reservedLogRepository.findRentedCarIdsIn(carIds);
+        Set<Long> repairingCarIds = repairRepository.findCarIdsWithActiveRepairsIn(carIds);
 
         Page<CarSimpleResponse> carDtos = carPage.map(car -> {
             boolean isContractMissing = !contractCarIds.contains(car.getId());
             boolean isInsuranceMissing = !insuranceCarIds.contains(car.getId());
             boolean isRented = rentedCarIds.contains(car.getId());
+            boolean isRepairing =  repairingCarIds.contains(car.getId());
 
-            return carMapper.toSimpleResponse(car, isContractMissing, isInsuranceMissing, isRented);
+            return carMapper.toSimpleResponse(car, isContractMissing, isInsuranceMissing, isRented, isRepairing);
         });
 
         return PageResponse.of(carDtos);
