@@ -71,7 +71,7 @@ public class DrivingLogEntity {
         if (employeeEntity != null) this.employeeEntity = employeeEntity;
         if (drivingLogEndReqDTO.getEndOdometer() != null) this.endOdometer = drivingLogEndReqDTO.getEndOdometer();
         if (drivingLogEndReqDTO.getEndOdometerImage() != null) this.endOdometerImage = drivingLogEndReqDTO.getEndOdometerImage();
-        this.endedAt = LocalDateTime.now();
+        this.endedAt = drivingLogEndReqDTO.getEndedAt();
         if (drivingLogEndReqDTO.getEndLat() != null) this.endLat = drivingLogEndReqDTO.getEndLat();
         if (drivingLogEndReqDTO.getEndLng() != null) this.endLng = drivingLogEndReqDTO.getEndLng();
         if (drivingLogEndReqDTO.getEndLocation() != null) this.endLocation = drivingLogEndReqDTO.getEndLocation();

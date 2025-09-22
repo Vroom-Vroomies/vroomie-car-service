@@ -60,9 +60,9 @@ public class DrivingLogService {
                 .orElseThrow(CarException::carNotFoundException);
 
         // 이미 운행 중인 기록이 있는지 확인
-        if (drivingLogRepository.existsByEmployeeEntity_EmailAndCarEntity_IdAndLogStatus(empEmail, carId, LogStatus.WRITING)){
-            throw alreadyExistsLogException();
-        }
+//        if (drivingLogRepository.existsByEmployeeEntity_EmailAndCarEntity_IdAndLogStatus(empEmail, carId, LogStatus.WRITING)){
+//            throw alreadyExistsLogException();
+//        }
 
         // DrivingLogStartReqDTO -> Entity 변환
         DrivingLogEntity drivingLogEntity = drivingLogMapper.toDrivingLogEntity(drivingLogStartReqDTO, employeeEntity, carEntity, LogStatus.WRITING);
@@ -91,9 +91,14 @@ public class DrivingLogService {
             throw employeeNotMatchException();
         }
 
+        // 종료 시간 검증
+        if (!drivingLogEndReqDTO.getEndedAt().isAfter(drivingLogEntity.getStartedAt())) {
+            throw invalidEndDateException();
+        }
+
         // 종료 거리계 검증
-        if (drivingLogEndReqDTO.getEndOdometer() < drivingLogEntity.getStartOdometer()) {
-            throw invalidEndOdometer();
+        if (drivingLogEndReqDTO.getEndOdometer() <= drivingLogEntity.getStartOdometer()) {
+            throw invalidEndOdometerException();
         }
 
         // 운행일지 제출 상태 검증
@@ -116,16 +121,21 @@ public class DrivingLogService {
         // 운행 일지 조회
         DrivingLogEntity drivingLogEntity = drivingLogRepository.findById(id).orElseThrow(DrivingLogException::drivingLogNotFoundException);
 
-        // 현재 수정하려는 직원 권한조회 (관리자 권한 이상만 수정 가능)
+        // 현재 수정하려는 직원 조회 (관리자 권한 이상 및 작성자 본인만 수정 가능)
         String empEmail = getCurrentUserEmail();
         EmployeeEntity employeeEntity = employeeRepository.findByEmail(empEmail).orElseThrow(EmployeeException::employeeNotFoundException);
-        if (employeeEntity.getRole().equals(Role.USER)) {
+        if (employeeEntity.getRole().equals(Role.USER) && !drivingLogEntity.getEmployeeEntity().getEmail().equals(empEmail)) {
             throw employeeNotEnoughRole();
         }
 
+        // 종료 시간 검증
+        if (!drivingLogReqDTO.getEndedAt().isAfter(drivingLogEntity.getStartedAt())) {
+            throw invalidEndDateException();
+        }
+
         // 종료 거리계 검증
-        if (drivingLogReqDTO.getEndOdometer() < drivingLogEntity.getStartOdometer()) {
-            throw invalidEndOdometer();
+        if (drivingLogReqDTO.getEndOdometer() <= drivingLogEntity.getStartOdometer()) {
+            throw invalidEndOdometerException();
         }
 
         // 운행일지 제출 상태 검증
