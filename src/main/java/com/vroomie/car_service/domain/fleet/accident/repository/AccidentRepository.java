@@ -11,16 +11,26 @@ import java.util.Optional;
 
 public interface AccidentRepository extends JpaRepository<AccidentEntity, Long> {
 
-    @Query("select a from AccidentEntity a left join fetch a.accidentImages where a.id = :id")
+    @Query("""
+        select a from AccidentEntity a
+        left join fetch a.car
+        left join fetch a.employee
+        left join fetch a.accidentImages
+        where a.id = :id
+    """)
     Optional<AccidentEntity> findByIdWithImages(@Param("id") Long id);
 
-    @Query(value = "SELECT a FROM AccidentEntity a " +
-            "LEFT JOIN FETCH a.car c " +
-            "LEFT JOIN FETCH a.employee e " +
-            "WHERE (:carId IS NULL OR a.car.id = :carId) " +
-            "AND (:isSaved IS NULL OR a.isSaved = :isSaved)",
-            countQuery = "SELECT count(a) FROM AccidentEntity a " +
-                    "WHERE (:carId IS NULL OR a.car.id = :carId) " +
-                    "AND (:isSaved IS NULL OR a.isSaved = :isSaved)")
+    @Query(value = """
+            SELECT a FROM AccidentEntity a
+            LEFT JOIN FETCH a.car c
+            LEFT JOIN FETCH a.employee e
+            WHERE (:carId IS NULL OR a.car.id = :carId)
+            AND (:isSaved IS NULL OR a.isSaved = :isSaved)
+            """,
+            countQuery = """
+                    SELECT count(a) FROM AccidentEntity a
+                    WHERE (:carId IS NULL OR a.car.id = :carId)
+                    AND (:isSaved IS NULL OR a.isSaved = :isSaved)
+                    """)
     Page<AccidentEntity> findWithFilters(@Param("carId") Long carId, @Param("isSaved") Boolean isSaved, Pageable pageable);
 }

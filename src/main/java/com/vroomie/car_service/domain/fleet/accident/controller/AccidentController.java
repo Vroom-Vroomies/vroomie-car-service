@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +27,7 @@ public class AccidentController {
 
     private final AccidentService accidentService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "신규 수리 기록 등록")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> createAccident(
             @RequestPart("req") AccidentCreateRequestDTO req,
@@ -56,7 +57,7 @@ public class AccidentController {
         return ResponseEntity.ok(ApiResponse.success(data, "사고 내역 상세 조회에 성공하였습니다."));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "사고 정보 수정", description = "사고 기록을 입력 받은 최신 정보로 업데이트 합니다")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> updateAccident(
             @PathVariable Long id,

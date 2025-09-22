@@ -176,7 +176,7 @@ public class AccidentService {
             throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
-        return "/images/accidents/" + storedFileName; // URL 경로 반환
+        return storedFileName; // URL 경로 반환
     }
 
     private void deleteFile(String filePath) {
