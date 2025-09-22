@@ -20,12 +20,12 @@ public interface DashboardOperationRepository extends JpaRepository<DrivingLogEn
         SELECT
             (SELECT COUNT(dl) FROM DrivingLogEntity dl
              JOIN dl.carEntity c WHERE c.companyId = :companyId AND CAST(dl.logStatus AS string) NOT IN ('COMPLETED', 'PREPARING')) as unwrittenDrivingLogs,
+            (SELECT COUNT(c) FROM CarEntity c
+             WHERE c.companyId = :companyId AND c.usageType = 'ASSIGNED') as assignedVehicles,
             (SELECT COUNT(r) FROM ReservationEntity r
-             JOIN r.car c WHERE c.companyId = :companyId AND r.status = 'ASSIGNED') as assignedVehicles,
+             JOIN r.car c WHERE c.companyId = :companyId AND r.status = 'APPROVED') as rentedVehicles,
             (SELECT COUNT(r) FROM ReservationEntity r
-             JOIN r.car c WHERE c.companyId = :companyId AND r.status = 'RENTED') as rentedVehicles,
-            (SELECT COUNT(r) FROM ReservationEntity r
-             JOIN r.car c WHERE c.companyId = :companyId AND r.endedAt < CURRENT_DATE AND r.status = 'RENTED') as overdueVehicles
+             JOIN r.car c WHERE c.companyId = :companyId AND r.endedAt < CURRENT_DATE AND r.status = 'APPROVED') as overdueVehicles
         """)
     OperationalStatsProjection findOperationalStatsByCompany(@Param("companyId") Long companyId);
 }
