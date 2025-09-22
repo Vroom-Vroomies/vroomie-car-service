@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public interface AccidentMapper {
 
     @Mappings({
-            @Mapping(source = "car.id", target = "carId"),
+            @Mapping(source = "car.number", target = "carNumber"),
             @Mapping(source = "employee.name", target = "empName"),
             @Mapping(source = "occurredAt", target = "date"),
             @Mapping(source = "saved", target = "save"),
@@ -42,6 +42,7 @@ public interface AccidentMapper {
         }
         return images.stream()
                 .map(AccidentImageEntity::getImage)
+                .map(filename -> "/images/accidents/" + filename)
                 .collect(Collectors.toList());
     }
 }
