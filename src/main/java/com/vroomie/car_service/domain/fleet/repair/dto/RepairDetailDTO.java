@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class RepairDetailDTO {
     private Long id;
-    private Long carId;
+    private String carNumber;
     private String empName;
     private String type;
     private String detail;

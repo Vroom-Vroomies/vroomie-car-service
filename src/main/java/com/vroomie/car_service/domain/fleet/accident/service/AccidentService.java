@@ -116,7 +116,7 @@ public class AccidentService {
         accidentImageRepository.deleteByAccidentId(id);
 
         // 2. 텍스트 정보 업데이트
-        accidentMapper.update(req, accident);
+        accident.update(req);
 
         // 3. 새로운 이미지 추가
         if (images != null && !images.isEmpty()) {
@@ -176,7 +176,7 @@ public class AccidentService {
             throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
-        return "/images/accidents/" + storedFileName; // URL 경로 반환
+        return storedFileName; // URL 경로 반환
     }
 
     private void deleteFile(String filePath) {

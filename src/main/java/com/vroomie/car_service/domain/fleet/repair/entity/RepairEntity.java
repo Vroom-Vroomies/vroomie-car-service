@@ -2,6 +2,7 @@ package com.vroomie.car_service.domain.fleet.repair.entity;
 
 import com.vroomie.car_service.domain.employee.entity.EmployeeEntity;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
+import com.vroomie.car_service.domain.fleet.repair.dto.RepairCreateRequestDTO;
 import com.vroomie.car_service.domain.fleet.repair.enums.RepairStatus;
 import com.vroomie.car_service.domain.fleet.repair.enums.RepairType;
 import jakarta.persistence.*;
@@ -60,6 +61,15 @@ public class RepairEntity {
         this.endedAt = endedAt;
         this.cost = cost;
         this.isSaved = isSaved;
+    }
+
+    public void update(RepairCreateRequestDTO dto) {
+        if (dto.getType() != null) this.type = RepairType.valueOf(dto.getType());
+        if (dto.getDetail() != null) this.detail = dto.getDetail();
+        if (dto.getStatus() != null) this.status = RepairStatus.valueOf(dto.getStatus());
+        if (dto.getStartedAt() != null) this.startedAt = dto.getStartedAt();
+        if (dto.getEndedAt() != null) this.endedAt = dto.getEndedAt();
+        if (dto.getCost() != null) this.cost = dto.getCost();
     }
 
     public void finalizeRepair() {

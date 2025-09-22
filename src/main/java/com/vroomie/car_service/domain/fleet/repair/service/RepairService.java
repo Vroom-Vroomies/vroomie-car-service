@@ -105,7 +105,7 @@ public class RepairService {
         repair.getRepairImages().clear();
 
         // 텍스트 정보 업데이트
-        repairMapper.update(req, repair);
+        repair.update(req);
 
         // 새 이미지 추가
         processAndAddImages(repair, beforeImages, RepairImageType.BEFORE);
