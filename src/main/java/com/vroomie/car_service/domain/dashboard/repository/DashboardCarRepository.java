@@ -3,6 +3,8 @@ package com.vroomie.car_service.domain.dashboard.repository;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.dashboard.projection.CarTypeDistributionProjection;
 import com.vroomie.car_service.domain.dashboard.projection.CarStatusProjection;
+import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -75,4 +77,20 @@ public interface DashboardCarRepository extends JpaRepository<CarEntity, Long> {
      */
     @Query("SELECT COUNT(c) FROM CarEntity c WHERE c.companyId = :companyId")
     Long countByCompanyId(@Param("companyId") Long companyId);
+
+
+    // seoeungi 추가
+    // 보험만료 카운트 쿼리
+    // Before(<), After(>)
+    // lessThan(<), greaterThan(>), lessThanOrEqual(>=), greaterThanOrEqual(<=)
+    // Between
+    /**
+     * @param companyId Long : 회사 ID
+     * @param status CarStatus : ACTIVE 또는 그 외
+     * @param insuExpiration LocalDate : 만료일
+     * @return Long
+     *
+     * @see CarStatus status
+     */
+    Long countByCompanyIdAndStatusAndInsuExpirationBefore(Long companyId, CarStatus status, LocalDate insuExpiration);
 }

@@ -13,16 +13,19 @@ import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
 import com.vroomie.car_service.domain.fleet.car.exceptions.CarException;
 import com.vroomie.car_service.domain.fleet.car.mapper.CarMapper;
 import com.vroomie.car_service.domain.fleet.car.repository.CarRepository;
+import com.vroomie.car_service.domain.fleet.car.repository.specification.CarAndRepairSpecification;
 import com.vroomie.car_service.domain.fleet.drivinglog.entity.DrivingLogEntity;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
 import com.vroomie.car_service.domain.fleet.drivinglog.repository.DrivingLogRepository;
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservedLogRepository;
 import com.vroomie.car_service.global.response.PageResponse;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,5 +180,16 @@ public class CarService {
             // 작성 중인 기록이 없으면 운행 시작 페이지로
             return "/member/reservation/" + carId;
         }
+    }
+
+    // seoeungi 추가
+    // 동일쿼리라면 status 또한 파라미터 처리
+    public long countInRepairCars(Long companyId) {
+        Specification<CarEntity> spec = CarAndRepairSpecification.hasCompanyId(companyId)
+            .and(CarAndRepairSpecification.hasStatus("ACTIVE"))
+            .and(CarAndRepairSpecification.insuExpirationAfter(LocalDate.now()))
+            .and(CarAndRepairSpecification.isInRepair());
+
+        return carRepository.count(spec);
     }
 }

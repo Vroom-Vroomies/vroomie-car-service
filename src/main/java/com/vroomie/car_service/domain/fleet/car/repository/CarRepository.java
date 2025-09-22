@@ -6,12 +6,14 @@ import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface CarRepository extends JpaRepository<CarEntity, Long> {
+// seoeungi JpaSpecificationExecutor 추가
+public interface CarRepository extends JpaRepository<CarEntity, Long>, JpaSpecificationExecutor<CarEntity> {
 
   Page<CarEntity> findAllByStatusAndUsageType(CarStatus status, CarUsageType usageType, Pageable pageable);
 
