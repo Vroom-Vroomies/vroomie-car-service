@@ -21,10 +21,10 @@ public class AdminReservationResponse {
     private String carNumber;
     private String memberName; // 대여 신청자 이름
 
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startedAt; // 대여 시작일자
 
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endedAt; // 대여 종료일자
 
     private ReservationStatus reservationStatus; // 예약 상태(승인 여부)
