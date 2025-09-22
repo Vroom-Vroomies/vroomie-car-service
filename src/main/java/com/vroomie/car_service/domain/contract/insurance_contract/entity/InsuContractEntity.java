@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.contract.insurance_contract.entity;
 
+import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.request.InsuranceRegistRequest;
 import com.vroomie.car_service.domain.contract.insurance_contract.enums.InsuranceStatus;
 import com.vroomie.car_service.domain.contract.insurance_contract.enums.PaymentType;
@@ -62,4 +63,7 @@ public class InsuContractEntity {
 
     }
 
+    public void updateInsuranceStatus(InsuranceStatus insuranceStatus) {
+        this.insuranceStatus = insuranceStatus;
+    }
 }

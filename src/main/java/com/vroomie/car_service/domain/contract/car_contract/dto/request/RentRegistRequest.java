@@ -26,4 +26,8 @@ public class RentRegistRequest extends ContractRegistRequest{
     private Boolean isAutoRenewal = false;
 
     private RentType rentType;
+
+    public void calculateAmount() {
+        super.monthlyFee = this.monthlyRent;
+    }
 }

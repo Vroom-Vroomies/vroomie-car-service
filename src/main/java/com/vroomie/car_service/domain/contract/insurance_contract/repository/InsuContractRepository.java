@@ -21,4 +21,11 @@ public interface InsuContractRepository extends JpaRepository<InsuContractEntity
          WHERE ic.car.id = :carId
     """)
     List<InsuContractEntity> findAllByCarId(@Param("carId") Long carId);
+
+    @Query("""
+        SELECT ic
+          FROM InsuContractEntity ic
+         WHERE ic.insuranceStatus IN ('NEW', 'RENEWED')
+    """)
+    List<InsuContractEntity> findAllActive();
 }

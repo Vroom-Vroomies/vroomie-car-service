@@ -4,6 +4,7 @@ import com.vroomie.car_service.domain.contract.insurance_contract.dto.request.In
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceDetailResponse;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceSimpleResponse;
 import com.vroomie.car_service.domain.contract.insurance_contract.service.InsuranceService;
+import com.vroomie.car_service.domain.fleet.car.dto.response.CarSimpleResponse;
 import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import com.vroomie.car_service.global.response.ApiResponse;
@@ -30,7 +31,7 @@ public class InsuranceController {
             List<InsuranceSimpleResponse> insuranceList =  insuranceService.getAllInsuranceList(carId);
             return ApiResponse.success(insuranceList);
         } catch(BusinessException e){
-            throw new BusinessException(ErrorCode.INSURANCE_NOT_FOUND, e.getMessage());
+            throw e;
         }
     }
 
@@ -42,7 +43,23 @@ public class InsuranceController {
             InsuranceDetailResponse insuranceDetail = insuranceService.getInsuranceDetail(insuranceId);
             return ApiResponse.success(insuranceDetail);
         } catch (BusinessException e){
-            throw new BusinessException(ErrorCode.INSURANCE_NOT_FOUND, e.getMessage());
+            throw e;
+        }
+    }
+
+    /** 보험 등록 가능 차량 조회 - 차량 상태가 ACTIVE인 경우 **/
+    @GetMapping("")
+    public ApiResponse<?> getCarListInsurable(){
+        try{
+            log.info(">>>> [InsuranceController] 보험 등록 가능 차량 조회 시작");
+            List<CarSimpleResponse> carList = insuranceService.findCarListInsurable();
+            if(carList.isEmpty()){
+                return ApiResponse.success("보험 등록 가능한 차량이 없습니다.");
+            } else {
+                return ApiResponse.success(carList);
+            }
+        } catch(BusinessException e){
+            throw e;
         }
     }
 
@@ -54,7 +71,7 @@ public class InsuranceController {
             InsuranceDetailResponse insuranceDetail = insuranceService.registNewInsurance(registDTO);
             return ApiResponse.success(insuranceDetail);
         } catch (BusinessException e){
-            throw new BusinessException(ErrorCode.CANNOT_REGIST_INSURANCE, e.getMessage());
+            throw e;
         }
     }
 
@@ -71,7 +88,7 @@ public class InsuranceController {
                 throw new BusinessException(ErrorCode.INSURANCE_NOT_FOUND);
             }
         } catch (BusinessException e){
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw e;
         }
     }
 }

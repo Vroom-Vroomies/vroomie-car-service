@@ -1,5 +1,6 @@
 package com.vroomie.car_service.global.exception;
 
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
@@ -57,6 +58,10 @@ public enum ErrorCode {
     // ========== 계약 정보 관련 (1700~1799) ==========
     CONTRACT_NOT_FOUND("계약 정보를 찾을 수 없습니다.", 1700, HttpStatus.NOT_FOUND),
     CONTRACT_TYPE_NOT_FOUND("알 수 없는 계약 유형입니다.", 1701, HttpStatus.BAD_REQUEST),
+    NOT_EXIST_CAR_CONTRACTABLE("계약 가능한 차량이 없습니다.", 1702, HttpStatus.NOT_FOUND),
+    INVALID_CONTRACT_PERIOD("계약 시작일이 종료일보다 늦을 순 없습니다.", 1703, HttpStatus.BAD_REQUEST),
+    INVALID_CONTRACT_AMOUNT("금액이 유효하지 않습니다.", 1704, HttpStatus.BAD_REQUEST),
+    CONTRACT_EXPIRED("해당 계약은 만료되었습니다.", 1705, HttpStatus.BAD_REQUEST),
 
     // ========== 점검 관련 (1800~1899) ==========
     INSPECTION_NOT_FOUND("점검 내역을 찾을 수 없습니다.", 1800, HttpStatus.NOT_FOUND),
@@ -67,7 +72,16 @@ public enum ErrorCode {
 
     // ========== 보험 정보 관련 (2200~2299) ==========
     INSURANCE_NOT_FOUND("보험 정보를 찾을 수 없습니다.", 2200, HttpStatus.NOT_FOUND),
-    CANNOT_REGIST_INSURANCE("보험 정보 등록 중 오류가 발생했습니다.", 2201, HttpStatus.INTERNAL_SERVER_ERROR);
+    CANNOT_REGIST_INSURANCE("보험 정보 등록 중 오류가 발생했습니다.", 2201, HttpStatus.INTERNAL_SERVER_ERROR),
+    NOT_EXIST_CAR_INSURABLE("보험 등록 가능한 차량이 없습니다.", 2202, HttpStatus.NOT_FOUND),
+    INVALID_INSURANCE_PERIOD("보험 시작일이 종료일보다 늦을 순 없습니다.", 2203, HttpStatus.BAD_REQUEST),
+    INVALID_PREMIUM_AMOUNT("보험료가 유효하지 않은 금액입니다.", 2204, HttpStatus.BAD_REQUEST),
+    DUPLICATED_INSURANCE("동일 보험의 경우 중복 등록이 불가합니다.", 2205, HttpStatus.CONFLICT),
+    INSURANCE_EXPIRED("해당 보험은 만료되었습니다.", 2206, HttpStatus.BAD_REQUEST),
+
+    // ========== 보험 정보 관련 (2300~2399) ==========
+    COST_TYPE_NOT_FOUND("해당 차량 비용 유형이 존재하지 않습니다.", 2301, HttpStatus.NOT_FOUND);
+
 
     private final String message;
     private final int statusCode;

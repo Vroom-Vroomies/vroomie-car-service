@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CarRepository extends JpaRepository<CarEntity, Long> {
 
@@ -51,4 +52,22 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
                      @Param("requestedStartTime") LocalDateTime requestedStartTime,
                      @Param("requestedEndTime") LocalDateTime requestedEndTime,
                      Pageable pageable);
+
+    @Query("""
+        SELECT c
+          FROM CarEntity c
+          LEFT JOIN CarContract cc ON c.id = cc.car.id
+         WHERE cc.car.id IS NULL
+           AND c.status IN ('ACTIVE')
+    """)
+    List<CarEntity> findAllCarsContractable();
+
+    @Query("""
+        SELECT c
+          FROM CarEntity c
+          LEFT JOIN InsuContractEntity ic ON ic.car.id = c.id
+         WHERE c.status = 'ACTIVE'
+           AND ic.car.id IS NULL
+    """)
+    List<CarEntity> getCarListInsurable();
 }

@@ -45,7 +45,7 @@ public abstract class ContractRegistRequest {
     @NotBlank(message = "공급처명은 필수 항목입니다.")
     private String provider;
 
-    private BigDecimal monthlyFee;
+    protected BigDecimal monthlyFee;
 
     @Builder.Default
     private boolean isInsured = false;

@@ -3,6 +3,7 @@ package com.vroomie.car_service.domain.contract.car_contract.entity;
 import com.vroomie.car_service.domain.contract.car_contract.dto.request.ContractUpdateRequest;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
+import com.vroomie.car_service.domain.contract.car_contract.enums.PaymentCycle;
 import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -75,16 +76,14 @@ public abstract class CarContract {
     @Column(name = "status")
     private ContractStatus contractStatus;
 
-    public CarContract(CarEntity car, String provider, BigDecimal monthlyFee, boolean isInsured, Date startAt, Date endAt, Date renewalDate, ContractStatus contractStatus){
-        this.car = car;
-        this.provider = provider;
-        this.monthlyFee = monthlyFee;
-        this.isInsured = isInsured;
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.renewalDate = renewalDate;
-        this.contractStatus = contractStatus;
-    }
+    private Integer paymentDay;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_cycle")
+    private PaymentCycle paymentCycle;
+
+    private Date firstPaymentDay;
+
 
     public void updateContract(ContractUpdateRequest updateDTO){
         this.provider = updateDTO.getProvider();
@@ -94,5 +93,9 @@ public abstract class CarContract {
         this.endAt = updateDTO.getEndAt();
         this.renewalDate = updateDTO.getRenewalDate();
         this.contractStatus = updateDTO.getContractStatus();
+    }
+
+    public void updateContractStatus(ContractStatus contractStatus){
+        this.contractStatus = contractStatus;
     }
 }
