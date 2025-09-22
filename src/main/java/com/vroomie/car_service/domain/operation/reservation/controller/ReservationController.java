@@ -46,6 +46,18 @@ public class ReservationController {
         return ApiResponse.success(response, "대여 신청 목록 조회 성공");
     }
 
+    // [관리자] 차량별 대여 신청 목록 조회
+    @Operation(summary = "[관리자]차량별 대여 신청 목록 조회", description = "차량별 대여 신청 목록을 조회합니다.")
+    @GetMapping("/admin/car/{carId}")
+    public ApiResponse<PageResponse<AdminReservationResponse>> getAdminReservationListByCar(@PathVariable Long carId,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.") int size) {
+
+        PageResponse<AdminReservationResponse> response = reservationService.getAdminReservationListByCar(carId,
+                currentPage, size);
+        return ApiResponse.success(response, "차량별 대여 신청 목록 조회 성공");
+    }
+
     // [관리자] 대여 신청 상태 변경(승인 or 거절)
     @Operation(summary = "[관리자]대여 신청 상태 변경", description = "대여 신청 상태를 변경합니다.")
     @PutMapping("/admin/{id}")

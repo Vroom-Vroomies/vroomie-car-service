@@ -65,6 +65,26 @@ public class ReservationService {
                                 .build();
         }
 
+        // [관리자] 차량별 대여 신청 목록 조회
+        public PageResponse<AdminReservationResponse> getAdminReservationListByCar(Long carId, int currentPage, int size) {
+
+                Page<ReservationEntity> reservations = reservationRepository
+                                .findByCarIdOrderByCreatedAtDesc(carId, PageRequest.of(currentPage - 1, size));
+
+                List<AdminReservationResponse> responses = reservationMapper
+                                .toAdminReservationResponseList(reservations.getContent());
+
+                return PageResponse.<AdminReservationResponse>builder()
+                                .data(responses)
+                                .currentPage(reservations.getNumber() + 1)
+                                .size(reservations.getSize())
+                                .totalPages(reservations.getTotalPages())
+                                .totalElements(reservations.getTotalElements())
+                                .hasNext(reservations.hasNext())
+                                .hasPrevious(reservations.hasPrevious())
+                                .build();
+        }
+
         // [관리자] 대여 신청 상태 변경(승인 or 거절)
         @Transactional
         public AdminReservationResponse updateAdminReservationStatus(Long id, AdminReservationRequest request) {

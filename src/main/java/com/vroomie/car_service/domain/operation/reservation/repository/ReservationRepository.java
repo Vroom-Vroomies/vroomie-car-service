@@ -14,6 +14,8 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 
     Page<ReservationEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+    Page<ReservationEntity> findByCarIdOrderByCreatedAtDesc(Long carId, Pageable pageable);
+
     @Query("SELECT r FROM ReservationEntity r WHERE r.car.id = :carId AND r.member.email = :memberEmail ORDER BY r.createdAt DESC LIMIT 1")
     ReservationEntity findLatestByCarAndMember(@Param("carId") Long carId, @Param("memberEmail") String memberEmail);
 
