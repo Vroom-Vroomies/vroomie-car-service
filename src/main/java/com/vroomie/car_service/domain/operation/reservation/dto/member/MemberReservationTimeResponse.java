@@ -16,10 +16,10 @@ public class MemberReservationTimeResponse {
     private String carNumber;
     private String carModel;
     
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yy-MM-dd HH:mm")
     private LocalDateTime startedAt;
     
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yy-MM-dd HH:mm")
     private LocalDateTime endedAt;
     
     private String reservationStatus;

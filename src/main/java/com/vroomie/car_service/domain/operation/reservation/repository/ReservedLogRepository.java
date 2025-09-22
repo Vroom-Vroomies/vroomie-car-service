@@ -1,6 +1,8 @@
 package com.vroomie.car_service.domain.operation.reservation.repository;
 
+import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservedLogEntity;
+import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -42,4 +45,13 @@ public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, 
        long countActiveRentalsByMemberEmail(@Param("memberEmail") String memberEmail);
 
        boolean existsByCarIdAndStatusIn(Long carId, List<RentStatus> statusList);
+
+
+       @Query("SELECT rl FROM ReservedLogEntity rl " +
+                     "WHERE rl.status = 'RENTED' " +
+                     "AND rl.returnDate IS NULL " +
+                     "AND rl.endedAt < :currentTime")
+       List<ReservedLogEntity> findOverdueRentals(@Param("currentTime") LocalDateTime currentTime);
+
+       List<ReservedLogEntity> findByReservationAndStatus(ReservationEntity reservation, RentStatus status);
 }

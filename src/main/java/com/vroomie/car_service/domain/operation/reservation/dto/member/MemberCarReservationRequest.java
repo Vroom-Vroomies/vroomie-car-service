@@ -13,7 +13,6 @@ import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberCarReservationRequest {
 
-    private Long carId;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private Purpose purpose;

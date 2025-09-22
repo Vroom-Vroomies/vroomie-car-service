@@ -6,14 +6,18 @@ import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
+import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
+import com.vroomie.car_service.domain.operation.reservation.enums.ReservationStatus;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DetailReservedLogResponse {
 
-    private Long id;
+    private Long reservationLogId;
 
+    private Long carId;
     private String carNumber;
     private String carModel;
     private String carImage;
@@ -24,9 +28,12 @@ public class DetailReservedLogResponse {
     private String carUsageType;
     private String carStatus; // 차량 상태
 
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yy-MM-dd HH:mm")
     private LocalDateTime startedAt;
-    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH시 mm분")
+    @JsonFormat(pattern = "yy-MM-dd HH:mm")
     private LocalDateTime endedAt;
-    private String purpose;
+    private Purpose purpose;
+    private String detail;
+    private RentStatus rentStatus;
+    private ReservationStatus reservationStatus;
 }
