@@ -21,7 +21,6 @@ public interface DrivingLogMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "employeeEntity", source = "employeeEntity")
     @Mapping(target = "carEntity", source = "carEntity")
-    @Mapping(target = "startedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "endOdometer", ignore = true)
     @Mapping(target = "endOdometerImage", ignore = true)
     @Mapping(target = "endedAt", ignore = true)

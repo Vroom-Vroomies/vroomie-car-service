@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -17,6 +18,9 @@ public class DrivingLogEndReqDTO {
 
     @NotNull(message = "주행 후 계기판 사진은 필수입니다.")
     private String endOdometerImage;
+
+    @NotNull(message = "운행 종료 시간 선택은 필수입니다.")
+    private LocalDateTime endedAt;
 
     // 프론트에서 GPS API로 수집
     private BigDecimal endLat;

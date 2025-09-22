@@ -26,6 +26,7 @@ public enum ErrorCode {
     DRIVING_LOG_NOT_FOUND("존재하지 않는 운행기록입니다.", 1201, HttpStatus.NOT_FOUND),
     INVALID_END_ODOMETER("종료 주행 거리는 시작 주행거리보다 커야합니다.", 1202, HttpStatus.BAD_REQUEST),
     DRIVING_LOG_ALREADY_SUBMITS("이미 제출된 운행일지입니다.", 1203, HttpStatus.BAD_REQUEST),
+    INVALID_END_DATE("종료 시각은 시작 시각보다 늦어야합니다.", 1204, HttpStatus.BAD_REQUEST),
 
     // ========== 예약 정보 관련 (1300~1399) ==========
     RESERVATION_NOT_FOUND("예약 정보를 찾을 수 없습니다.", 1300, HttpStatus.NOT_FOUND),

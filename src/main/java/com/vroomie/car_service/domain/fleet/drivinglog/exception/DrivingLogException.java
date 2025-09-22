@@ -16,11 +16,15 @@ public class DrivingLogException extends BusinessException {
         return new DrivingLogException(ErrorCode.DRIVING_LOG_NOT_FOUND);
     }
 
-    public static DrivingLogException invalidEndOdometer() {
+    public static DrivingLogException invalidEndOdometerException() {
         return new DrivingLogException(ErrorCode.INVALID_END_ODOMETER);
     }
 
     public static DrivingLogException alreadySubmitsLogException() {
         return new DrivingLogException(ErrorCode.DRIVING_LOG_ALREADY_SUBMITS);
+    }
+
+    public static DrivingLogException invalidEndDateException() {
+        return new DrivingLogException(ErrorCode.INVALID_END_DATE);
     }
 }
