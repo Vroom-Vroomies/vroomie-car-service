@@ -24,4 +24,9 @@ public class LeaseRegistRequest extends ContractRegistRequest{
     private Long mileageLimit;
     private BigDecimal excessMileageRate;
     private LeaseType leaseType;
+
+    public void calculateAmounts() {
+        // 주행거리 초과
+        super.monthlyFee = this.monthlyLease;
+    }
 }

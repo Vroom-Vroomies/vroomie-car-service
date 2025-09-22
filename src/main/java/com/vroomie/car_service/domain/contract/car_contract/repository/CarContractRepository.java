@@ -22,4 +22,11 @@ public interface CarContractRepository extends JpaRepository<CarContract,Long> {
          WHERE cc.car.id = :carId
     """)
     Optional<CarContract> findByCarId(@Param("carId") Long carId);
+
+    @Query("""
+        SELECT cc
+          FROM CarContract cc
+         WHERE cc.contractStatus IN ('NEW', 'RENEWED')
+    """)
+    List<CarContract> findAllActive();
 }

@@ -20,4 +20,9 @@ public class PurchaseRegistRequest extends ContractRegistRequest {
     private BigDecimal interestRate;
     private Integer loanTerm;
     private BigDecimal monthlyRepayment;
+
+    public void calculateAmount() {
+        if(monthlyRepayment != null && monthlyRepayment.compareTo(BigDecimal.ZERO) > 0) {}
+        super.monthlyFee = this.monthlyRepayment;
+    }
 }

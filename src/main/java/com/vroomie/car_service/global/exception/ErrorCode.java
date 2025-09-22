@@ -77,7 +77,11 @@ public enum ErrorCode {
     INVALID_INSURANCE_PERIOD("보험 시작일이 종료일보다 늦을 순 없습니다.", 2203, HttpStatus.BAD_REQUEST),
     INVALID_PREMIUM_AMOUNT("보험료가 유효하지 않은 금액입니다.", 2204, HttpStatus.BAD_REQUEST),
     DUPLICATED_INSURANCE("동일 보험의 경우 중복 등록이 불가합니다.", 2205, HttpStatus.CONFLICT),
-    INSURANCE_EXPIRED("해당 보험은 만료되었습니다.", 2206, HttpStatus.BAD_REQUEST);
+    INSURANCE_EXPIRED("해당 보험은 만료되었습니다.", 2206, HttpStatus.BAD_REQUEST),
+
+    // ========== 보험 정보 관련 (2300~2399) ==========
+    COST_TYPE_NOT_FOUND("해당 차량 비용 유형이 존재하지 않습니다.", 2301, HttpStatus.NOT_FOUND);
+
 
     private final String message;
     private final int statusCode;

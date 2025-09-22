@@ -1,5 +1,7 @@
 package com.vroomie.car_service.domain.contract.insurance_contract.service;
 
+import com.vroomie.car_service.domain.contract.car_contract.entity.CarContract;
+import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.request.InsuranceRegistRequest;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceDetailResponse;
 import com.vroomie.car_service.domain.contract.insurance_contract.dto.response.InsuranceSimpleResponse;
@@ -15,9 +17,13 @@ import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -140,4 +146,36 @@ public class InsuranceService {
         }
     }
 
+    @Transactional
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void updateContractStatus(){
+        try{
+            log.info(">>>> [InsuranceService] 보험 상태 변경 시작");
+            List<InsuContractEntity> activeInsurances = insuranceRepository.findAllActive();
+            LocalDate today = LocalDate.now();
+            Date todaySQL = Date.valueOf(today);
+
+            List<InsuContractEntity> expiredInsurances = new ArrayList<>();
+            int updateCount = 0;
+
+            for(InsuContractEntity insurance : activeInsurances){
+                if(insurance.getEndDate().before(todaySQL)){
+                    insurance.updateInsuranceStatus(InsuranceStatus.EXPIRED);
+                    expiredInsurances.add(insurance);
+                    updateCount++;
+
+                    log.info(">>>> 보험 계약 만료 처리 - ID : {}, 종료일 : {}", insurance.getId(), insurance.getEndDate());
+                }
+            }
+
+            if (!expiredInsurances.isEmpty()) {
+                insuranceRepository.saveAll(expiredInsurances);
+                log.info(">>>> 보험 계약 만료 상태 업데이트 완료 - 총 {}건 처리", updateCount);
+            } else {
+                log.info(">>>> 만료된 보험 계약이 없습니다. 날짜 : {}", todaySQL);
+            }
+        } catch(BusinessException e){
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

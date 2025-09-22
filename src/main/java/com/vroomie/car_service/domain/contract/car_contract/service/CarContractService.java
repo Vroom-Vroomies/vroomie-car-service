@@ -19,9 +19,14 @@ import com.vroomie.car_service.global.exception.BusinessException;
 import com.vroomie.car_service.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -128,10 +133,16 @@ public class CarContractService {
         CarContract contract = null;
         // 계약 시작 일자가 계약 종료 일자보다 빠른지/느린지 판단
         if (registDTO instanceof LeaseRegistRequest) {
+            LeaseRegistRequest leaseDTO = (LeaseRegistRequest) registDTO;
+            leaseDTO.calculateAmounts();
             contract = carContractMapper.toLeaseContract((LeaseRegistRequest) registDTO);
         } else if (registDTO instanceof RentRegistRequest) {
+            RentRegistRequest rentDTO = (RentRegistRequest) registDTO;
+            rentDTO.calculateAmount();
             contract = carContractMapper.toRentContract((RentRegistRequest) registDTO);
         } else if (registDTO instanceof PurchaseRegistRequest) {
+            PurchaseRegistRequest purchaseDTO = (PurchaseRegistRequest)registDTO;
+            purchaseDTO.calculateAmount();
             contract = carContractMapper.toPurchaseContract((PurchaseRegistRequest) registDTO);
         }
 
@@ -238,6 +249,41 @@ public class CarContractService {
             throw new BusinessException(ErrorCode.NOT_EXIST_CAR_CONTRACTABLE);
         }
     }
+
+    @Transactional
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void updateContractStatus(){
+        try{
+            log.info(">>>> [CarContractService] 계약 상태 변경 시작");
+            List<CarContract> activeContracts = contractRepository.findAllActive();
+            LocalDate today = LocalDate.now();
+            Date todaySQL = Date.valueOf(today);
+
+            List<CarContract> expirecContracts = new ArrayList<>();
+            int updateCount = 0;
+
+            for(CarContract contract : activeContracts){
+                if(contract.getEndAt().before(todaySQL)){
+                    contract.updateContractStatus(ContractStatus.EXPIRED);
+                    expirecContracts.add(contract);
+                    updateCount++;
+
+                    log.info(">>>> 차량 계약 만료 처리 - ID : {}, 종료일 : {}", contract.getId(), contract.getEndAt());
+                }
+            }
+
+            if(!expirecContracts.isEmpty()){
+                contractRepository.saveAll(expirecContracts);
+                log.info(">>>> 차량 계약 만료 상태 없데이트 완료 - 총 {}건 처리", updateCount);
+            } else {
+                log.info(">>>> 만료된 차량 계약이 없습니다. 날짜 : {}", todaySQL);
+            }
+        } catch (BusinessException e){
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
 
     /** 계약 삭제 시 차량 유지비용에 영향을 미치기 때문에 삭제 불가. **/
 }
