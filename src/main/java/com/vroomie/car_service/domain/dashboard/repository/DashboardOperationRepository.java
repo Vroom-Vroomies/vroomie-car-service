@@ -16,16 +16,19 @@ public interface DashboardOperationRepository extends JpaRepository<DrivingLogEn
      * @param companyId 회사 아이디
      * @return OperationalStatsProjection 운영 통계 프로젝션
      */
-    @Query("""
+    @Query(value = """
         SELECT
-            (SELECT COUNT(dl) FROM DrivingLogEntity dl
-             JOIN dl.carEntity c WHERE c.companyId = :companyId AND CAST(dl.logStatus AS string) NOT IN ('COMPLETED', 'PREPARING')) as unwrittenDrivingLogs,
-            (SELECT COUNT(c) FROM CarEntity c
-             WHERE c.companyId = :companyId AND c.usageType = 'ASSIGNED') as assignedVehicles,
-            (SELECT COUNT(r) FROM ReservationEntity r
-             JOIN r.car c WHERE c.companyId = :companyId AND r.status = 'APPROVED') as rentedVehicles,
-            (SELECT COUNT(r) FROM ReservationEntity r
-             JOIN r.car c WHERE c.companyId = :companyId AND r.endedAt < CURRENT_DATE AND r.status = 'APPROVED') as overdueVehicles
-        """)
+            (SELECT COUNT(*) FROM tbl_driving_log dl
+             JOIN tbl_car c ON dl.car_id = c.id
+             WHERE c.company_id = :companyId AND dl.log_status NOT IN ('COMPLETED', 'PREPARING')) as unwrittenDrivingLogs,
+            (SELECT COUNT(*) FROM tbl_car c
+             WHERE c.company_id = :companyId AND c.usage_type = 'ASSIGNED') as assignedVehicles,
+            (SELECT COUNT(*) FROM tbl_reservation r
+             JOIN tbl_car c ON r.car_id = c.id
+             WHERE c.company_id = :companyId AND r.status = 'APPROVED') as rentedVehicles,
+            (SELECT COUNT(*) FROM tbl_reservation r
+             JOIN tbl_car c ON r.car_id = c.id
+             WHERE c.company_id = :companyId AND r.ended_at < CURRENT_DATE AND r.status = 'APPROVED') as overdueVehicles
+        """, nativeQuery = true)
     OperationalStatsProjection findOperationalStatsByCompany(@Param("companyId") Long companyId);
 }

@@ -35,21 +35,37 @@ public interface DashboardCarRepository extends JpaRepository<CarEntity, Long> {
      * @param companyId 회사 아이디
      * @return List<CarStatusProjection>
      */
-    @Query("""
-        SELECT cs.status as status, COUNT(cs.status) as count
-        FROM (
-            SELECT c.id,
-                CASE
-                    WHEN c.insuExpiration < CURRENT_DATE THEN '보험만료'
-                    WHEN EXISTS (SELECT 1 FROM RepairEntity r WHERE r.car.id = c.id AND CAST(r.status AS string) IN ('PENDING', 'IN_PROGRESS')) THEN '수리중'
-                    WHEN EXISTS (SELECT 1 FROM InspectionEntity i WHERE i.car.id = c.id AND i.finalResult IS NULL) THEN '점검중'
-                    ELSE '정상'
-                END as status
-            FROM CarEntity c
-            WHERE c.companyId = :companyId AND c.status = 'ACTIVE'
-        ) cs
-        GROUP BY cs.status
-        """)
+    @Query(value = """
+        SELECT '보험만료' as status, COUNT(*) as count
+        FROM tbl_car c
+        WHERE c.company_id = :companyId AND c.status = 'ACTIVE' AND c.insu_expiration < CURRENT_DATE
+
+        UNION ALL
+
+        SELECT '수리중' as status, COUNT(*) as count
+        FROM tbl_car c
+        WHERE c.company_id = :companyId AND c.status = 'ACTIVE'
+          AND c.insu_expiration >= CURRENT_DATE
+          AND EXISTS (SELECT 1 FROM tbl_repair r WHERE r.car_id = c.id AND r.status = 'IN_REPAIR')
+
+        UNION ALL
+
+        SELECT '점검중' as status, COUNT(*) as count
+        FROM tbl_car c
+        WHERE c.company_id = :companyId AND c.status = 'ACTIVE'
+          AND c.insu_expiration >= CURRENT_DATE
+          AND NOT EXISTS (SELECT 1 FROM tbl_repair r WHERE r.car_id = c.id AND r.status = 'IN_REPAIR')
+          AND EXISTS (SELECT 1 FROM tbl_inspection i WHERE i.car_id = c.id AND i.final_result IS NULL)
+
+        UNION ALL
+
+        SELECT '정상' as status, COUNT(*) as count
+        FROM tbl_car c
+        WHERE c.company_id = :companyId AND c.status = 'ACTIVE'
+          AND c.insu_expiration >= CURRENT_DATE
+          AND NOT EXISTS (SELECT 1 FROM tbl_repair r WHERE r.car_id = c.id AND r.status = 'IN_REPAIR')
+          AND NOT EXISTS (SELECT 1 FROM tbl_inspection i WHERE i.car_id = c.id AND i.final_result IS NULL)
+        """, nativeQuery = true)
     List<CarStatusProjection> findCarStatusByCompany(@Param("companyId") Long companyId);
 
     /**
