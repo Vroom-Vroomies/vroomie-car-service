@@ -54,3 +54,9 @@ logging:
     com.vroomie.car_service.domain.operation.reservation: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+app:
+  backend:
+    base-url: ${APP_BACKEND_BASE_URL}
+  frontend:
+    base-url: ${APP_FRONTEND_BASE_URL}
