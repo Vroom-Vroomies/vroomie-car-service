@@ -99,6 +99,12 @@ public class ReservationService {
                 reservation.updateStatus(request.getReservationStatus());
                 ReservationEntity updatedReservation = reservationRepository.save(reservation);
 
+                // REJECTED 상태로 변경된 경우 기존 RESERVED 상태를 REJECTED로 변경
+                if (request.getReservationStatus() == ReservationStatus.REJECTED) {
+                        reservation.getReservedLog().updateStatus(RentStatus.REJECTED);
+                        reservedLogRepository.save(reservation.getReservedLog());
+                }
+
                 // APPROVED 상태로 변경된 경우 기존 RESERVED 상태를 RENTED로 변경
                 if (request.getReservationStatus() == ReservationStatus.APPROVED) {
                         updateReservedLogStatusToRented(updatedReservation);
