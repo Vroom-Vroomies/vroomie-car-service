@@ -25,11 +25,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 정적 리소스는 /static/** 경로에서만 처리
@@ -39,5 +34,10 @@ public class WebConfig implements WebMvcConfigurer {
         // 업로드된 이미지 파일 경로
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
