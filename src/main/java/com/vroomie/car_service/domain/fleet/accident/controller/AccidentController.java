@@ -6,10 +6,13 @@ import com.vroomie.car_service.domain.fleet.accident.dto.AccidentFinalizeRequest
 import com.vroomie.car_service.domain.fleet.accident.dto.AccidentListResponseDTO;
 import com.vroomie.car_service.domain.fleet.accident.service.AccidentService;
 import com.vroomie.car_service.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,11 +22,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/fleet/accidents")
 @RequiredArgsConstructor
+@Tag(name = "사고 기록", description = "사고 기록 관련 API")
 public class AccidentController {
 
     private final AccidentService accidentService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "신규 수리 기록 등록")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> createAccident(
             @RequestPart("req") AccidentCreateRequestDTO req,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
@@ -35,6 +40,7 @@ public class AccidentController {
     }
 
     @GetMapping
+    @Operation(summary = "전체 사고 목록 조회", description = "전체 사고 목록을 조회합니다. \n 필터: 차 ID, 최종 제출 여부")
     public ResponseEntity<ApiResponse<Page<AccidentListResponseDTO>>> getAccidentList(
             @RequestParam(required = false) Long carId,
             @RequestParam(required = false) Boolean save,
@@ -45,12 +51,14 @@ public class AccidentController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "사고 이력 상세 조회", description = "ID로 사고 정보를 상세 조회합니다.")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> getAccidentDetail(@PathVariable Long id) {
         AccidentDetailDTO data = accidentService.getAccidentById(id);
         return ResponseEntity.ok(ApiResponse.success(data, "사고 내역 상세 조회에 성공하였습니다."));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "사고 정보 수정", description = "사고 기록을 입력 받은 최신 정보로 업데이트 합니다")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> updateAccident(
             @PathVariable Long id,
             @RequestPart("req") AccidentCreateRequestDTO req,
@@ -60,6 +68,7 @@ public class AccidentController {
     }
 
     @PatchMapping("/save/{id}")
+    @Operation(summary = "사고 이력 최종 제출", description = "사고 이력을 최종 제출합니다. 최종 제출 이후에는 수정이 불가능합니다.")
     public ResponseEntity<ApiResponse<AccidentDetailDTO>> finalizeAccident(
             @PathVariable Long id,
             @RequestBody AccidentFinalizeRequestDTO req) {

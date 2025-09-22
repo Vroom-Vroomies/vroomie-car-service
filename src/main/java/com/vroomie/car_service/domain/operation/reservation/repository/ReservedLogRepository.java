@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.operation.reservation.repository;
 
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservedLogEntity;
+import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +40,6 @@ public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, 
                      "WHERE m.email = :memberEmail " +
                      "AND rl.status IN ('RENTED', 'OVERDUE')")
        long countActiveRentalsByMemberEmail(@Param("memberEmail") String memberEmail);
+
+       boolean existsByCarIdAndStatusIn(Long carId, List<RentStatus> statusList);
 }

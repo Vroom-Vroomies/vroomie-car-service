@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public interface RepairMapper {
 
     @Mappings({
-            @Mapping(source = "car.id", target = "carId"),
+            @Mapping(source = "car.number", target = "carNumber"),
             @Mapping(source = "employee.name", target = "empName"),
             @Mapping(source = "saved", target = "save"),
             @Mapping(target = "beforeImages", expression = "java(mapImages(repair.getRepairImages(), com.vroomie.car_service.domain.fleet.repair.enums.RepairImageType.BEFORE))"),
@@ -42,6 +42,7 @@ public interface RepairMapper {
         return images.stream()
                 .filter(image -> image.getType() == type)
                 .map(RepairImageEntity::getImage)
+                .map(filename -> "/images/repairs/" + filename)
                 .collect(Collectors.toList());
     }
 }
