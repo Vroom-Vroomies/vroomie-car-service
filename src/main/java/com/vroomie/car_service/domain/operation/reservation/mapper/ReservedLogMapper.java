@@ -29,6 +29,7 @@ public interface ReservedLogMapper {
     @Mapping(source = "car.usageType", target = "carUsageType")
     @Mapping(source = "car.status", target = "carStatus")
     @Mapping(source = "reservation.purpose", target = "purpose")
+    @Mapping(source = "reservation.detail", target = "detail")
     @Mapping(source = "reservation.id", target = "reservationLogId")
     @Mapping(source = "car.id", target = "carId")
     @Mapping(source = "reservation.status", target = "reservationStatus")
