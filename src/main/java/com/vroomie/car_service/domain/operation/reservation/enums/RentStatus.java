@@ -5,5 +5,6 @@ public enum RentStatus {
     RETURNED,
     OVERDUE, // 연체
     RESERVED, // 예약 중
-    CANCELLED // 취소
+    CANCELLED, // 취소
+    REJECTED // 거절
 }
