@@ -26,7 +26,7 @@ public class ReservedLogService {
     private final ReservedLogRepository reservedLogRepository;
     private final ReservedLogMapper reservedLogMapper;
 
-    // [사용자] 내 대여 이력 목록 조회
+    // [사용자] 내 대여 이력 목록 조회 (RESERVED, RENTED, RETURNED, OVERDUE 상태 포함)
     public PageResponse<ReservedLogResponse> getReservedLogList(int currentPage, int size) {
         // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // String currentUserEmail = authentication.getName();

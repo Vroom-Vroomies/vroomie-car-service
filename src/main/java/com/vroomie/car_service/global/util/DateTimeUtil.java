@@ -34,6 +34,11 @@ public class DateTimeUtil {
         int minute = dateTime.getMinute();
 
         // 9:00 ~ 18:00, 30분 단위만 허용
+        // 18시인 경우 정각(00분)만 허용 (18:00까지만)
+        if (hour == 18) {
+            return minute == 0;
+        }
+        
         return hour >= 9 && hour < 18 && (minute == 0 || minute == 30);
     }
 }

@@ -29,7 +29,12 @@ public interface ReservedLogMapper {
     @Mapping(source = "car.usageType", target = "carUsageType")
     @Mapping(source = "car.status", target = "carStatus")
     @Mapping(source = "reservation.purpose", target = "purpose")
+    @Mapping(source = "reservation.id", target = "reservationLogId")
+    @Mapping(source = "car.id", target = "carId")
+    @Mapping(source = "reservation.status", target = "reservationStatus")
+    @Mapping(source = "status", target = "rentStatus")
     DetailReservedLogResponse toDetailReservedLogResponse(ReservedLogEntity reservedLog);
+
 
     default RentStatus calculateRentStatus(ReservedLogEntity reservedLog) {
         if (reservedLog.getStatus() != null) {

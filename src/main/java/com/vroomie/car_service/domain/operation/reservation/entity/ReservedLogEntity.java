@@ -53,4 +53,12 @@ public class ReservedLogEntity {
 
     private LocalDateTime returnDate;
     private LocalDateTime createdAt;
+
+    public void updateStatus(RentStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void updateAdmin(EmployeeEntity newAdmin) {
+        this.admin = newAdmin;
+    }
 }

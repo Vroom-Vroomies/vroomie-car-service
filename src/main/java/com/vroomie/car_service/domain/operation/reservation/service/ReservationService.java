@@ -3,6 +3,7 @@ package com.vroomie.car_service.domain.operation.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Arrays;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -77,9 +79,9 @@ public class ReservationService {
                 reservation.updateStatus(request.getReservationStatus());
                 ReservationEntity updatedReservation = reservationRepository.save(reservation);
 
-                // APPROVED 상태로 변경된 경우 대여 이력 생성
+                // APPROVED 상태로 변경된 경우 기존 RESERVED 상태를 RENTED로 변경
                 if (request.getReservationStatus() == ReservationStatus.APPROVED) {
-                        createReservedLog(updatedReservation);
+                        updateReservedLogStatusToRented(updatedReservation);
                 }
 
                 AdminReservationResponse response = reservationMapper.toAdminReservationResponse(updatedReservation);
@@ -90,8 +92,8 @@ public class ReservationService {
         // 대여 이력 생성
         private void createReservedLog(ReservationEntity reservation) {
 
-                // 현재 인증된 사용자 정보 가져오기 (관리자)
-                String adminEmail = UserUtil.getCurrentUserEmail();
+                // 관리자 이메일 가져오기
+                String adminEmail = UserUtil.getCurrentAdminEmail();
 
                 // 관리자 정보 조회
                 var admin = employeeRepository.findByEmail(adminEmail)
@@ -105,6 +107,47 @@ public class ReservationService {
                                 .startedAt(reservation.getStartedAt())
                                 .endedAt(reservation.getEndedAt())
                                 .status(RentStatus.RENTED)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+                reservedLogRepository.save(reservedLog);
+        }
+
+        // RESERVED 상태의 대여 이력을 RENTED로 변경
+        private void updateReservedLogStatusToRented(ReservationEntity reservation) {
+                // 해당 예약의 RESERVED 상태 ReservedLog 조회
+                List<ReservedLogEntity> reservedLogs = reservedLogRepository.findByReservationAndStatus(
+                                reservation, RentStatus.RESERVED);
+
+                if (!reservedLogs.isEmpty()) {
+                        ReservedLogEntity reservedLog = reservedLogs.get(0); // 첫 번째 항목 사용
+
+                        // 관리자 정보로 업데이트
+                        String adminEmail = UserUtil.getCurrentAdminEmail();
+                        var admin = employeeRepository.findByEmail(adminEmail)
+                                        .orElseThrow(() -> AdminReservationException.employeeNotFound(adminEmail));
+
+                        // 상태를 RENTED로 변경하고 관리자 정보 업데이트
+                        reservedLog.updateStatus(RentStatus.RENTED);
+                        reservedLog.updateAdmin(admin);
+                        reservedLogRepository.save(reservedLog);
+                }
+        }
+
+        // PENDING 상태 예약에 대한 대여 이력 생성 (RESERVED 상태)
+        private void createReservedLogForPendingReservation(ReservationEntity reservation, String memberEmail) {
+                // 직원 정보 조회 (관리자 대신 신청자로 설정)
+                var member = employeeRepository.findByEmail(memberEmail)
+                                .orElseThrow(() -> AdminReservationException.employeeNotFound(memberEmail));
+
+                // RESERVED 상태로 대여 이력 생성
+                ReservedLogEntity reservedLog = ReservedLogEntity.builder()
+                                .car(reservation.getCar())
+                                .admin(member) // 신청자를 admin 필드에 임시 저장
+                                .reservation(reservation)
+                                .startedAt(reservation.getStartedAt())
+                                .endedAt(reservation.getEndedAt())
+                                .status(RentStatus.RESERVED)
                                 .createdAt(LocalDateTime.now())
                                 .build();
 
@@ -127,6 +170,9 @@ public class ReservationService {
                 // 업무시간 체크 (9:00 ~ 18:00)
                 boolean isValidStartHour = DateTimeUtil.isValidBusinessHour(requestedStartTime);
                 boolean isValidEndHour = DateTimeUtil.isValidBusinessHour(requestedEndTime);
+
+                log.info("Time validation - Start: {} (valid: {}), End: {} (valid: {})",
+                                requestedStartTime, isValidStartHour, requestedEndTime, isValidEndHour);
 
                 if (!isValidStartHour || !isValidEndHour) {
                         throw AdminReservationException.invalidTimeSlot();
@@ -154,7 +200,8 @@ public class ReservationService {
         // [사용자] 차량 상세 조회
         public MemberCarDetailResponse getMemberCarDetail(Long carId) {
 
-                String memberEmpEmail = UserUtil.getCurrentUserEmail();
+                // 사용자 이메일 가져오기
+                String memberEmpEmail = UserUtil.getCurrentMemberEmail();
 
                 CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
                 ReservationEntity reservation = reservationRepository.findLatestByCarAndMember(carId, memberEmpEmail);
@@ -168,12 +215,13 @@ public class ReservationService {
 
         // [사용자] 차량 대여 신청하기
         @Transactional
-        public MemberCarDetailResponse createMemberCarReservation(MemberCarReservationRequest request) {
+        public MemberCarDetailResponse createMemberCarReservation(MemberCarReservationRequest request, Long carId) {
 
-                String memberEmpEmail = UserUtil.getCurrentUserEmail();
+                // 사용자 이메일 가져오기
+                String memberEmpEmail = UserUtil.getCurrentMemberEmail();
 
                 // 차량 존재 여부 확인
-                CarEntity car = carRepository.findAvailableCarById(request.getCarId(), CarStatus.ACTIVE);
+                CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
                 if (car == null) {
                         throw CarException.carNotFoundException();
                 }
@@ -197,7 +245,7 @@ public class ReservationService {
                                 ReservationStatus.APPROVED);
 
                 long conflictCount = reservationRepository.countConflictingReservations(
-                                request.getCarId(),
+                                carId,
                                 request.getStartedAt(),
                                 request.getEndedAt(),
                                 conflictStatuses);
@@ -237,6 +285,9 @@ public class ReservationService {
 
                 ReservationEntity savedReservation = reservationRepository.save(reservation);
 
+                // 대여 이력에도 RESERVED 상태로 데이터 생성
+                createReservedLogForPendingReservation(savedReservation, memberEmpEmail);
+
                 return reservationMapper.toMemberCarDetailResponse(car, savedReservation);
         }
 
@@ -244,7 +295,8 @@ public class ReservationService {
         @Transactional
         public MemberCarDetailResponse cancelMemberCarReservation(Long carId) {
 
-                String memberEmpEmail = UserUtil.getCurrentUserEmail();
+                // 사용자 이메일 가져오기
+                String memberEmpEmail = UserUtil.getCurrentMemberEmail();
 
                 // 차량 존재 여부 확인
                 CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
@@ -267,6 +319,8 @@ public class ReservationService {
 
                 // 상태를 CANCELLED로 변경
                 reservation.updateStatus(ReservationStatus.CANCELLED);
+                reservation.getReservedLog().updateStatus(RentStatus.CANCELLED);
+                reservedLogRepository.save(reservation.getReservedLog());
                 ReservationEntity updatedReservation = reservationRepository.save(reservation);
 
                 return reservationMapper.toMemberCarDetailResponse(car, updatedReservation);

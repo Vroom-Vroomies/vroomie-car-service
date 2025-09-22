@@ -15,6 +15,7 @@ import com.vroomie.car_service.domain.operation.reservation.dto.member.Available
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarReservationRequest;
 import com.vroomie.car_service.domain.operation.reservation.service.ReservationService;
+import com.vroomie.car_service.domain.operation.reservation.service.OverdueUpdateService;
 import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.response.ApiResponse;
@@ -31,6 +32,7 @@ import jakarta.validation.constraints.Max;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final OverdueUpdateService overdueUpdateService;
 
     // [관리자] 대여 신청 목록 조회
     @Operation(summary = "[관리자]대여 신청 목록 조회", description = "대여 신청 목록을 조회합니다.")
@@ -77,8 +79,9 @@ public class ReservationController {
     // 차량 대여 신청하기
     @Operation(summary = "[사용자]차량 대여 신청하기", description = "차량 대여 신청을 합니다.")
     @PostMapping("/member/car/{carId}")
-    public ApiResponse<MemberCarDetailResponse> createMemberCarReservation(@RequestBody MemberCarReservationRequest request) {
-        return ApiResponse.success(reservationService.createMemberCarReservation(request), "차량 대여 신청 성공");
+    public ApiResponse<MemberCarDetailResponse> createMemberCarReservation(
+            @RequestBody MemberCarReservationRequest request, @PathVariable Long carId) {
+        return ApiResponse.success(reservationService.createMemberCarReservation(request, carId), "차량 대여 신청 성공");
     }
 
     // 차량 대여 취소하기
@@ -86,5 +89,13 @@ public class ReservationController {
     @DeleteMapping("/member/car/{carId}")
     public ApiResponse<MemberCarDetailResponse> cancelMemberCarReservation(@PathVariable Long carId) {
         return ApiResponse.success(reservationService.cancelMemberCarReservation(carId), "차량 대여 취소 성공");
+    }
+
+    // [관리자] 연체 상태 수동 업데이트
+    @Operation(summary = "[관리자]연체 상태 수동 업데이트", description = "연체된 대여 상태를 수동으로 업데이트합니다.")
+    @PostMapping("/admin/update-overdue")
+    public ApiResponse<String> updateOverdueRentals() {
+        overdueUpdateService.manualUpdateOverdueRentals();
+        return ApiResponse.success("연체 상태 업데이트 완료", "연체 상태 업데이트 성공");
     }
 }

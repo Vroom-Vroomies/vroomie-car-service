@@ -13,61 +13,56 @@ import java.util.List;
 
 public interface CarRepository extends JpaRepository<CarEntity, Long> {
 
-    Page<CarEntity> findAllByStatusAndUsageType(CarStatus status, CarUsageType usageType, Pageable pageable);
+  Page<CarEntity> findAllByStatusAndUsageType(CarStatus status, CarUsageType usageType, Pageable pageable);
 
-    Page<CarEntity> findAllByStatus(CarStatus status, Pageable pageable);
+  Page<CarEntity> findAllByStatus(CarStatus status, Pageable pageable);
 
-    Page<CarEntity> findAllByUsageType(CarUsageType usageType, Pageable pageable);
+  Page<CarEntity> findAllByUsageType(CarUsageType usageType, Pageable pageable);
 
-    boolean existsByNumber(String number);
+  boolean existsByNumber(String number);
 
-       @Query("SELECT c FROM CarEntity c " +
-                     "WHERE c.id = :carId " +
-                     "AND c.status = :status " +
-                     "AND NOT EXISTS (" +
-                     "    SELECT rl FROM ReservedLogEntity rl " +
-                     "    WHERE rl.car = c " +
-                     "    AND rl.status != com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RETURNED"
-                     +
-                     ")")
-       CarEntity findAvailableCarById(@Param("carId") Long carId, @Param("status") CarStatus status);
+  @Query("SELECT c FROM CarEntity c " +
+      "WHERE c.id = :carId " +
+      "AND c.status = :status ")
+  CarEntity findAvailableCarById(@Param("carId") Long carId, @Param("status") CarStatus status);
 
-       @Query("SELECT c FROM CarEntity c " +
-                     "WHERE c.status = :status " +
-                     "AND NOT EXISTS (" +
-                     "    SELECT rl FROM ReservedLogEntity rl " +
-                     "    WHERE rl.car = c " +
-                     "    AND rl.status != com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RETURNED "
-                     +
-                     "    AND ((" +
-                     "        rl.startedAt <= :requestedStartTime AND rl.endedAt > :requestedStartTime" +
-                     "    ) OR (" +
-                     "        rl.startedAt < :requestedEndTime AND rl.endedAt >= :requestedEndTime" +
-                     "    ) OR (" +
-                     "        rl.startedAt >= :requestedStartTime AND rl.endedAt <= :requestedEndTime" +
-                     "    ))" +
-                     ") " +
-                     "ORDER BY c.id")
-       Page<CarEntity> findAvailableCarsByTimeSlotWithReservedLog(@Param("status") CarStatus status,
-                     @Param("requestedStartTime") LocalDateTime requestedStartTime,
-                     @Param("requestedEndTime") LocalDateTime requestedEndTime,
-                     Pageable pageable);
+  @Query("""
+          SELECT c
+            FROM CarEntity c
+            LEFT JOIN CarContract cc ON c.id = cc.car.id
+           WHERE cc.car.id IS NULL
+             AND c.status IN ('ACTIVE')
+      """)
+  List<CarEntity> findAllCarsContractable();
 
-    @Query("""
-        SELECT c
-          FROM CarEntity c
-          LEFT JOIN CarContract cc ON c.id = cc.car.id
-         WHERE cc.car.id IS NULL
-           AND c.status IN ('ACTIVE')
-    """)
-    List<CarEntity> findAllCarsContractable();
+  @Query("""
+          SELECT c
+            FROM CarEntity c
+            LEFT JOIN InsuContractEntity ic ON ic.car.id = c.id
+           WHERE c.status = 'ACTIVE'
+             AND ic.car.id IS NULL
+      """)
+  List<CarEntity> getCarListInsurable();
 
-    @Query("""
-        SELECT c
-          FROM CarEntity c
-          LEFT JOIN InsuContractEntity ic ON ic.car.id = c.id
-         WHERE c.status = 'ACTIVE'
-           AND ic.car.id IS NULL
-    """)
-    List<CarEntity> getCarListInsurable();
+  @Query("SELECT c FROM CarEntity c " +
+      "WHERE c.status = :status " +
+      "AND NOT EXISTS (" +
+      "    SELECT rl FROM ReservedLogEntity rl " +
+      "    WHERE rl.car = c " +
+      "    AND rl.status != com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RETURNED "
+      +
+      "    AND ((" +
+      "        rl.startedAt <= :requestedStartTime AND rl.endedAt > :requestedStartTime" +
+      "    ) OR (" +
+      "        rl.startedAt < :requestedEndTime AND rl.endedAt >= :requestedEndTime" +
+      "    ) OR (" +
+      "        rl.startedAt >= :requestedStartTime AND rl.endedAt <= :requestedEndTime" +
+      "    ))" +
+      ") " +
+      "ORDER BY c.id")
+  Page<CarEntity> findAvailableCarsByTimeSlotWithReservedLog(@Param("status") CarStatus status,
+      @Param("requestedStartTime") LocalDateTime requestedStartTime,
+      @Param("requestedEndTime") LocalDateTime requestedEndTime,
+      Pageable pageable);
+
 }
