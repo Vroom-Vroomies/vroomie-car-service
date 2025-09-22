@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface DashboardOperationRepository extends JpaRepository<DrivingLogEntity, Long> {
 
     /**
+     *
      * 운영 통계 쿼리 : 운행기록 미작성, 지급된 차량, 대여중 챠량, 반납 지연 차량을 조회합니다.
      * @param companyId 회사 아이디
      * @return OperationalStatsProjection 운영 통계 프로젝션

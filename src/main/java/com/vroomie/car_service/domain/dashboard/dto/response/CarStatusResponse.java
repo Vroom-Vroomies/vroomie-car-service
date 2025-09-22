@@ -10,14 +10,14 @@ import java.util.List;
  */
 @Getter
 @Builder
-public class VehicleStatusResponse {
+public class CarStatusResponse {
     private Integer total;
     private String centerLabel; // donut chart 중앙에 올 라벨
-    private List<VehicleStatusItem> items;
+    private List<CarStatusItem> items;
 
     @Getter
     @Builder
-    public static class VehicleStatusItem {
+    public static class CarStatusItem {
         private String status;
         private Integer count;
         private String color;

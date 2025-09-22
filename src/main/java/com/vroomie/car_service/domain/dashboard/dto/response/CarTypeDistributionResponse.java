@@ -6,19 +6,19 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * 차량 보유 현황 조회 응답 DTO
- * - 차량 종류 별 보유 현황(트럭, SUV ...)
+ * 차량 타입별 분포 조회 응답 DTO
+ * - 차량 종류별 분포 현황(트럭, SUV ...)
  */
 @Getter
 @Builder
-public class VehicleOwnershipResponse {
+public class CarTypeDistributionResponse {
     private Integer total;
     private String centerLabel;
-    private List<VehicleOwnershipItem> items;
+    private List<CarTypeDistributionItem> items;
 
     @Getter
     @Builder
-    public static class VehicleOwnershipItem {
+    public static class CarTypeDistributionItem {
         private String label;
         private Integer value;
         private String color;
