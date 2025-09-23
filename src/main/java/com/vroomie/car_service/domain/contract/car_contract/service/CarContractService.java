@@ -45,7 +45,7 @@ public class CarContractService {
         log.info(">>>> [CarContractService] 계약 상세 정보 조회 시작 - contractId: {}", carId);
 
         CarContract contract = contractRepository.findByCarId(carId).orElseThrow(() -> new BusinessException(ErrorCode.CONTRACT_NOT_FOUND));
-        System.out.println("😀😀😀contract = " + contract);
+//        System.out.println("😀😀😀contract = " + contract);
 
         if (contract instanceof LeaseContract) {
             LeaseContractResponse leaseDTO = carContractMapper.toLeaseContractResponse((LeaseContract) contract);
@@ -127,7 +127,6 @@ public class CarContractService {
 
     public void registNewContract(ContractRegistRequest registDTO) {
 
-        System.out.println("✅✅✅contract = " + registDTO);
         // 입력값 검증
         validateContractRequest(registDTO);
         CarContract contract = null;
@@ -238,6 +237,8 @@ public class CarContractService {
             log.warn("계약 ID {} 에 대한 업데이트 DTO 타입 불일치 또는 예상치 못한 계약 타입: existingContract type = {}, updateDTO type = {}",
                     contractId, existingContract.getClass().getSimpleName(), updateDTO.getClass().getSimpleName());
         }
+
+        contractRepository.save(existingContract);
     }
 
     public List<CarSimpleResponse> findAllCarsContractable() {

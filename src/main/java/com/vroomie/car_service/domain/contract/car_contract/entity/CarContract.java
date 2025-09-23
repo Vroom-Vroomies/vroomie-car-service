@@ -33,7 +33,6 @@ import java.sql.Timestamp;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-@AllArgsConstructor
 @ToString
 @SuperBuilder
 public abstract class CarContract {
@@ -84,10 +83,13 @@ public abstract class CarContract {
 
     private Date firstPaymentDay;
 
+    protected void setMonthlyFee(BigDecimal monthlyFee) {
+        this.monthlyFee = monthlyFee;
+    }
 
     public void updateContract(ContractUpdateRequest updateDTO){
         this.provider = updateDTO.getProvider();
-        this.monthlyFee = updateDTO.getMonthlyFee();
+//        this.monthlyFee = updateDTO.getMonthlyFee();
         this.isInsured = updateDTO.isInsured();
         this.startAt = updateDTO.getStartAt();
         this.endAt = updateDTO.getEndAt();

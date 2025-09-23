@@ -33,11 +33,19 @@ public class PurchaseContract extends CarContract{
     private BigDecimal monthlyRepayment;  // 월 상환금
 
     public void updatePurchaseContract(PurchaseUpdateRequest updateDTO){
+        // 1. 공통 필드 업데이트
+        super.updateContract(updateDTO);
+
         this.purchasePrice = updateDTO.getPurchasePrice();
         this.downPayment = updateDTO.getDownPayment();
         this.loanAmount = updateDTO.getLoanAmount();
         this.interestRate = updateDTO.getInterestRate();
         this.loanTerm = updateDTO.getLoanTerm();
         this.monthlyRepayment = updateDTO.getMonthlyRepayment();
+
+        // 3. monthlyFee에 monthlyLease 값 할당
+        if(monthlyRepayment != null && monthlyRepayment.compareTo(BigDecimal.ZERO) > 0) {
+            super.setMonthlyFee(this.monthlyRepayment);
+        }
     }
 }

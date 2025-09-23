@@ -36,10 +36,15 @@ public class RentContract extends CarContract {
     private RentType rentType;
 
     public void updateRentContract(RentUpdateRequest updateDTO){
+        // 1. 공통 필드 업데이트
+        super.updateContract(updateDTO);
+
         this.monthlyRent = updateDTO.getMonthlyRent();
         this.deposit = updateDTO.getDeposit();
-//        this.paymentCycle = updateDTO.getPaymentCycle();
         this.isAutoRenewal = updateDTO.getIsAutoRenewal();
         this.rentType = updateDTO.getRentType();
+
+        // 3. monthlyFee에 monthlyLease 값 할당
+        super.setMonthlyFee(this.monthlyRent);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
+import com.vroomie.car_service.domain.contract.car_contract.enums.PaymentCycle;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import java.sql.Date;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 @SuperBuilder
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -41,7 +42,7 @@ public abstract class ContractUpdateRequest {
     @NotBlank(message = "공급처명은 필수 항목입니다.")
     private String provider;
 
-    private BigDecimal monthlyFee;
+    protected BigDecimal monthlyFee;
 
     @Builder.Default
     private boolean isInsured = false;
@@ -59,4 +60,14 @@ public abstract class ContractUpdateRequest {
 
     @Builder.Default
     private ContractStatus contractStatus = ContractStatus.NEW;
+
+    @NotNull(message = "납부 일자는 필수 항목입니다.")
+    private Integer paymentDay;
+
+    @Builder.Default
+    private PaymentCycle paymentCycle = PaymentCycle.MONTHLY;
+
+    @NotNull(message = "첫 납부 일자는 필수 항목입니다.")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
+    private Date firstPaymentDay;
 }
