@@ -24,4 +24,5 @@ public class RentUpdateRequest extends ContractUpdateRequest{
     private Boolean isAutoRenewal = false;
 
     private RentType rentType;
+
 }
