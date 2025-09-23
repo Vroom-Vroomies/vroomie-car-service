@@ -101,13 +101,7 @@ public interface DashboardInsuranceRepository extends JpaRepository<InsuContract
         SELECT
             DATE_FORMAT(CURRENT_DATE, '%Y-%m') as month,
             CONCAT('insurance_', ic.paymentType) as feeType,
-            SUM(CASE
-                WHEN ic.paymentType = 'MONTHLY' THEN ic.premium
-                WHEN ic.paymentType = 'QUARTERLY' THEN ic.premium / 3
-                WHEN ic.paymentType = 'SEMI_ANNUAL' THEN ic.premium / 6
-                WHEN ic.paymentType = 'ANNUAL' THEN ic.premium / 12
-                ELSE ic.premium
-            END) as amount,
+            ic.premium as amount,
             'insurance' as source
         FROM InsuContractEntity ic
         JOIN ic.car c

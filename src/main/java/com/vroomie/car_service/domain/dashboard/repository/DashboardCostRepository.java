@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,8 +26,8 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
      * 운행 기록의 변동 비용을 월별로 집계하여 반환합니다.
      *
      * @param companyId 회사 ID
-     * @param startDate 조회 시작일
-     * @param endDate 조회 종료일
+     * @param startDateTime 조회 시작일시
+     * @param endDateTime 조회 종료일시
      * @return 월별 변동 비용 리스트
      */
     @Query("""
@@ -40,14 +40,14 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         JOIN vc.drivingLogEntity dl
         JOIN dl.carEntity c
         WHERE c.companyId = :companyId
-        AND dl.createdAt BETWEEN :startDate AND :endDate
+        AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
         GROUP BY DATE_FORMAT(dl.createdAt, '%Y-%m'), vc.category
         ORDER BY DATE_FORMAT(dl.createdAt, '%Y-%m'), vc.category
         """)
     List<MonthlyCostProjection> findVariableCostsByMonth(
         @Param("companyId") Long companyId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime
     );
 
     /**
@@ -55,8 +55,8 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
      * 특정 기간 동안 각 차량의 변동 비용을 비용 유형별로 집계합니다.
      *
      * @param companyId 회사 ID
-     * @param startDate 조회 시작일
-     * @param endDate 조회 종료일
+     * @param startDateTime 조회 시작일시
+     * @param endDateTime 조회 종료일시
      * @param vehicleIds 조회할 차량 ID 리스트 (null이면 전체 차량)
      * @param pageable 페이징 정보
      * @return 차량별 변동 비용 리스트
@@ -73,15 +73,15 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         JOIN vc.drivingLogEntity dl
         JOIN dl.carEntity c
         WHERE c.companyId = :companyId
-        AND dl.createdAt BETWEEN :startDate AND :endDate
+        AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
         AND (:vehicleIds IS NULL OR c.number IN :vehicleIds)
         GROUP BY c.number, c.model, vc.category, DATE_FORMAT(dl.createdAt, '%Y-%m')
         ORDER BY c.number, vc.category
         """)
     List<VehicleMaintenanceProjection> findVehicleVariableCosts(
         @Param("companyId") Long companyId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate,
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime,
         @Param("vehicleIds") List<String> vehicleIds,
         Pageable pageable
     );
@@ -111,8 +111,8 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         """)
     List<MaintenanceBreakdownProjection> findMaintenanceBreakdown(
         @Param("companyId") Long companyId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
     );
 
     /**

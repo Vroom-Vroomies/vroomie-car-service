@@ -51,39 +51,57 @@ public class DynamicFeeTypeService {
         // 변동 비용에서 사용 중인 유형
         List<AvailableFeeTypeProjection> variableFeeTypes = costRepository.findAvailableVariableFeeTypes(companyId);
         for (AvailableFeeTypeProjection feeType : variableFeeTypes) {
-            availableFeeTypes.add(feeType.getFeeType());
-            feeTypeAmounts.put(feeType.getFeeType(), feeType.getTotalAmount());
+            if (feeType.getFeeType() != null) {
+                availableFeeTypes.add(feeType.getFeeType());
+                BigDecimal amount = feeType.getTotalAmount() != null ? feeType.getTotalAmount() : BigDecimal.ZERO;
+                feeTypeAmounts.put(feeType.getFeeType(), amount);
+            }
         }
 
         // 계약에서 사용 중인 유형
         List<AvailableFeeTypeProjection> contractFeeTypes = contractRepository.findAvailableContractFeeTypes(companyId);
         for (AvailableFeeTypeProjection feeType : contractFeeTypes) {
-            availableFeeTypes.add(feeType.getFeeType());
-            feeTypeAmounts.put(feeType.getFeeType(), feeType.getTotalAmount());
+            if (feeType.getFeeType() != null) {
+                availableFeeTypes.add(feeType.getFeeType());
+                BigDecimal amount = feeType.getTotalAmount() != null ? feeType.getTotalAmount() : BigDecimal.ZERO;
+                feeTypeAmounts.put(feeType.getFeeType(), amount);
+            }
         }
 
         // 보험에서 사용 중인 유형
         List<AvailableFeeTypeProjection> insuranceFeeTypes = insuranceRepository.findAvailableInsuranceFeeTypes(companyId);
         for (AvailableFeeTypeProjection feeType : insuranceFeeTypes) {
-            availableFeeTypes.add(feeType.getFeeType());
-            feeTypeAmounts.put(feeType.getFeeType(), feeType.getTotalAmount());
+            if (feeType.getFeeType() != null) {
+                availableFeeTypes.add(feeType.getFeeType());
+                BigDecimal amount = feeType.getTotalAmount() != null ? feeType.getTotalAmount() : BigDecimal.ZERO;
+                feeTypeAmounts.put(feeType.getFeeType(), amount);
+            }
         }
 
         // 중복 제거
         Set<String> uniqueFeeTypes = new HashSet<>(availableFeeTypes);
 
-        // 총 금액 계산
-        BigDecimal totalAmount = feeTypeAmounts.values().stream()
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 총 금액 계산 (null 값 방어)
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (BigDecimal amount : feeTypeAmounts.values()) {
+            if (amount != null) {
+                totalAmount = totalAmount.add(amount);
+            }
+        }
 
         // 설정 매핑 및 FeeTypeData 생성
         List<FeeTypeData> feeTypes = new ArrayList<>();
         for (String feeTypeId : uniqueFeeTypes) {
             FeeTypeInfo config = feeTypeConfig.getFeeTypeInfo(feeTypeId);
             BigDecimal amount = feeTypeAmounts.get(feeTypeId);
-            BigDecimal percentage = totalAmount.compareTo(BigDecimal.ZERO) > 0 ?
-                amount.divide(totalAmount, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)) :
-                BigDecimal.ZERO;
+            if (amount == null) {
+                amount = BigDecimal.ZERO;
+            }
+
+            BigDecimal percentage = BigDecimal.ZERO;
+            if (totalAmount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(BigDecimal.ZERO) > 0) {
+                percentage = amount.divide(totalAmount, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+            }
 
             if (config != null) {
                 feeTypes.add(toFeeTypeData(config, amount, percentage));

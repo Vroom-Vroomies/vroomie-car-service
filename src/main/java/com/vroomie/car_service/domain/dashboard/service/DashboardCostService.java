@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,9 +66,11 @@ public class DashboardCostService {
         LocalDate adjustedStartDate = LocalDate.parse(dateRange.getStartDate());
         LocalDate adjustedEndDate = LocalDate.parse(dateRange.getEndDate());
 
-        // 변동 비용 조회
+        // 변동 비용 조회 (LocalDate를 LocalDateTime으로 변환)
+        LocalDateTime startDateTime = adjustedStartDate.atStartOfDay();
+        LocalDateTime endDateTime = adjustedEndDate.atTime(23, 59, 59);
         List<MonthlyCostProjection> variableCosts = costRepository.findVariableCostsByMonth(
-            companyId, adjustedStartDate, adjustedEndDate
+            companyId, startDateTime, endDateTime
         );
 
         // 고정 비용 조회 (계약료)
@@ -112,9 +115,11 @@ public class DashboardCostService {
 
         Pageable pageable = PageRequest.of(0, limit);
 
-        // 차량별 유지보수 비용 조회
+        // 차량별 유지보수 비용 조회 (LocalDate를 LocalDateTime으로 변환)
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : LocalDate.now().minusMonths(1).atStartOfDay();
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
         List<VehicleMaintenanceProjection> projections = costRepository.findVehicleVariableCosts(
-            companyId, startDate, endDate, vehicleIds, pageable
+            companyId, startDateTime, endDateTime, vehicleIds, pageable
         );
 
         // 차량별 그룹핑
@@ -129,7 +134,7 @@ public class DashboardCostService {
         }
 
         // 월별 비교 분석
-        MonthlyComparison comparison = buildMonthlyComparison(companyId, startDate, endDate);
+        MonthlyComparison comparison = buildMonthlyComparison(companyId, startDateTime, endDateTime);
 
         // 요약 정보 구성
         MaintenanceSummary summary = buildMaintenanceSummary(vehicles);
@@ -157,9 +162,11 @@ public class DashboardCostService {
 
         LocalDate[] dateRange = parseMonthToDateRange(month);
 
-        // 유지보수 비용 분석 조회
+        // 유지보수 비용 분석 조회 (LocalDate를 LocalDateTime으로 변환)
+        LocalDateTime startDateTime = dateRange[0].atStartOfDay();
+        LocalDateTime endDateTime = dateRange[1].atTime(23, 59, 59);
         List<MaintenanceBreakdownProjection> projections = costRepository.findMaintenanceBreakdown(
-            companyId, dateRange[0], dateRange[1]
+            companyId, startDateTime, endDateTime
         );
 
         // 총 비용 계산
@@ -188,7 +195,7 @@ public class DashboardCostService {
         }
 
         // 추세 정보 계산
-        MaintenanceTrends trends = calculateTrends(companyId, dateRange[0], dateRange[1]);
+        MaintenanceTrends trends = calculateTrends(companyId, startDateTime, endDateTime);
 
         log.info("[DashboardCostService] 유지보수 비용 분석 조회 완료 - 총 비용: {}", total);
 
@@ -335,7 +342,7 @@ public class DashboardCostService {
     /**
      * 월별 비교 분석을 구성합니다.
      */
-    private MonthlyComparison buildMonthlyComparison(Long companyId, LocalDate startDate, LocalDate endDate) {
+    private MonthlyComparison buildMonthlyComparison(Long companyId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         // TODO: 실제 월별 비교 로직 구현
         return MonthlyComparison.builder()
             .thisMonth(new HashMap<>())
@@ -372,7 +379,7 @@ public class DashboardCostService {
     /**
      * 추세 정보를 계산합니다.
      */
-    private MaintenanceTrends calculateTrends(Long companyId, LocalDate startDate, LocalDate endDate) {
+    private MaintenanceTrends calculateTrends(Long companyId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         // TODO: 실제 추세 계산 로직 구현
         return MaintenanceTrends.builder()
             .monthlyTrends(new ArrayList<>())
