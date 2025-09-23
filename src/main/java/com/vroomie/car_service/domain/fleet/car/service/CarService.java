@@ -125,14 +125,21 @@ public class CarService {
                 .orElseThrow(CarException::carNotFoundException);
 
         carEntity.update(
+                request.getNumber(),
                 request.getImage(),
                 request.getModel(),
-                request.getTotalMileage(),
+                request.getType(),
+                request.getYear(),
                 request.getColor(),
+                request.getTotalMileage(),
                 request.getStatus(),
                 request.getInsuExpiration(),
                 request.getLastInspection(),
-                request.getInspectionCycle()
+                request.getInspectionCycle(),
+                request.getAllowableCapacity(),
+                request.getFuelType(),
+                request.getGearType(),
+                request.getIdentification().toUpperCase()
         );
 
         return carMapper.toDetailResponse(carEntity);
