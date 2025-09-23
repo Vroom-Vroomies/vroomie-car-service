@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -176,7 +177,7 @@ public class AccidentService {
             throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
-        return storedFileName; // URL 경로 반환
+        return "/uploads/images/accidents/" + storedFileName; // URL 경로 반환
     }
 
     private void deleteFile(String filePath) {

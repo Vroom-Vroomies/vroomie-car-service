@@ -42,7 +42,7 @@ public interface RepairMapper {
         return images.stream()
                 .filter(image -> image.getType() == type)
                 .map(RepairImageEntity::getImage)
-                .map(filename -> "/images/repairs/" + filename)
+                .map(filename -> "/uploads/images/repairs/" + filename)
                 .collect(Collectors.toList());
     }
 }
