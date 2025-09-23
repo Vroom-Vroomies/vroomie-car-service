@@ -20,7 +20,7 @@ public interface CarMapper {
     @Mapping(target = "statusAlert", expression = "java(toStatusAlert(isContractMissing, isInsuranceMissing))")
     @Mapping(source = "car.usageType", target = "usageType")
     @Mapping(source = "isRented", target = "isRented")
-    CarSimpleResponse toSimpleResponse(CarEntity car, boolean isContractMissing, boolean isInsuranceMissing, boolean isRented);
+    CarSimpleResponse toSimpleResponse(CarEntity car, boolean isContractMissing, boolean isInsuranceMissing, boolean isRented, boolean isRepairing);
 
     @Mapping(target = "statusAlert", expression = "java(toStatusAlert(isContractMissing, isInsuranceMissing))")
     @Mapping(source = "car.usageType", target = "usageType")
