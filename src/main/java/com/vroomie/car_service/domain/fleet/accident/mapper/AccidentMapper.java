@@ -42,7 +42,6 @@ public interface AccidentMapper {
         }
         return images.stream()
                 .map(AccidentImageEntity::getImage)
-                .map(filename -> "/images/accidents/" + filename)
                 .collect(Collectors.toList());
     }
 }
