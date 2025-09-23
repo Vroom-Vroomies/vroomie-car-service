@@ -6,6 +6,7 @@ import com.vroomie.car_service.domain.fleet.car.enums.CarStatus;
 import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "tbl_car")
 @Getter
+@Builder
 @DynamicUpdate
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CarEntity {
 
@@ -57,29 +60,6 @@ public class CarEntity {
     @Enumerated(EnumType.STRING)
     private CarGearType gearType;
 
-    @Builder
-    public CarEntity(Long companyId, String identification, String number, String image, String model, String type, Long totalMileage, String color, Integer year,
-               CarStatus status, LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle, Integer allowableCapacity, CarFuelType fuelType,
-               CarUsageType usageType, CarGearType gearType) {
-        this.companyId = companyId;
-        this.identification = identification;
-        this.number = number;
-        this.image = image;
-        this.model = model;
-        this.type = type;
-        this.totalMileage = totalMileage;
-        this.color = color;
-        this.year = year;
-        this.status = status;
-        this.insuExpiration = insuExpiration;
-        this.lastInspection = lastInspection;
-        this.inspectionCycle = inspectionCycle;
-        this.allowableCapacity = allowableCapacity;
-        this.fuelType = fuelType;
-        this.usageType = usageType;
-        this.gearType = gearType;
-    }
-
     // =================================================================
     // 비즈니스 로직을 담은 메소드
     // =================================================================
@@ -117,16 +97,24 @@ public class CarEntity {
      * 차량 기본 정보 업데이트
      */
     // 차량 정보 업데이트 메서드
-    public void update(String image, String model, Long totalMileage, String color, CarStatus status,
-                       LocalDate insuExpiration, LocalDate lastInspection, Integer inspectionCycle) {
+    public void update(String number, String image, String model, String type, Integer year, String color,
+                       Long totalMileage, CarStatus status, LocalDate insuExpiration, LocalDate lastInspection,
+                       Integer inspectionCycle, Integer allowableCapacity, CarFuelType fuelType, CarGearType gearType, String identification) {
+        if (number != null) this.number = number;
         if (image != null) this.image = image;
         if (model != null) this.model = model;
-        if (totalMileage != null) this.totalMileage = totalMileage;
+        if (type != null) this.type = type;
+        if (year != null) this.year = year;
         if (color != null) this.color = color;
+        if (totalMileage != null) this.totalMileage = totalMileage;
         if (status != null) this.status = status;
         if (insuExpiration != null) this.insuExpiration = insuExpiration;
         if (lastInspection != null) this.lastInspection = lastInspection;
         if (inspectionCycle != null) this.inspectionCycle = inspectionCycle;
+        if (allowableCapacity != null) this.allowableCapacity = allowableCapacity;
+        if (fuelType != null) this.fuelType = fuelType;
+        if (gearType != null) this.gearType = gearType;
+        if (identification != null) this.identification = identification;
     }
 
     public void updateLastInspection(LocalDateTime date){
