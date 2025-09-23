@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum PaymentType {
 
-    LUMP_SUM("일시납입"),
-    MONTHLY("월납입"),
-    QUARTERLY("분기납입");
+    MONTHLY("월납입");
 
     private final String paymentType;
 }
