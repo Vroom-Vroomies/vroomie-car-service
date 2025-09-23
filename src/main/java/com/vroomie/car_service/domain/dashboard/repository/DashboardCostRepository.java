@@ -105,7 +105,7 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         JOIN dl.carEntity c
         WHERE c.companyId = :companyId
         AND dl.createdAt BETWEEN :startDate AND :endDate
-        AND vc.category IN ('MAINTENANCE', 'REPAIR', 'INSPECTION')
+        AND vc.category IN ('CAR_WASH_COST', 'FINE')
         GROUP BY vc.category
         ORDER BY SUM(vc.cost) DESC
         """)
@@ -157,7 +157,7 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         JOIN dl.carEntity c
         WHERE c.companyId = :companyId
         AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
-        AND vc.category IN ('MAINTENANCE', 'REPAIR', 'INSPECTION')
+        AND vc.category IN ('CAR_WASH_COST', 'FINE')
         GROUP BY vc.category
         ORDER BY SUM(vc.cost) DESC
         """)
@@ -186,7 +186,7 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         JOIN dl.carEntity c
         WHERE c.companyId = :companyId
         AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
-        AND vc.category IN ('MAINTENANCE', 'REPAIR', 'INSPECTION')
+        AND vc.category IN ('CAR_WASH_COST', 'FINE')
         GROUP BY DATE_FORMAT(dl.createdAt, '%Y-%m')
         ORDER BY DATE_FORMAT(dl.createdAt, '%Y-%m')
         """)
