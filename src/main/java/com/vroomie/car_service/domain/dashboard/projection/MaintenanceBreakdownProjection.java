@@ -25,4 +25,12 @@ public interface MaintenanceBreakdownProjection {
      * @return 데이터 소스
      */
     String getSource();
+
+    /**
+     * 해당 비용 유형의 발생 건수 (선택적)
+     * @return 발생 건수, 없으면 null
+     */
+    default Long getIncidentCount() {
+        return null;
+    }
 }

@@ -136,4 +136,63 @@ public interface DashboardCostRepository extends JpaRepository<VariableCostEntit
         ORDER BY SUM(vc.cost) DESC
         """)
     List<AvailableFeeTypeProjection> findAvailableVariableFeeTypes(@Param("companyId") Long companyId);
+
+    /**
+     * 특정 기간의 유지보수 비용을 비용 유형별로 발생 건수와 함께 조회합니다.
+     * 전월 대비 증감률 계산 및 평균 건당 비용 계산을 위한 데이터를 제공합니다.
+     *
+     * @param companyId 회사 ID
+     * @param startDateTime 조회 시작일시
+     * @param endDateTime 조회 종료일시
+     * @return 유지보수 비용 상세 분석 리스트
+     */
+    @Query("""
+        SELECT
+            vc.category as feeType,
+            SUM(vc.cost) as amount,
+            COUNT(vc.id) as incidentCount,
+            'variable_cost' as source
+        FROM VariableCostEntity vc
+        JOIN vc.drivingLogEntity dl
+        JOIN dl.carEntity c
+        WHERE c.companyId = :companyId
+        AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
+        AND vc.category IN ('MAINTENANCE', 'REPAIR', 'INSPECTION')
+        GROUP BY vc.category
+        ORDER BY SUM(vc.cost) DESC
+        """)
+    List<MaintenanceBreakdownProjection> findMaintenanceBreakdownWithDetails(
+        @Param("companyId") Long companyId,
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime
+    );
+
+    /**
+     * 지난 N개월간 월별 유지보수 비용 추세를 조회합니다.
+     * 추세 분석 및 예측을 위한 기간별 데이터를 제공합니다.
+     *
+     * @param companyId 회사 ID
+     * @param startDateTime 조회 시작일시 (N개월 전)
+     * @param endDateTime 조회 종료일시 (현재)
+     * @return 월별 유지보수 비용 추세 리스트
+     */
+    @Query("""
+        SELECT
+            DATE_FORMAT(dl.createdAt, '%Y-%m') as month,
+            SUM(vc.cost) as amount,
+            'maintenance_trend' as source
+        FROM VariableCostEntity vc
+        JOIN vc.drivingLogEntity dl
+        JOIN dl.carEntity c
+        WHERE c.companyId = :companyId
+        AND dl.createdAt BETWEEN :startDateTime AND :endDateTime
+        AND vc.category IN ('MAINTENANCE', 'REPAIR', 'INSPECTION')
+        GROUP BY DATE_FORMAT(dl.createdAt, '%Y-%m')
+        ORDER BY DATE_FORMAT(dl.createdAt, '%Y-%m')
+        """)
+    List<MonthlyCostProjection> findMaintenanceTrendsByMonth(
+        @Param("companyId") Long companyId,
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime
+    );
 }
