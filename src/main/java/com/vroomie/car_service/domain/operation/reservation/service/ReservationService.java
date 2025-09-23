@@ -2,6 +2,7 @@ package com.vroomie.car_service.domain.operation.reservation.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
@@ -9,6 +10,7 @@ import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReser
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarReservationRequest;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.CurrentCarResponse;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservationEntity;
 import com.vroomie.car_service.domain.operation.reservation.entity.ReservedLogEntity;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservationRepository;
@@ -66,7 +68,8 @@ public class ReservationService {
         }
 
         // [관리자] 차량별 대여 신청 목록 조회
-        public PageResponse<AdminReservationResponse> getAdminReservationListByCar(Long carId, int currentPage, int size) {
+        public PageResponse<AdminReservationResponse> getAdminReservationListByCar(Long carId, int currentPage,
+                        int size) {
 
                 Page<ReservationEntity> reservations = reservationRepository
                                 .findByCarIdOrderByCreatedAtDesc(carId, PageRequest.of(currentPage - 1, size));
@@ -85,8 +88,8 @@ public class ReservationService {
                                 .build();
         }
 
-        // [관리자] 대여 신청 상태 변경(승인 or 거절)
-        @Transactional
+        // [관리자] 대여 신청 상태 변경(승인 or 거절) (동시성 처리)
+        @Transactional(isolation = Isolation.SERIALIZABLE)
         public AdminReservationResponse updateAdminReservationStatus(Long id, AdminReservationRequest request) {
 
                 ReservationEntity reservation = reservationRepository.findById(id)
@@ -121,7 +124,7 @@ public class ReservationService {
                 // 관리자 이메일 가져오기
                 String adminEmail = UserUtil.getCurrentAdminEmail();
 
-                // 관리자 정보 조회
+                // 관리자 정보 조회(유저 dto가 없으므로 var 사용)
                 var admin = employeeRepository.findByEmail(adminEmail)
                                 .orElseThrow(() -> AdminReservationException.employeeNotFound(adminEmail));
 
@@ -162,7 +165,7 @@ public class ReservationService {
 
         // PENDING 상태 예약에 대한 대여 이력 생성 (RESERVED 상태)
         private void createReservedLogForPendingReservation(ReservationEntity reservation, String memberEmail) {
-                // 직원 정보 조회 (관리자 대신 신청자로 설정)
+                // 직원 정보 조회 (관리자 대신 신청자로 설정)(유저 dto가 없으므로 var 사용)
                 var member = employeeRepository.findByEmail(memberEmail)
                                 .orElseThrow(() -> AdminReservationException.employeeNotFound(memberEmail));
 
@@ -239,18 +242,16 @@ public class ReservationService {
                 return reservationMapper.toMemberCarDetailResponse(car, reservation);
         }
 
-        // [사용자] 차량 대여 신청하기
-        @Transactional
+        // [사용자] 차량 대여 신청하기 (동시성 처리)
+        @Transactional(isolation = Isolation.SERIALIZABLE)
         public MemberCarDetailResponse createMemberCarReservation(MemberCarReservationRequest request, Long carId) {
 
                 // 사용자 이메일 가져오기
                 String memberEmpEmail = UserUtil.getCurrentMemberEmail();
 
-                // 차량 존재 여부 확인
-                CarEntity car = carRepository.findAvailableCarById(carId, CarStatus.ACTIVE);
-                if (car == null) {
-                        throw CarException.carNotFoundException();
-                }
+                // 차량 존재 여부 확인 (비관적 락 적용)
+                CarEntity car = carRepository.findByIdAndStatusWithLock(carId, CarStatus.ACTIVE)
+                                .orElseThrow(() -> CarException.carNotFoundException());
 
                 // 요청 시간 유효성 검증
                 if (request.getStartedAt().isBefore(LocalDateTime.now())) {
@@ -293,7 +294,7 @@ public class ReservationService {
                         throw AdminReservationException.memberAlreadyHasActiveReservation();
                 }
 
-                // 직원 조회
+                // 직원 조회(유저 dto가 없으므로 var 사용)
                 var member = employeeRepository.findByEmail(memberEmpEmail)
                                 .orElseThrow(() -> AdminReservationException.employeeNotFound(memberEmpEmail));
 
@@ -317,8 +318,8 @@ public class ReservationService {
                 return reservationMapper.toMemberCarDetailResponse(car, savedReservation);
         }
 
-        // [사용자] 차량 대여 취소하기
-        @Transactional
+        // [사용자] 차량 대여 취소하기 (동시성 처리)
+        @Transactional(isolation = Isolation.SERIALIZABLE)
         public MemberCarDetailResponse cancelMemberCarReservation(Long carId) {
 
                 // 사용자 이메일 가져오기
@@ -350,6 +351,30 @@ public class ReservationService {
                 ReservationEntity updatedReservation = reservationRepository.save(reservation);
 
                 return reservationMapper.toMemberCarDetailResponse(car, updatedReservation);
+        }
+
+        // [사용자] 현재 대여 중인 차량 조회
+        public CurrentCarResponse getCurrentRentedCar() {
+                String memberEmail = UserUtil.getCurrentMemberEmail();
+
+                ReservedLogEntity activeRental = reservedLogRepository
+                                .findByMemberEmailAndStatus(memberEmail,
+                                                Arrays.asList(RentStatus.RENTED, RentStatus.OVERDUE,
+                                                                RentStatus.RESERVED))
+                                .stream()
+                                .findFirst()
+                                .orElse(null);
+
+                if (activeRental != null) {
+                        return new CurrentCarResponse(activeRental.getCar().getId(),
+                                        activeRental.getStartedAt(),
+                                        activeRental.getEndedAt(),
+                                        activeRental.getReservation().getPurpose(),
+                                        activeRental.getReservation().getDetail(),
+                                        activeRental.getReservation().getStatus());
+                }
+
+                return new CurrentCarResponse(null, null, null, null, null, null);
         }
 
 }

@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import com.vroomie.car_service.domain.operation.reservation.enums.ReservationStatus;
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 // import com.vroomie.car_service.domain.operation.reservation.enums.DrivingLogStatus;
 
 @Getter
@@ -32,7 +33,8 @@ public class AdminReservationResponse {
     // private DrivingLogStatus drivingLogStatus; // 운행 로그 상태(준비중, 작성중, 대기중, 완료)
     private String drivingLogStatus; // 운행 로그 상태(준비중, 작성중, 대기중, 완료)
     private String adminName; // 담당자 이름
-    private String purpose;
+    private Purpose purpose;
+    private String detail;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp createdAt;

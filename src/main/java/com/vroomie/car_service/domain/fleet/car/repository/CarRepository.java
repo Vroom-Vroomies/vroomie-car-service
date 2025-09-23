@@ -6,10 +6,13 @@ import com.vroomie.car_service.domain.fleet.car.enums.CarUsageType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface CarRepository extends JpaRepository<CarEntity, Long> {
 
@@ -49,8 +52,9 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
       "AND NOT EXISTS (" +
       "    SELECT rl FROM ReservedLogEntity rl " +
       "    WHERE rl.car = c " +
-      "    AND rl.status != com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RETURNED "
-      +
+      "    AND rl.status IN (com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RENTED, " +
+      "                     com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.OVERDUE, " +
+      "                     com.vroomie.car_service.domain.operation.reservation.enums.RentStatus.RESERVED) " +
       "    AND ((" +
       "        rl.startedAt <= :requestedStartTime AND rl.endedAt > :requestedStartTime" +
       "    ) OR (" +
@@ -64,5 +68,10 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
       @Param("requestedStartTime") LocalDateTime requestedStartTime,
       @Param("requestedEndTime") LocalDateTime requestedEndTime,
       Pageable pageable);
+
+  // 비관적 락을 사용하여 차량 조회 (예약 생성 시 동시성 제어용)
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT c FROM CarEntity c WHERE c.id = :carId AND c.status = :status")
+  Optional<CarEntity> findByIdAndStatusWithLock(@Param("carId") Long carId, @Param("status") CarStatus status);
 
 }

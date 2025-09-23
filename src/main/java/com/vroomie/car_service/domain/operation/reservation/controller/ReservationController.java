@@ -14,6 +14,7 @@ import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReser
 import com.vroomie.car_service.domain.operation.reservation.dto.member.AvailableCarListResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarDetailResponse;
 import com.vroomie.car_service.domain.operation.reservation.dto.member.MemberCarReservationRequest;
+import com.vroomie.car_service.domain.operation.reservation.dto.member.CurrentCarResponse;
 import com.vroomie.car_service.domain.operation.reservation.service.ReservationService;
 import com.vroomie.car_service.domain.operation.reservation.service.OverdueUpdateService;
 import lombok.RequiredArgsConstructor;
@@ -101,6 +102,13 @@ public class ReservationController {
     @DeleteMapping("/member/car/{carId}")
     public ApiResponse<MemberCarDetailResponse> cancelMemberCarReservation(@PathVariable Long carId) {
         return ApiResponse.success(reservationService.cancelMemberCarReservation(carId), "차량 대여 취소 성공");
+    }
+
+    // [사용자] 현재 대여 중인 차량 조회
+    @Operation(summary = "[사용자]현재 대여 중인 차량 조회", description = "현재 대여 중인 차량의 carId, startedAt, endedAt를 반환합니다.")
+    @GetMapping("/member/current")
+    public ApiResponse<CurrentCarResponse> getCurrentRentedCar() {
+        return ApiResponse.success(reservationService.getCurrentRentedCar(), "현재 대여 중인 차량 조회 성공");
     }
 
     // [관리자] 연체 상태 수동 업데이트
