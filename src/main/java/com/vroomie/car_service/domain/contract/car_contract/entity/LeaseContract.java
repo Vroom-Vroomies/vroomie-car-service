@@ -38,7 +38,10 @@ public class LeaseContract extends CarContract{
     private LeaseType leaseType;
 
     public void updateLeaseContract(LeaseUpdateRequest updateDTO){
+        // 1. 공통 필드 업데이트
         super.updateContract(updateDTO);
+
+        // 2. 리스 관련 필드 업데이트
         this.monthlyLease = updateDTO.getMonthlyLease();
         this.leasePeriod = updateDTO.getLeasePeriod();
         this.residualValue = updateDTO.getResidualValue();
@@ -46,5 +49,8 @@ public class LeaseContract extends CarContract{
         this.mileageLimit = updateDTO.getMileageLimit();
         this.excessMileageRate = updateDTO.getExcessMileageRate();
         this.leaseType = updateDTO.getLeaseType();
+
+        // 3. monthlyFee에 monthlyLease 값 할당
+        super.setMonthlyFee(this.monthlyLease);
     }
 }

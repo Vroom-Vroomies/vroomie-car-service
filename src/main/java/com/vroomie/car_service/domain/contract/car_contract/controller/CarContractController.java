@@ -62,6 +62,8 @@ public class CarContractController {
     public ApiResponse<?> updateCarContractDetails(@RequestBody ContractUpdateRequest dto, @PathVariable("contractId") Long contractId){
 
         log.info(">>>> [CarContractController] 차량 계약 수정 시작 - contractId: {}", contractId);
+        System.out.println("😀😀😀😀" + dto.getContractType());
+        System.out.println("😀😀😀😀" + dto.getProvider());
 
         try{
             contractService.modifyContractInfo(dto, contractId);

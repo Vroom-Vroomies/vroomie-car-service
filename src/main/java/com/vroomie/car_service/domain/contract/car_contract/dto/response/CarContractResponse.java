@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractStatus;
 import com.vroomie.car_service.domain.contract.car_contract.enums.ContractType;
+import com.vroomie.car_service.domain.contract.car_contract.enums.PaymentCycle;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -46,4 +47,7 @@ public class CarContractResponse {
     private Timestamp updatedAt;
     private Date renewalDate;
     private ContractStatus contractStatus;
+    private Integer paymentDay;
+    private PaymentCycle paymentCycle;
+    private Date firstPaymentDay;
 }
