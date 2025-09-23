@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface RepairRepository extends JpaRepository<RepairEntity, Long> {
 
@@ -39,4 +41,11 @@ public interface RepairRepository extends JpaRepository<RepairEntity, Long> {
             @Param("isSaved") Boolean isSaved,
             Pageable pageable
     );
+
+    // 수리중인 차량 목록
+    @Query("SELECT  r.car.id " +
+            "FROM    RepairEntity r " +
+            "WHERE  r.car.id IN :carIds" +
+            "   AND r.status = 'IN_REPAIR'")
+    Set<Long> findCarIdsWithActiveRepairsIn(@Param("carIds") List<Long> carIds);
 }
