@@ -15,11 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,15 +64,17 @@ public class DashboardService {
         List<CarTypeDistributionProjection> projections = dashboardCarRepository.findCarTypeDistributionByCompany(companyId);
         Long totalCount = dashboardCarRepository.countByCompanyId(companyId);
 
-        AtomicInteger colorIndex = new AtomicInteger(0);
-        List<CarTypeDistributionItem> items = projections.stream()
-            .map(p -> CarTypeDistributionItem.builder()
+        List<CarTypeDistributionItem> items = new ArrayList<>();
+        for (int i = 0; i < projections.size(); i++) {
+            CarTypeDistributionProjection p = projections.get(i);
+            CarTypeDistributionItem item = CarTypeDistributionItem.builder()
                 .label(p.getType())
                 .value(p.getCount().intValue())
-                .color(getCarTypeColor(p.getType(), colorIndex.getAndIncrement()))
+                .color(getCarTypeColor(p.getType(), i))
                 .percentage(totalCount > 0 ? (p.getCount().doubleValue() / totalCount * 100) : 0.0)
-                .build())
-            .collect(Collectors.toList());
+                .build();
+            items.add(item);
+        }
 
         return CarTypeDistributionResponse.builder()
             .total(totalCount.intValue())
@@ -92,23 +93,30 @@ public class DashboardService {
     public CarStatusResponse getCarStatus(Long companyId) {
         List<CarStatusProjection> projections = dashboardCarRepository.findCarStatusByCompany(companyId);
 
-        int runningTotal = projections.stream()
-            .filter(p -> "정상".equals(p.getStatus()))
-            .mapToInt(p -> p.getCount().intValue())
-            .sum();
+        // 퍼센트 계산을 위한 정상 차량 수와 전체 차량 수
+        int runningTotal = 0;
+        int totalCount = 0;
 
-        int totalCount = projections.stream()
-            .mapToInt(p -> p.getCount().intValue())
-            .sum();
+        // 1. runningTotal, totalCount 세기.
+        for (CarStatusProjection p : projections) {
+            int count = p.getCount().intValue();
+            if ("정상".equals(p.getStatus())) {
+                runningTotal += count;
+            }
+            totalCount += count;
+        }
 
-        List<CarStatusItem> items = projections.stream()
-            .map(p -> CarStatusItem.builder()
+        // 2. 위의 카운팅을 반영한 퍼센트 계산 후 패키징
+        List<CarStatusItem> items = new ArrayList<>();
+        for (CarStatusProjection p : projections) {
+            CarStatusItem item = CarStatusItem.builder()
                 .status(p.getStatus())
                 .count(p.getCount().intValue())
                 .color(CAR_STATUS_COLORS.getOrDefault(p.getStatus(), "#94A3B8"))
                 .percentage(totalCount > 0 ? (p.getCount().doubleValue() / totalCount * 100) : 0.0)
-                .build())
-            .collect(Collectors.toList());
+                .build();
+            items.add(item);
+        }
 
         return CarStatusResponse.builder()
             .total(runningTotal)
