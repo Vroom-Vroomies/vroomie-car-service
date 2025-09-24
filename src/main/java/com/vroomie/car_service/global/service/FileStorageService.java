@@ -21,6 +21,8 @@ public class FileStorageService {
     @Value("${minio.bucket}")
     private String bucketName;
 
+    @Value("${minio.external-endpoint}")
+    private String externalEndpoint;
     /**
      * MultipartFile을 MinIO에 업로드, 접근 가능한 URL 반환
      * @param file 업로드할 파일
@@ -46,17 +48,7 @@ public class FileStorageService {
                             .build()
             );
 
-            // MinIO 서버의 실제 endpoint 주소와 버킷, 파일 이름을 조합하여 최종 URL 생성
-            String endpoint = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(bucketName)
-                            .object(fileName)
-                            .build()
-            ).split("\\?")[0];
-
-            // presigned URL에서 쿼리 파라미터를 제거한 URL
-            return endpoint;
+            return externalEndpoint + "/" + bucketName + "/" + fileName;
 
         } catch (Exception e) {
             throw new RuntimeException("파일 업로드에 실패했습니다.", e);
