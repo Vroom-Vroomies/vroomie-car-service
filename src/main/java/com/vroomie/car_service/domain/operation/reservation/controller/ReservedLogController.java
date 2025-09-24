@@ -23,7 +23,6 @@ import com.vroomie.car_service.global.constants.PaginationConstants;
 @Tag(name = "대여 이력 관리")
 public class ReservedLogController {
 
-
     private final ReservedLogService reservedLogService;
 
     // [사용자] 내 대여 이력 목록 조회
@@ -32,6 +31,7 @@ public class ReservedLogController {
     public ApiResponse<PageResponse<ReservedLogResponse>> getReservedLogList(
             @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_NUMBER) @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
             @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE) @Min(value = PaginationConstants.MIN_PAGE_SIZE, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = PaginationConstants.MAX_PAGE_SIZE, message = "페이지 크기는 100 이하여야 합니다.") int size) {
+
         return ApiResponse.success(reservedLogService.getReservedLogList(currentPage, size), "내 대여 이력 목록 조회 성공");
     }
 
@@ -39,6 +39,7 @@ public class ReservedLogController {
     @GetMapping("/{id}")
     @Operation(summary = "[사용자]내 대여 이력 상세 조회", description = "내 대여 이력 상세를 조회합니다.")
     public ApiResponse<DetailReservedLogResponse> getReservedLog(@PathVariable Long id) {
+
         return ApiResponse.success(reservedLogService.getReservedLog(id), "내 대여 이력 상세 조회 성공");
     }
 }
