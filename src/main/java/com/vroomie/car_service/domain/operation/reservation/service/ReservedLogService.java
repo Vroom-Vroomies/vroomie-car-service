@@ -36,15 +36,7 @@ public class ReservedLogService {
         List<ReservedLogResponse> responses = reservedLogMapper
                 .toReservedLogResponseList(reservedLogs.getContent());
 
-        return PageResponse.<ReservedLogResponse>builder()
-                .data(responses)
-                .currentPage(reservedLogs.getNumber() + 1)
-                .size(reservedLogs.getSize())
-                .totalPages(reservedLogs.getTotalPages())
-                .totalElements(reservedLogs.getTotalElements())
-                .hasNext(reservedLogs.hasNext())
-                .hasPrevious(reservedLogs.hasPrevious())    
-                .build();
+        return PageResponse.of(reservedLogs, responses);
     }
 
     // [사용자] 내 대여 이력 상세 조회
