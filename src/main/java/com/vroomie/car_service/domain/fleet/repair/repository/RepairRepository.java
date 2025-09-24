@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.fleet.repair.repository;
 
+import com.vroomie.car_service.domain.fleet.log.projection.CarLogProjection;
 import com.vroomie.car_service.domain.fleet.repair.entity.RepairEntity;
 import com.vroomie.car_service.domain.fleet.repair.enums.RepairStatus;
 import org.springframework.data.domain.Page;
@@ -48,4 +49,18 @@ public interface RepairRepository extends JpaRepository<RepairEntity, Long> {
             "WHERE  r.car.id IN :carIds" +
             "   AND r.status = 'IN_REPAIR'")
     Set<Long> findCarIdsWithActiveRepairsIn(@Param("carIds") List<Long> carIds);
+
+    @Query("""
+        SELECT r.id as logId,
+               'REPAIR' as logType,
+               r.startedAt as date,
+               r.detail as description,
+               e.name as handler,
+               r.status as status,
+               r.cost as cost
+        FROM RepairEntity r
+        LEFT JOIN EmployeeEntity e ON r.employee.email = e.email
+        WHERE r.car.id = :carId
+        """)
+    Page<CarLogProjection> findRepairLogsByCarId(@Param("carId") Long carId, Pageable pageable);
 }

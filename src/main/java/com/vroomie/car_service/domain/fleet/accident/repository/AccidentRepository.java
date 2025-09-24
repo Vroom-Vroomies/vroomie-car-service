@@ -1,6 +1,7 @@
 package com.vroomie.car_service.domain.fleet.accident.repository;
 
 import com.vroomie.car_service.domain.fleet.accident.entity.AccidentEntity;
+import com.vroomie.car_service.domain.fleet.log.projection.CarLogProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +34,18 @@ public interface AccidentRepository extends JpaRepository<AccidentEntity, Long> 
                     AND (:isSaved IS NULL OR a.isSaved = :isSaved)
                     """)
     Page<AccidentEntity> findWithFilters(@Param("carId") Long carId, @Param("isSaved") Boolean isSaved, Pageable pageable);
+
+    @Query("""
+        SELECT a.id as logId,
+               'ACCIDENT' as logType,
+               a.occurredAt as date,
+               a.note as description,
+               e.name as handler,
+               CASE WHEN a.isSaved = true THEN '처리완료' ELSE '처리중' END as status,
+               a.cost as cost
+        FROM AccidentEntity a
+        LEFT JOIN EmployeeEntity e ON a.employee.email = e.email
+        WHERE a.car.id = :carId
+        """)
+    Page<CarLogProjection> findAccidentLogsByCarId(@Param("carId") Long carId, Pageable pageable);
 }

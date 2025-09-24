@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class CarLogRepositoryImpl implements CarLogRepository {
 
     @Override
     public Page<CarLogListResponseDTO> getCarLogByCarId(Long carId, List<String> logTypes, Pageable pageable) {
-        // 동적으로 UNION ALL 쿼리 생성
+
         List<String> unionParts = new ArrayList<>();
         if (logTypes.isEmpty() || logTypes.contains("ACCIDENT")) {
             unionParts.add(getAccidentQuery());
@@ -37,36 +36,27 @@ public class CarLogRepositoryImpl implements CarLogRepository {
 
         String unionQuery = String.join(" UNION ALL ", unionParts);
 
-        // count Query 생성
+        // Count
         String countQueryStr = "SELECT COUNT(*) FROM (" + unionQuery + ") AS car_logs";
         Query countQuery = em.createNativeQuery(countQueryStr);
         countQuery.setParameter("carId", carId);
         long total = ((Number) countQuery.getSingleResult()).longValue();
 
-        // 데이터 조회 쿼리
+        // Data
         String dataQueryStr = "SELECT * FROM (" + unionQuery + ") AS car_logs ORDER BY date DESC";
-        Query dataQuery = em.createNativeQuery(dataQueryStr);
-        dataQuery.setParameter("carId", carId);
-        dataQuery.setFirstResult((int) pageable.getOffset());
-        dataQuery.setMaxResults(pageable.getPageSize());
+        List<CarLogListResponseDTO> results = em.createNativeQuery(dataQueryStr, CarLogListResponseDTO.class)
+                .setParameter("carId", carId)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
 
-        // generic 규칙 무시
-        @SuppressWarnings("unchecked")
-        List<Object[]> results = dataQuery.getResultList();
-
-        // DTO 변환
-        List<CarLogListResponseDTO> content = results.stream()
-                .map(CarLogListResponseDTO::new)
-                .collect(Collectors.toList());
-
-        // Page 객체로 반환
-        return new PageImpl<>(content, pageable, total);
+        return new PageImpl<>(results, pageable, total);
     }
 
     private String getAccidentQuery() {
         return """
             SELECT
-                a.id AS LogId,
+                a.id AS logId,
                 'ACCIDENT' AS logType,
                 a.occurred_at AS date,
                 a.note AS description,
@@ -82,7 +72,7 @@ public class CarLogRepositoryImpl implements CarLogRepository {
     private String getRepairQuery() {
         return """
             SELECT
-                r.id AS LogId,
+                r.id AS logId,
                 'REPAIR' AS logType,
                 r.started_at AS date,
                 r.detail AS description,
@@ -98,7 +88,7 @@ public class CarLogRepositoryImpl implements CarLogRepository {
     private String getInspectionQuery() {
         return """
             SELECT
-                i.id AS LogId,
+                i.id AS logId,
                 'INSPECTION' AS logType,
                 i.date AS date,
                 i.inspection_type AS description,
