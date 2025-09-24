@@ -5,6 +5,7 @@ import com.vroomie.car_service.domain.fleet.car.entity.CarEntity;
 import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogEndReqDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.dto.req.DrivingLogReqDTO;
 import com.vroomie.car_service.domain.fleet.drivinglog.enums.LogStatus;
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -56,6 +57,10 @@ public class DrivingLogEntity {
     private BigDecimal odometerDistance;
 
     @Enumerated(EnumType.STRING)
+    private Purpose purpose;
+    private String note;
+
+    @Enumerated(EnumType.STRING)
     private LogStatus logStatus;
 
     @CreatedDate
@@ -95,6 +100,7 @@ public class DrivingLogEntity {
         if (drivingLogReqDTO.getEndOdometerImage() != null) this.endOdometerImage = drivingLogReqDTO.getEndOdometerImage();
         if (drivingLogReqDTO.getStartedAt() != null) this.startedAt = drivingLogReqDTO.getStartedAt();
         if (drivingLogReqDTO.getEndedAt() != null) this.endedAt = drivingLogReqDTO.getEndedAt();
+        if (drivingLogReqDTO.getNote() != null) this.note = drivingLogReqDTO.getNote();
 
         // 거리 계산 (수정된 계기판 기반)
         if (this.startOdometer != null && this.endOdometer != null) {

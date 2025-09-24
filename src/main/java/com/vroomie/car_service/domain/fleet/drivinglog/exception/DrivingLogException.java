@@ -16,6 +16,10 @@ public class DrivingLogException extends BusinessException {
         return new DrivingLogException(ErrorCode.DRIVING_LOG_NOT_FOUND);
     }
 
+    public static DrivingLogException drivingLogListNotFoundException() {
+        return new DrivingLogException(ErrorCode.DRIVING_LOG_LIST_NOT_FOUND);
+    }
+
     public static DrivingLogException invalidEndOdometerException() {
         return new DrivingLogException(ErrorCode.INVALID_END_ODOMETER);
     }
