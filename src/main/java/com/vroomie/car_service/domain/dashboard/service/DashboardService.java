@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.dashboard.service;
 
+import com.vroomie.car_service.domain.dashboard.dto.response.DashboardSummaryResponse;
 import com.vroomie.car_service.domain.dashboard.repository.DashboardCarRepository;
 import com.vroomie.car_service.domain.dashboard.repository.DashboardOperationRepository;
 import com.vroomie.car_service.domain.dashboard.projection.CarTypeDistributionProjection;
@@ -51,6 +52,23 @@ public class DashboardService {
      */
     private String getCarTypeColor(String carType, int index) {
         return CAR_TYPE_COLOR_PALETTE.get(index % CAR_TYPE_COLOR_PALETTE.size());
+    }
+
+    /**
+     * 전체 대시보드 정보를 조회합니다.
+     * @param companyId
+     * @return DashboardSummaryResponse
+     */
+    public DashboardSummaryResponse getDashboardSummary(Long companyId) {
+        // 차량 타입별 분포 현황( 중형, 준중형..)
+        CarTypeDistributionResponse carTypeDistribution = getCarTypeDistribution(companyId);
+        // 차량 상태 현황( 정상, 수리중, 점검중, 보험 만료 )
+        CarStatusResponse carStatus = getCarStatus(companyId);
+        // 차량 관리 현황( ex. 운행기록 미작성건 )
+        OperationalStatsResponse operationalStats = getOperationalStats(companyId);
+
+
+        return null;
     }
 
     /**
