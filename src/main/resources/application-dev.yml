@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
-      
+
   # Flyway 설정
   flyway:
     enabled: true
@@ -66,7 +66,15 @@ kakao:
   rest-api:
     key: ${KAKAO_REST_API_KEY}
 
+# 네이버 clova ocr
 ncloud:
   ocr:
     url: ${NCLOUD_OCR_URL}
     secret-key: ${NCLOUD_OCR_SECRET_KEY}
+
+# minio
+minio:
+  endpoint: ${MINIO_ENDPOINT}
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: car-images
