@@ -65,6 +65,14 @@ public class CarEntity {
     // =================================================================
 
     /**
+     * 차량 이미지 URL 저장
+     * @param imageUrl 저장할 이미지 URL
+     */
+    public void setImage(String imageUrl) {
+        this.image = imageUrl;
+    }
+
+    /**
      * 운행 종료 후 최종 주행거리 기록
      * @param finalMileage 최종 주행거리
      */
