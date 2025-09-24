@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
+import com.vroomie.car_service.global.constants.PaginationConstants;
 
 import java.util.List;
 
@@ -45,6 +46,19 @@ public class PageResponse<T> {
                 .totalElements(0)
                 .hasNext(false)
                 .hasPrevious(currentPage > 1)
+                .build();
+    }
+
+    // 페이지 응답 생성을 위한 공통 메서드 (Page 객체와 변환된 데이터로 PageResponse 생성)
+    public static <T> PageResponse<T> of(Page<?> page, List<T> data) {
+        return PageResponse.<T>builder()
+                .data(data)
+                .currentPage(page.getNumber() + PaginationConstants.PAGE_OFFSET)
+                .size(page.getSize())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .hasNext(page.hasNext())
+                .hasPrevious(page.hasPrevious())
                 .build();
     }
 
