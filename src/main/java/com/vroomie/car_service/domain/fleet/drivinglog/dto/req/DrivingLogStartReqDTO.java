@@ -1,5 +1,6 @@
 package com.vroomie.car_service.domain.fleet.drivinglog.dto.req;
 
+import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,11 @@ public class DrivingLogStartReqDTO {
 
     @NotNull(message = "운행 시작 시간 선택은 필수입니다.")
     private LocalDateTime startedAt;
+
+    // 프론트에서 props로 내려줌
+    private Purpose purpose;
+
+    private String note;
 
     // 프론트에서 GPS API로 수집
     private BigDecimal startLat;

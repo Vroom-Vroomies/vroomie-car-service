@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>업무용승용차 운행기록부</title>
+    <style>
+        @font-face {
+            font-family: 'Nanum Gothic', 'Apple SD Gothic Neo', sans-serif;;
+            src: url('fonts/NanumGothic.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'Nanum Gothic', '나눔 고딕', sans-serif;
+            font-size: 11px;
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 800px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .main-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .text-left {
+            text-align: left;
+            padding-left: 10px;
+        }
+        .no-border {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header-section">
+    <div>
+        <span>상 호 명: </span>
+        <span th:text="${companyName}"></span>
+    </div>
+    <div>
+        <span>과 세 기 간: </span>
+        <span th:text="${taxPeriod}"></span>
+    </div>
+    <div>
+        <span>사업자등록번호: </span>
+        <span th:text="${businessNumber}"></span>
+    </div>
+</div>
+<div style="text-align: center; margin: 10px 0;">
+    <span class="main-title">업무용승용차 운행기록부</span>
+</div>
+
+<!-- Car Info -->
+<table>
+    <tr>
+        <td class="no-border text-left" colspan="10">1. 기본정보</td>
+    </tr>
+    <tr>
+        <td colspan="5">차 종</td>
+        <td colspan="5">자동차등록번호</td>
+    </tr>
+    <tr>
+        <td colspan="5" th:text="${carType}"></td>
+        <td colspan="5" th:text="${carNumber}"></td>
+    </tr>
+</table>
+
+<!-- Driving Log -->
+<table>
+    <tr>
+        <td class="no-border text-left" colspan="20">2. 업무용 사용비율 계산</td>
+    </tr>
+    <tr>
+        <th colspan="3" rowspan="2">일자<br/>(요일)</th>
+        <th colspan="3" rowspan="2">부서</th>
+        <th colspan="3" rowspan="2">성명</th>
+        <th colspan="2" rowspan="2">⑤ 주행 전<br/>계기판(km)</th>
+        <th colspan="2" rowspan="2">⑥ 주행 후<br/>계기판(km)</th>
+        <th colspan="2" rowspan="2">⑦ 주행거리(km)</th>
+        <th colspan="2">⑧ 출·퇴근용(km)</th>
+        <th colspan="2">⑨ 일반 업무용(km)</th>
+        <th colspan="1" rowspan="2">비 고</th>
+    </tr>
+    <tr>
+        <th colspan="2">출·퇴근</th>
+        <th colspan="2">업무</th>
+    </tr>
+
+    <!-- 반복되는 운행 내역 -->
+    <tr th:each="log : ${logs}">
+        <td colspan="3" th:text="${log.date}"></td>
+        <td colspan="3" th:text="${log.department}"></td>
+        <td colspan="3" th:text="${log.name}"></td>
+        <td colspan="2" th:text="${log.startOdometer}"></td>
+        <td colspan="2" th:text="${log.endOdometer}"></td>
+        <td colspan="2" th:text="${log.distance}"></td>
+        <td colspan="2" th:text="${log.commuteDistance}"></td>
+        <td colspan="2" th:text="${log.businessDistance}"></td>
+        <td colspan="1" th:text="${log.note}"></td>
+    </tr>
+
+    <!-- Summary -->
+    <tr>
+        <td colspan="12"></td>
+        <td colspan="4">① 과세기간 총주행거리(km)</td>
+        <td colspan="3">② 과세기간 업무용 사용거리(km)</td>
+        <td colspan="1">③ 업무사용비율(②/①)</td>
+    </tr>
+    <tr>
+        <td colspan="12"></td>
+        <td colspan="4" th:text="${totalDistance}"></td>
+        <td colspan="3" th:text="${totalBusinessDistance}"></td>
+        <td colspan="1" th:text="${businessRate} + '%'"></td>
+    </tr>
+</table>
+
+
+</body>
+</html>

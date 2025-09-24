@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import com.vroomie.car_service.domain.operation.reservation.enums.Purpose;
 
 @Getter
 @NoArgsConstructor
@@ -19,5 +18,6 @@ public class DrivingLogReqDTO {
     private String endOdometerImage;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
+    private String note;
 
 }
