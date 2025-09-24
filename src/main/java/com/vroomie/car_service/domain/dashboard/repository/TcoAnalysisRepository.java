@@ -4,6 +4,8 @@ import com.vroomie.car_service.domain.dashboard.entity.TcoAnalysisEntity;
 import com.vroomie.car_service.domain.dashboard.projection.CostSavingOpportunityProjection;
 import com.vroomie.car_service.domain.dashboard.projection.TcoProjection;
 import com.vroomie.car_service.domain.dashboard.projection.TcoRecommendationProjection;
+import com.vroomie.car_service.domain.dashboard.projection.TcoAnalysisProjection;
+import com.vroomie.car_service.domain.dashboard.projection.CostDistributionProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -346,5 +349,99 @@ public interface TcoAnalysisRepository extends JpaRepository<TcoAnalysisEntity, 
         @Param("vehicleId") String vehicleId,
         @Param("year") Integer year,
         @Param("month") Integer month
+    );
+
+    /**
+     * 서비스에서 사용하는 TCO 분석 데이터를 필터와 함께 조회합니다.
+     */
+    @Query("""
+        SELECT
+            c.number as vehicleId,
+            c.model as vehicleName,
+            c.type as vehicleType,
+            cc.contractType as contractType,
+            (COALESCE(cc.monthlyFee * 12, 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE') THEN vc.cost ELSE 0 END), 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('CAR_WASH_COST', 'FINE') THEN vc.cost ELSE 0 END), 0)) as totalCost,
+            COALESCE(cc.monthlyFee * 12, 0) as contractCost,
+            COALESCE(SUM(CASE WHEN vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE') THEN vc.cost ELSE 0 END), 0) as operationalCost,
+            COALESCE(SUM(CASE WHEN vc.category IN ('CAR_WASH_COST', 'FINE') THEN vc.cost ELSE 0 END), 0) as maintenanceCost,
+            COALESCE(SUM(COALESCE(dl.odometerDistance, dl.gpsDistance)), 0) as mileage,
+            COALESCE(COUNT(dl.id), 0) as usageDays
+        FROM CarEntity c
+        LEFT JOIN CarContract cc ON c.id = cc.car.id AND cc.contractStatus IN ('NEW', 'RENEWED')
+        LEFT JOIN DrivingLogEntity dl ON c.id = dl.carEntity.id
+            AND dl.createdAt BETWEEN :startDate AND :endDate
+        LEFT JOIN VariableCostEntity vc ON dl.id = vc.drivingLogEntity.id
+        WHERE c.companyId = :companyId
+        AND (:minTotalCost IS NULL OR (COALESCE(cc.monthlyFee * 12, 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE') THEN vc.cost ELSE 0 END), 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('CAR_WASH_COST', 'FINE') THEN vc.cost ELSE 0 END), 0)) >= :minTotalCost)
+        AND (:maxTotalCost IS NULL OR (COALESCE(cc.monthlyFee * 12, 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE') THEN vc.cost ELSE 0 END), 0) +
+             COALESCE(SUM(CASE WHEN vc.category IN ('CAR_WASH_COST', 'FINE') THEN vc.cost ELSE 0 END), 0)) <= :maxTotalCost)
+        AND (:contractTypes IS NULL OR cc.contractType IN :contractTypes)
+        AND (:vehicleTypes IS NULL OR c.type IN :vehicleTypes)
+        GROUP BY c.id, c.number, c.model, c.type, cc.contractType, cc.monthlyFee
+        ORDER BY (COALESCE(cc.monthlyFee * 12, 0) +
+                 COALESCE(SUM(CASE WHEN vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE') THEN vc.cost ELSE 0 END), 0) +
+                 COALESCE(SUM(CASE WHEN vc.category IN ('CAR_WASH_COST', 'FINE') THEN vc.cost ELSE 0 END), 0)) DESC
+        """)
+    Page<TcoAnalysisProjection> findTcoAnalysisWithFilters(
+        @Param("companyId") Long companyId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("minTotalCost") BigDecimal minTotalCost,
+        @Param("maxTotalCost") BigDecimal maxTotalCost,
+        @Param("contractTypes") List<String> contractTypes,
+        @Param("vehicleTypes") List<String> vehicleTypes,
+        Pageable pageable
+    );
+
+
+    /**
+     * 비용 분포 데이터를 조회합니다.
+     */
+    @Query("""
+        SELECT
+            'CONTRACT' as category,
+            SUM(COALESCE(cc.monthlyFee * 12, 0)) as amount,
+            COUNT(DISTINCT c.id) as vehicleCount
+        FROM CarEntity c
+        LEFT JOIN CarContract cc ON c.id = cc.car.id AND cc.contractStatus IN ('NEW', 'RENEWED')
+        LEFT JOIN DrivingLogEntity dl ON c.id = dl.carEntity.id
+            AND dl.createdAt BETWEEN :startDate AND :endDate
+        WHERE c.companyId = :companyId
+
+        UNION ALL
+
+        SELECT
+            'OPERATIONAL' as category,
+            SUM(COALESCE(vc.cost, 0)) as amount,
+            COUNT(DISTINCT c.id) as vehicleCount
+        FROM CarEntity c
+        LEFT JOIN DrivingLogEntity dl ON c.id = dl.carEntity.id
+            AND dl.createdAt BETWEEN :startDate AND :endDate
+        LEFT JOIN VariableCostEntity vc ON dl.id = vc.drivingLogEntity.id
+            AND vc.category IN ('FUEL_COST', 'PARKING_COST', 'TOLL_FEE')
+        WHERE c.companyId = :companyId
+
+        UNION ALL
+
+        SELECT
+            'MAINTENANCE' as category,
+            SUM(COALESCE(vc.cost, 0)) as amount,
+            COUNT(DISTINCT c.id) as vehicleCount
+        FROM CarEntity c
+        LEFT JOIN DrivingLogEntity dl ON c.id = dl.carEntity.id
+            AND dl.createdAt BETWEEN :startDate AND :endDate
+        LEFT JOIN VariableCostEntity vc ON dl.id = vc.drivingLogEntity.id
+            AND vc.category IN ('CAR_WASH_COST', 'FINE')
+        WHERE c.companyId = :companyId
+        """)
+    List<CostDistributionProjection> findCostDistribution(
+        @Param("companyId") Long companyId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
     );
 }
