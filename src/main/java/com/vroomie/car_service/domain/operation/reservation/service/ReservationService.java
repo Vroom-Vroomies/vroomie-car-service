@@ -2,7 +2,6 @@ package com.vroomie.car_service.domain.operation.reservation.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Isolation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.vroomie.car_service.domain.operation.reservation.dto.admin.AdminReservationResponse;
@@ -28,9 +27,9 @@ import org.springframework.data.domain.Page;
 import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.util.DateTimeUtil;
 import com.vroomie.car_service.global.util.UserUtil;
+import com.vroomie.car_service.global.constants.PaginationConstants;
+import com.vroomie.car_service.global.constants.BusinessConstants;
 import org.springframework.data.domain.PageRequest;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Arrays;
@@ -41,30 +40,36 @@ import java.util.Arrays;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+
         private final ReservationRepository reservationRepository;
         private final ReservedLogRepository reservedLogRepository;
         private final EmployeeRepository employeeRepository;
         private final CarRepository carRepository;
         private final ReservationMapper reservationMapper;
 
+        // 페이지 응답 생성을 위한 공통 메서드
+        private <T> PageResponse<T> createPageResponse(Page<?> page, List<T> data) {
+                return PageResponse.<T>builder()
+                                .data(data)
+                                .currentPage(page.getNumber() + PaginationConstants.PAGE_OFFSET)
+                                .size(page.getSize())
+                                .totalPages(page.getTotalPages())
+                                .totalElements(page.getTotalElements())
+                                .hasNext(page.hasNext())
+                                .hasPrevious(page.hasPrevious())
+                                .build();
+        }
+
         // [관리자] 대여 신청 목록 조회
         public PageResponse<AdminReservationResponse> getAdminReservationList(int currentPage, int size) {
 
                 Page<ReservationEntity> reservations = reservationRepository
-                                .findAllByOrderByCreatedAtDesc(PageRequest.of(currentPage - 1, size));
+                                .findAllByOrderByCreatedAtDesc(PageRequest.of(currentPage - PaginationConstants.PAGE_OFFSET, size));
 
                 List<AdminReservationResponse> responses = reservationMapper
                                 .toAdminReservationResponseList(reservations.getContent());
 
-                return PageResponse.<AdminReservationResponse>builder()
-                                .data(responses)
-                                .currentPage(reservations.getNumber() + 1)
-                                .size(reservations.getSize())
-                                .totalPages(reservations.getTotalPages())
-                                .totalElements(reservations.getTotalElements())
-                                .hasNext(reservations.hasNext())
-                                .hasPrevious(reservations.hasPrevious())
-                                .build();
+                return createPageResponse(reservations, responses);
         }
 
         // [관리자] 차량별 대여 신청 목록 조회
@@ -72,29 +77,23 @@ public class ReservationService {
                         int size) {
 
                 Page<ReservationEntity> reservations = reservationRepository
-                                .findByCarIdOrderByCreatedAtDesc(carId, PageRequest.of(currentPage - 1, size));
+                                .findByCarIdOrderByCreatedAtDesc(carId,
+                                                PageRequest.of(currentPage - PaginationConstants.PAGE_OFFSET, size));
 
                 List<AdminReservationResponse> responses = reservationMapper
                                 .toAdminReservationResponseList(reservations.getContent());
 
-                return PageResponse.<AdminReservationResponse>builder()
-                                .data(responses)
-                                .currentPage(reservations.getNumber() + 1)
-                                .size(reservations.getSize())
-                                .totalPages(reservations.getTotalPages())
-                                .totalElements(reservations.getTotalElements())
-                                .hasNext(reservations.hasNext())
-                                .hasPrevious(reservations.hasPrevious())
-                                .build();
+                return createPageResponse(reservations, responses);
         }
 
-        // [관리자] 대여 신청 상태 변경(승인 or 거절) (동시성 처리)
-        @Transactional(isolation = Isolation.SERIALIZABLE)
+        // [관리자] 대여 신청 상태 변경(승인 or 거절) (비관적 락으로 동시성 처리)
+        @Transactional
         public AdminReservationResponse updateAdminReservationStatus(Long id, AdminReservationRequest request) {
 
-                ReservationEntity reservation = reservationRepository.findById(id)
-                                .orElseThrow(
-                                                () -> AdminReservationException.reservationNotFound(id));
+                ReservationEntity reservation = reservationRepository.findByIdWithLock(id);
+                if (reservation == null) {
+                        throw AdminReservationException.reservationNotFound(id);
+                }
 
                 // 상태 변경 유효성 검증
                 AdminReservationException.validateStatusChange(reservation.getStatus(), request.getReservationStatus());
@@ -118,30 +117,6 @@ public class ReservationService {
                 return response;
         }
 
-        // 대여 이력 생성
-        private void createReservedLog(ReservationEntity reservation) {
-
-                // 관리자 이메일 가져오기
-                String adminEmail = UserUtil.getCurrentAdminEmail();
-
-                // 관리자 정보 조회(유저 dto가 없으므로 var 사용)
-                var admin = employeeRepository.findByEmail(adminEmail)
-                                .orElseThrow(() -> AdminReservationException.employeeNotFound(adminEmail));
-
-                // 대여 이력 생성
-                ReservedLogEntity reservedLog = ReservedLogEntity.builder()
-                                .car(reservation.getCar())
-                                .admin(admin)
-                                .reservation(reservation)
-                                .startedAt(reservation.getStartedAt())
-                                .endedAt(reservation.getEndedAt())
-                                .status(RentStatus.RENTED)
-                                .createdAt(LocalDateTime.now())
-                                .build();
-
-                reservedLogRepository.save(reservedLog);
-        }
-
         // RESERVED 상태의 대여 이력을 RENTED로 변경
         private void updateReservedLogStatusToRented(ReservationEntity reservation) {
                 // 해당 예약의 RESERVED 상태 ReservedLog 조회
@@ -149,7 +124,7 @@ public class ReservationService {
                                 reservation, RentStatus.RESERVED);
 
                 if (!reservedLogs.isEmpty()) {
-                        ReservedLogEntity reservedLog = reservedLogs.get(0); // 첫 번째 항목 사용
+                        ReservedLogEntity reservedLog = reservedLogs.get(PaginationConstants.FIRST_ITEM_INDEX);
 
                         // 관리자 정보로 업데이트
                         String adminEmail = UserUtil.getCurrentAdminEmail();
@@ -210,20 +185,12 @@ public class ReservationService {
                 Page<CarEntity> availableCars = carRepository
                                 .findAvailableCarsByTimeSlotWithReservedLog(CarStatus.ACTIVE, requestedStartTime,
                                                 requestedEndTime,
-                                                PageRequest.of(currentPage - 1, size));
+                                                PageRequest.of(currentPage - PaginationConstants.PAGE_OFFSET, size));
 
                 List<AvailableCarListResponse> responses = reservationMapper
                                 .toAvailableCarListResponseList(availableCars.getContent());
 
-                return PageResponse.<AvailableCarListResponse>builder()
-                                .data(responses)
-                                .currentPage(availableCars.getNumber() + 1)
-                                .size(availableCars.getSize())
-                                .totalPages(availableCars.getTotalPages())
-                                .totalElements(availableCars.getTotalElements())
-                                .hasNext(availableCars.hasNext())
-                                .hasPrevious(availableCars.hasPrevious())
-                                .build();
+                return createPageResponse(availableCars, responses);
         }
 
         // [사용자] 차량 상세 조회
@@ -242,16 +209,18 @@ public class ReservationService {
                 return reservationMapper.toMemberCarDetailResponse(car, reservation);
         }
 
-        // [사용자] 차량 대여 신청하기 (동시성 처리)
-        @Transactional(isolation = Isolation.SERIALIZABLE)
+        // [사용자] 차량 대여 신청하기 (비관적 락으로 동시성 처리)
+        @Transactional
         public MemberCarDetailResponse createMemberCarReservation(MemberCarReservationRequest request, Long carId) {
 
                 // 사용자 이메일 가져오기
                 String memberEmpEmail = UserUtil.getCurrentMemberEmail();
 
                 // 차량 존재 여부 확인 (비관적 락 적용)
-                CarEntity car = carRepository.findByIdAndStatusWithLock(carId, CarStatus.ACTIVE)
-                                .orElseThrow(() -> CarException.carNotFoundException());
+                CarEntity car = carRepository.findByIdAndStatusWithLock(carId, CarStatus.ACTIVE);
+                if (car == null) {
+                        throw CarException.carNotFoundException();
+                }
 
                 // 요청 시간 유효성 검증
                 if (request.getStartedAt().isBefore(LocalDateTime.now())) {
@@ -277,20 +246,20 @@ public class ReservationService {
                                 request.getEndedAt(),
                                 conflictStatuses);
 
-                if (conflictCount > 0) {
+                if (conflictCount > PaginationConstants.MIN_COUNT_THRESHOLD) {
                         throw AdminReservationException.reservationTimeConflict();
                 }
 
                 // 사용자가 이미 반납하지 않은 대여가 있는지 확인
                 long activeRentalCount = reservedLogRepository.countActiveRentalsByMemberEmail(memberEmpEmail);
-                if (activeRentalCount > 0) {
+                if (activeRentalCount > PaginationConstants.MIN_COUNT_THRESHOLD) {
                         throw AdminReservationException.memberAlreadyHasActiveRental();
                 }
 
                 // 사용자가 이미 예약 중인 차량이 있는지 확인
                 long activeReservationCount = reservationRepository
                                 .countActiveReservationsByMemberEmail(memberEmpEmail);
-                if (activeReservationCount > 0) {
+                if (activeReservationCount > PaginationConstants.MIN_COUNT_THRESHOLD) {
                         throw AdminReservationException.memberAlreadyHasActiveReservation();
                 }
 
@@ -318,8 +287,8 @@ public class ReservationService {
                 return reservationMapper.toMemberCarDetailResponse(car, savedReservation);
         }
 
-        // [사용자] 차량 대여 취소하기 (동시성 처리)
-        @Transactional(isolation = Isolation.SERIALIZABLE)
+        // [사용자] 차량 대여 취소하기 (비관적 락으로 동시성 처리)
+        @Transactional
         public MemberCarDetailResponse cancelMemberCarReservation(Long carId) {
 
                 // 사용자 이메일 가져오기

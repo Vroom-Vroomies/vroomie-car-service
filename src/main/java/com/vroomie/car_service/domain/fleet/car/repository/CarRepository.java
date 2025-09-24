@@ -12,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface CarRepository extends JpaRepository<CarEntity, Long> {
 
@@ -72,6 +71,6 @@ public interface CarRepository extends JpaRepository<CarEntity, Long> {
   // 비관적 락을 사용하여 차량 조회 (예약 생성 시 동시성 제어용)
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT c FROM CarEntity c WHERE c.id = :carId AND c.status = :status")
-  Optional<CarEntity> findByIdAndStatusWithLock(@Param("carId") Long carId, @Param("status") CarStatus status);
+  CarEntity findByIdAndStatusWithLock(@Param("carId") Long carId, @Param("status") CarStatus status);
 
 }
