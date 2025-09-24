@@ -60,9 +60,9 @@ public class DrivingLogService {
                 .orElseThrow(CarException::carNotFoundException);
 
         // 이미 운행 중인 기록이 있는지 확인
-//        if (drivingLogRepository.existsByEmployeeEntity_EmailAndCarEntity_IdAndLogStatus(empEmail, carId, LogStatus.WRITING)){
-//            throw alreadyExistsLogException();
-//        }
+        if (drivingLogRepository.existsByEmployeeEntity_EmailAndCarEntity_IdAndLogStatus(empEmail, carId, LogStatus.WRITING)){
+            throw alreadyExistsLogException();
+        }
 
         // DrivingLogStartReqDTO -> Entity 변환
         DrivingLogEntity drivingLogEntity = drivingLogMapper.toDrivingLogEntity(drivingLogStartReqDTO, employeeEntity, carEntity, LogStatus.WRITING);
