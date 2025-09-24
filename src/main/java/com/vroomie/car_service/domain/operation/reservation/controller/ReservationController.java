@@ -51,7 +51,7 @@ public class ReservationController {
 
     // [관리자] 차량별 대여 신청 목록 조회
     @Operation(summary = "[관리자]차량별 대여 신청 목록 조회", description = "차량별 대여 신청 목록을 조회합니다.")
-    @GetMapping("/admin/car/{carId}")
+    @GetMapping("/admin/cars/{carId}")
     public ApiResponse<PageResponse<AdminReservationResponse>> getAdminReservationListByCar(@PathVariable Long carId,
             @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_NUMBER) @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
             @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE) @Min(value = PaginationConstants.MIN_PAGE_SIZE, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = PaginationConstants.MAX_PAGE_SIZE, message = "페이지 크기는 100 이하여야 합니다.") int size) {
@@ -67,6 +67,7 @@ public class ReservationController {
     public ApiResponse<AdminReservationResponse> updateAdminReservationStatus(
             @PathVariable @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "대여 신청 ID는 1 이상이어야 합니다.") Long id,
             @RequestBody AdminReservationRequest request) {
+
         return ApiResponse.success(reservationService.updateAdminReservationStatus(id, request), "대여 신청 상태 변경 성공");
     }
 
@@ -86,23 +87,26 @@ public class ReservationController {
 
     // [사용자] 차량 상세 조회
     @Operation(summary = "[사용자]차량 상세 조회", description = "차량 상세를 조회합니다.")
-    @GetMapping("/member/car/{carId}")
+    @GetMapping("/member/cars/{carId}")
     public ApiResponse<MemberCarDetailResponse> getMemberCarDetail(@PathVariable Long carId) {
+
         return ApiResponse.success(reservationService.getMemberCarDetail(carId), "차량 상세 조회 성공");
     }
 
     // 차량 대여 신청하기
     @Operation(summary = "[사용자]차량 대여 신청하기", description = "차량 대여 신청을 합니다.")
-    @PostMapping("/member/car/{carId}")
+    @PostMapping("/member/cars/{carId}")
     public ApiResponse<MemberCarDetailResponse> createMemberCarReservation(
             @RequestBody MemberCarReservationRequest request, @PathVariable Long carId) {
+
         return ApiResponse.success(reservationService.createMemberCarReservation(request, carId), "차량 대여 신청 성공");
     }
 
     // 차량 대여 취소하기
     @Operation(summary = "[사용자]차량 대여 취소하기", description = "차량 대여 취소를 합니다.")
-    @DeleteMapping("/member/car/{carId}")
+    @DeleteMapping("/member/cars/{carId}")
     public ApiResponse<MemberCarDetailResponse> cancelMemberCarReservation(@PathVariable Long carId) {
+
         return ApiResponse.success(reservationService.cancelMemberCarReservation(carId), "차량 대여 취소 성공");
     }
 
@@ -110,6 +114,7 @@ public class ReservationController {
     @Operation(summary = "[사용자]현재 대여 중인 차량 조회", description = "현재 대여 중인 차량의 carId, startedAt, endedAt를 반환합니다.")
     @GetMapping("/member/current")
     public ApiResponse<CurrentCarResponse> getCurrentRentedCar() {
+
         return ApiResponse.success(reservationService.getCurrentRentedCar(), "현재 대여 중인 차량 조회 성공");
     }
 
@@ -117,6 +122,7 @@ public class ReservationController {
     @Operation(summary = "[관리자]연체 상태 수동 업데이트", description = "연체된 대여 상태를 수동으로 업데이트합니다.")
     @PostMapping("/admin/update-overdue")
     public ApiResponse<String> updateOverdueRentals() {
+
         overdueUpdateService.manualUpdateOverdueRentals();
         return ApiResponse.success("연체 상태 업데이트 완료", "연체 상태 업데이트 성공");
     }
