@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import org.hibernate.annotations.BatchSize;
+import com.vroomie.car_service.global.constants.BusinessConstants;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -35,14 +37,17 @@ public class ReservedLogEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
+    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private CarEntity car;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_emp_email")
+    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private EmployeeEntity admin;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
+    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private ReservationEntity reservation;
 
     private LocalDateTime startedAt;
