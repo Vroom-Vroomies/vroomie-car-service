@@ -90,8 +90,7 @@ public class ReservationService {
 
                 // REJECTED 상태로 변경된 경우 기존 RESERVED 상태를 REJECTED로 변경
                 if (request.getReservationStatus() == ReservationStatus.REJECTED) {
-                        reservation.getReservedLog().updateStatus(RentStatus.REJECTED);
-                        reservedLogRepository.save(reservation.getReservedLog());
+                        updateReservedLogStatusToRejected(updatedReservation);
                 }
 
                 // APPROVED 상태로 변경된 경우 기존 RESERVED 상태를 RENTED로 변경
@@ -120,6 +119,27 @@ public class ReservationService {
 
                         // 상태를 RENTED로 변경하고 관리자 정보 업데이트
                         reservedLog.updateStatus(RentStatus.RENTED);
+                        reservedLog.updateAdmin(admin);
+                        reservedLogRepository.save(reservedLog);
+                }
+        }
+
+        // RESERVED 상태의 대여 이력을 REJECTED로 변경
+        private void updateReservedLogStatusToRejected(ReservationEntity reservation) {
+                // 해당 예약의 RESERVED 상태 ReservedLog 조회
+                List<ReservedLogEntity> reservedLogs = reservedLogRepository.findByReservationAndStatus(
+                                reservation, RentStatus.RESERVED);
+
+                if (!reservedLogs.isEmpty()) {
+                        ReservedLogEntity reservedLog = reservedLogs.get(PaginationConstants.FIRST_ITEM_INDEX);
+
+                        // 관리자 정보로 업데이트
+                        String adminEmail = UserUtil.getCurrentAdminEmail();
+                        var admin = employeeRepository.findByEmail(adminEmail)
+                                        .orElseThrow(() -> AdminReservationException.employeeNotFound(adminEmail));
+
+                        // 상태를 REJECTED로 변경하고 관리자 정보 업데이트
+                        reservedLog.updateStatus(RentStatus.REJECTED);
                         reservedLog.updateAdmin(admin);
                         reservedLogRepository.save(reservedLog);
                 }
@@ -155,10 +175,14 @@ public class ReservationService {
 
                 // 현재 시간보다 이전 시간대는 예약 불가
                 if (requestedStartTime.isBefore(LocalDateTime.now())) {
-                        throw AdminReservationException.invalidTimeSlot();
+                        throw AdminReservationException.pastDateTimeNotAllowed();
                 }
 
-                // 업무시간 체크 (9:00 ~ 18:00)
+                // 과거 시간 검증
+                DateTimeUtil.validateNotPastTime(requestedStartTime);
+                DateTimeUtil.validateNotPastTime(requestedEndTime);
+
+                // 업무시간 체크 (24시간 운영)
                 boolean isValidStartHour = DateTimeUtil.isValidBusinessHour(requestedStartTime);
                 boolean isValidEndHour = DateTimeUtil.isValidBusinessHour(requestedEndTime);
 
@@ -211,10 +235,14 @@ public class ReservationService {
 
                 // 요청 시간 유효성 검증
                 if (request.getStartedAt().isBefore(LocalDateTime.now())) {
-                        throw AdminReservationException.invalidTimeSlot();
+                        throw AdminReservationException.pastDateTimeNotAllowed();
                 }
 
-                // 업무시간 체크 (9:00 ~ 18:00)
+                // 과거 시간 검증
+                DateTimeUtil.validateNotPastTime(request.getStartedAt());
+                DateTimeUtil.validateNotPastTime(request.getEndedAt());
+
+                // 업무시간 체크 (24시간 운영)
                 boolean isValidStartHour = DateTimeUtil.isValidBusinessHour(request.getStartedAt());
                 boolean isValidEndHour = DateTimeUtil.isValidBusinessHour(request.getEndedAt());
 
