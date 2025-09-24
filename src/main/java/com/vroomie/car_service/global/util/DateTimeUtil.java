@@ -34,13 +34,20 @@ public class DateTimeUtil {
         int hour = dateTime.getHour();
         int minute = dateTime.getMinute();
 
-        // 업무시간(9:00 ~ 18:00), 30분 단위만 허용
-        // 18시인 경우 정각(00분)만 허용 (18:00까지만)
-        if (hour == BusinessConstants.BUSINESS_END_HOUR) {
-            return minute == 0;
-        }
-        
+        // 24시간 운영, 30분 단위만 허용
         return hour >= BusinessConstants.BUSINESS_START_HOUR && hour < BusinessConstants.BUSINESS_END_HOUR 
                 && (minute == 0 || minute == 30);
+    }
+
+    /**
+     * 주어진 시간이 현재 시간 이후인지 검증합니다.
+     * 
+     * @param dateTime 검증할 시간
+     * @throws AdminReservationException 과거 시간인 경우
+     */
+    public static void validateNotPastTime(LocalDateTime dateTime) {
+        if (dateTime.isBefore(LocalDateTime.now())) {
+            throw AdminReservationException.pastDateTimeNotAllowed();
+        }
     }
 }

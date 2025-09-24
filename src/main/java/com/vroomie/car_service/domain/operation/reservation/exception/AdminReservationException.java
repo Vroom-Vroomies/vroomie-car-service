@@ -57,4 +57,8 @@ public class AdminReservationException {
     public static BusinessException memberAlreadyHasActiveReservation() {
         return new BusinessException(ErrorCode.MEMBER_ALREADY_HAS_ACTIVE_RESERVATION);
     }
+
+    public static BusinessException pastDateTimeNotAllowed() {
+        return new BusinessException(ErrorCode.PAST_DATETIME_NOT_ALLOWED);
+    }
 }
