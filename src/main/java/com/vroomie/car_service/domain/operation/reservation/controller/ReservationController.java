@@ -20,6 +20,7 @@ import com.vroomie.car_service.domain.operation.reservation.service.OverdueUpdat
 import lombok.RequiredArgsConstructor;
 import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.response.ApiResponse;
+import com.vroomie.car_service.global.constants.PaginationConstants;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,7 @@ import jakarta.validation.constraints.Max;
 @Tag(name = "대여 신청 관리")
 public class ReservationController {
 
+
     private final ReservationService reservationService;
     private final OverdueUpdateService overdueUpdateService;
 
@@ -39,8 +41,8 @@ public class ReservationController {
     @Operation(summary = "[관리자]대여 신청 목록 조회", description = "대여 신청 목록을 조회합니다.")
     @GetMapping("/admin")
     public ApiResponse<PageResponse<AdminReservationResponse>> getAdminReservationList(
-            @RequestParam(defaultValue = "1") @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.") int size) {
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_NUMBER) @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE) @Min(value = PaginationConstants.MIN_PAGE_SIZE, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = PaginationConstants.MAX_PAGE_SIZE, message = "페이지 크기는 100 이하여야 합니다.") int size) {
 
         PageResponse<AdminReservationResponse> response = reservationService.getAdminReservationList(currentPage,
                 size);
@@ -51,8 +53,8 @@ public class ReservationController {
     @Operation(summary = "[관리자]차량별 대여 신청 목록 조회", description = "차량별 대여 신청 목록을 조회합니다.")
     @GetMapping("/admin/car/{carId}")
     public ApiResponse<PageResponse<AdminReservationResponse>> getAdminReservationListByCar(@PathVariable Long carId,
-            @RequestParam(defaultValue = "1") @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.") int size) {
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_NUMBER) @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE) @Min(value = PaginationConstants.MIN_PAGE_SIZE, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = PaginationConstants.MAX_PAGE_SIZE, message = "페이지 크기는 100 이하여야 합니다.") int size) {
 
         PageResponse<AdminReservationResponse> response = reservationService.getAdminReservationListByCar(carId,
                 currentPage, size);
@@ -63,7 +65,7 @@ public class ReservationController {
     @Operation(summary = "[관리자]대여 신청 상태 변경", description = "대여 신청 상태를 변경합니다.")
     @PutMapping("/admin/{id}")
     public ApiResponse<AdminReservationResponse> updateAdminReservationStatus(
-            @PathVariable @Min(value = 1, message = "대여 신청 ID는 1 이상이어야 합니다.") Long id,
+            @PathVariable @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "대여 신청 ID는 1 이상이어야 합니다.") Long id,
             @RequestBody AdminReservationRequest request) {
         return ApiResponse.success(reservationService.updateAdminReservationStatus(id, request), "대여 신청 상태 변경 성공");
     }
@@ -74,8 +76,8 @@ public class ReservationController {
     public ApiResponse<PageResponse<AvailableCarListResponse>> getAvailableCarsByTimeSlot(
             @RequestParam String requestedStartTime,
             @RequestParam String requestedEndTime,
-            @RequestParam(defaultValue = "1") @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다.") int size) {
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_NUMBER) @Min(value = PaginationConstants.MIN_PAGE_NUMBER, message = "페이지 번호는 1 이상이어야 합니다.") int currentPage,
+            @RequestParam(defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE) @Min(value = PaginationConstants.MIN_PAGE_SIZE, message = "페이지 크기는 1 이상이어야 합니다.") @Max(value = PaginationConstants.MAX_PAGE_SIZE, message = "페이지 크기는 100 이하여야 합니다.") int size) {
 
         return ApiResponse.success(
                 reservationService.getAvailableCarsByTimeSlot(requestedStartTime, requestedEndTime, currentPage, size),
