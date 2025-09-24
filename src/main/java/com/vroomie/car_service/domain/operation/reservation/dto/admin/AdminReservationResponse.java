@@ -30,7 +30,6 @@ public class AdminReservationResponse {
 
     private ReservationStatus reservationStatus; // 예약 상태(승인 여부)
     private RentStatus rentStatus; // 대여 상태(대여 중, 반납 완료)
-    // private DrivingLogStatus drivingLogStatus; // 운행 로그 상태(준비중, 작성중, 대기중, 완료)
     private String drivingLogStatus; // 운행 로그 상태(준비중, 작성중, 대기중, 완료)
     private String adminName; // 담당자 이름
     private Purpose purpose;

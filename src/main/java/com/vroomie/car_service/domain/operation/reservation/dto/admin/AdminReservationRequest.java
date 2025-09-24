@@ -10,5 +10,6 @@ import com.vroomie.car_service.domain.operation.reservation.enums.ReservationSta
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminReservationRequest {
+    
     private ReservationStatus reservationStatus; // 예약 상태(승인 여부)
 }
