@@ -19,6 +19,7 @@ import com.vroomie.car_service.domain.fleet.drivinglog.repository.DrivingLogRepo
 import com.vroomie.car_service.domain.fleet.repair.repository.RepairRepository;
 import com.vroomie.car_service.domain.operation.reservation.enums.RentStatus;
 import com.vroomie.car_service.domain.operation.reservation.repository.ReservedLogRepository;
+import com.vroomie.car_service.global.service.FileStorageService;
 import com.vroomie.car_service.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
+import java.util.Base64;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +50,7 @@ public class CarService {
     private final DrivingLogRepository drivingLogRepository;
     private final RepairRepository repairRepository;
     private final CarMapper carMapper;
+    private final FileStorageService fileStorageService;
 
     @Transactional(readOnly = true)
     public PageResponse<CarSimpleResponse> fetchCarList(Pageable pageable, String status, String usageType) {
@@ -107,12 +111,50 @@ public class CarService {
 
     @Transactional
     public CarDetailResponse createCar(CarRegistRequest request) {
-
         if (carRepository.existsByNumber(request.getNumber())) {
             throw CarException.carAlreadyExistsException();
         }
 
+        String imageUrl = null;
+        String base64Data = request.getImageBase64();
+
+        if (base64Data != null && !base64Data.trim().isEmpty()) {
+            try {
+                // Base64 데이터에서 Content-Type과 순수 데이터 분리
+                String[] parts = base64Data.split(",");
+                if (parts.length != 2) {
+                    throw new IllegalArgumentException("잘못된 Base64 데이터 형식입니다.");
+                }
+
+                String base64Prefix = parts[0]; // data:image/png;base64
+                String pureBase64 = parts[1];   // 순수 데이터
+
+                // Content-Type 추출 (image/png)
+                String contentType = base64Prefix.substring(base64Prefix.indexOf(":") + 1, base64Prefix.indexOf(";"));
+
+                // Base64 문자열을 byte 배열로 디코딩
+                byte[] imageBytes = Base64.getDecoder().decode(pureBase64);
+
+                // 추출한 Content-Type과 함께 MockMultipartFile 객체 생성
+                MultipartFile imageFile = new MockMultipartFile(
+                        request.getImageName(),      // 파일 이름
+                        request.getImageName(),      // 원본 파일 이름
+                        contentType,
+                        imageBytes
+                );
+
+                // MinIO에 업로드
+                imageUrl = fileStorageService.uploadFile(imageFile, "cars");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("이미지 처리 중 예상치 못한 오류가 발생했습니다.", e);
+            }
+        }
+
         CarEntity newCar = carMapper.toEntity(request);
+        newCar.setImage(imageUrl);
+
         CarEntity savedCar = carRepository.save(newCar);
 
         return carMapper.toDetailResponse(savedCar);

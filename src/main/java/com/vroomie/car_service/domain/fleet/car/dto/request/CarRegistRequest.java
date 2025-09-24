@@ -32,7 +32,8 @@ public class CarRegistRequest {
     @NotBlank(message = "차량번호는 필수입니다.")
     private String number;
 
-    private String image;
+    private String imageBase64;
+    private String imageName;
 
     @Trimmed
     @NotBlank(message = "모델명은 필수입니다.")

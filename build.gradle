@@ -39,6 +39,12 @@ dependencies {
 	// 외부 API 호출
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	// minio
+	implementation 'io.minio:minio:8.5.9'
+	
+	// mock
+	implementation 'org.springframework.boot:spring-boot-starter-test'
+
 	// thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
