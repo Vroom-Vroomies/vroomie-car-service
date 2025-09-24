@@ -28,7 +28,6 @@ import com.vroomie.car_service.global.response.PageResponse;
 import com.vroomie.car_service.global.util.DateTimeUtil;
 import com.vroomie.car_service.global.util.UserUtil;
 import com.vroomie.car_service.global.constants.PaginationConstants;
-import com.vroomie.car_service.global.constants.BusinessConstants;
 import org.springframework.data.domain.PageRequest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,18 +46,6 @@ public class ReservationService {
         private final CarRepository carRepository;
         private final ReservationMapper reservationMapper;
 
-        // 페이지 응답 생성을 위한 공통 메서드
-        private <T> PageResponse<T> createPageResponse(Page<?> page, List<T> data) {
-                return PageResponse.<T>builder()
-                                .data(data)
-                                .currentPage(page.getNumber() + PaginationConstants.PAGE_OFFSET)
-                                .size(page.getSize())
-                                .totalPages(page.getTotalPages())
-                                .totalElements(page.getTotalElements())
-                                .hasNext(page.hasNext())
-                                .hasPrevious(page.hasPrevious())
-                                .build();
-        }
 
         // [관리자] 대여 신청 목록 조회
         public PageResponse<AdminReservationResponse> getAdminReservationList(int currentPage, int size) {
@@ -69,7 +56,7 @@ public class ReservationService {
                 List<AdminReservationResponse> responses = reservationMapper
                                 .toAdminReservationResponseList(reservations.getContent());
 
-                return createPageResponse(reservations, responses);
+                return PageResponse.of(reservations, responses);
         }
 
         // [관리자] 차량별 대여 신청 목록 조회
@@ -83,7 +70,7 @@ public class ReservationService {
                 List<AdminReservationResponse> responses = reservationMapper
                                 .toAdminReservationResponseList(reservations.getContent());
 
-                return createPageResponse(reservations, responses);
+                return PageResponse.of(reservations, responses);
         }
 
         // [관리자] 대여 신청 상태 변경(승인 or 거절) (비관적 락으로 동시성 처리)
@@ -190,7 +177,7 @@ public class ReservationService {
                 List<AvailableCarListResponse> responses = reservationMapper
                                 .toAvailableCarListResponseList(availableCars.getContent());
 
-                return createPageResponse(availableCars, responses);
+                return PageResponse.of(availableCars, responses);
         }
 
         // [사용자] 차량 상세 조회
