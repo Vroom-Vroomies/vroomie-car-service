@@ -46,16 +46,27 @@ public interface ReservedLogRepository extends JpaRepository<ReservedLogEntity, 
         boolean existsByCarIdAndStatusIn(Long carId, List<RentStatus> statusList);
 
         @Query("SELECT rl FROM ReservedLogEntity rl " +
+                        "JOIN FETCH rl.car c " +
+                        "JOIN FETCH rl.reservation r " +
+                        "LEFT JOIN FETCH rl.admin a " +
                         "WHERE rl.status = 'RENTED' " +
                         "AND rl.returnDate IS NULL " +
                         "AND rl.endedAt < :currentTime")
         List<ReservedLogEntity> findOverdueRentals(@Param("currentTime") LocalDateTime currentTime);
 
-        List<ReservedLogEntity> findByReservationAndStatus(ReservationEntity reservation, RentStatus status);
+        @Query("SELECT rl FROM ReservedLogEntity rl " +
+                        "JOIN FETCH rl.car c " +
+                        "LEFT JOIN FETCH rl.admin a " +
+                        "WHERE rl.reservation = :reservation " +
+                        "AND rl.status = :status")
+        List<ReservedLogEntity> findByReservationAndStatus(@Param("reservation") ReservationEntity reservation, 
+                        @Param("status") RentStatus status);
 
         @Query("SELECT rl FROM ReservedLogEntity rl " +
-                        "JOIN rl.reservation r " +
-                        "JOIN r.member m " +
+                        "JOIN FETCH rl.car c " +
+                        "JOIN FETCH rl.reservation r " +
+                        "JOIN FETCH r.member m " +
+                        "LEFT JOIN FETCH rl.admin a " +
                         "WHERE m.email = :memberEmail " +
                         "AND rl.status IN :statuses")
         List<ReservedLogEntity> findByMemberEmailAndStatus(@Param("memberEmail") String memberEmail,
