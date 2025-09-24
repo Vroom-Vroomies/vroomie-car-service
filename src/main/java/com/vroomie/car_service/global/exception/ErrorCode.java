@@ -80,7 +80,7 @@ public enum ErrorCode {
     DUPLICATED_INSURANCE("동일 보험의 경우 중복 등록이 불가합니다.", 2205, HttpStatus.CONFLICT),
     INSURANCE_EXPIRED("해당 보험은 만료되었습니다.", 2206, HttpStatus.BAD_REQUEST),
 
-    // ========== 보험 정보 관련 (2300~2399) ==========
+    // ========== 실제 비용 정보 관련 (2300~2399) ==========
     COST_TYPE_NOT_FOUND("해당 차량 비용 유형이 존재하지 않습니다.", 2301, HttpStatus.NOT_FOUND);
 
 

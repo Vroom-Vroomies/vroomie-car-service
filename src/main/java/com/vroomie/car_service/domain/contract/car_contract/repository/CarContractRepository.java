@@ -29,4 +29,12 @@ public interface CarContractRepository extends JpaRepository<CarContract,Long> {
          WHERE cc.contractStatus IN ('NEW', 'RENEWED')
     """)
     List<CarContract> findAllActive();
+
+    @Query("""
+        SELECT cc
+          FROM CarContract cc
+         WHERE cc.contractStatus IN ('NEW', 'RENEWED')
+           AND cc.paymentDay = :todayDayOfMonth
+    """)
+    List<CarContract> findActiveContractsByPaymentDay(@Param("todayDayOfMonth") int todayDayOfMonth);
 }
