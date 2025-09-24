@@ -56,31 +56,51 @@ public class ActualCostService {
     // 요일은 무시하는 ?로 지정하여 매월 1일 새벽 1시에 작동합니다.
     @Scheduled(cron = "0 0 2 * * ?")    // 매일 새벽 1시에 작업 실행
 //    @Scheduled(cron = "0 */1 * * * ?")  // 테스트용 매 분
-    public void generateMonthlyCosts(){
-        List<CarContract> activeContracts = contractRepository.findAllActive();
-        List<InsuContractEntity> activeInsurances = insuranceRepository.findAllActive();
+    public void generateDailyCosts(){
+        LocalDate today = LocalDate.now();
+        int todayDayOfMonth = today.getDayOfMonth();
 
-        for(CarContract contract : activeContracts){
-            if(contract.getContractStatus() != ContractStatus.EXPIRED){
+        // 오늘이 납부일인 계약/보험들만 처리
+        List<CarContract> todayPaymentContracts  = contractRepository.findActiveContractsByPaymentDay(todayDayOfMonth);
+        List<InsuContractEntity> todayPaymentInsurances  = insuranceRepository.findAllActiveInsurancesByPaymentDay(todayDayOfMonth);
+
+        for(CarContract contract : todayPaymentContracts){
+            // 이미 이번 달에 생성했는지 확인
+            if(!isAlreadyGeneratedThisMonth(contract.getId(), today)){
                 if (contract instanceof LeaseContract) {
                     generateLeaseCost((LeaseContract) contract);
                 } else if (contract instanceof RentContract) {
                     generateRentCost((RentContract)contract);
                 } else if (contract instanceof PurchaseContract){
-                    if(((PurchaseContract) contract).getLoanAmount() != null){
-                        generatePurchaseCost((PurchaseContract)contract);
+                    PurchaseContract purchaseContract = (PurchaseContract) contract;
+                    if(purchaseContract.getLoanAmount() != null){
+                        // 대출 있는 경우: 매월 상환금
+                        generatePurchaseCost(purchaseContract);
+                    } else {
+                        // 대출 없는 경우: firstPaymentDay에 구매가격 한번만
+                        generatePurchaseOneTimeCost(purchaseContract);
                     }
                 }
             }
         }
 
-        for(InsuContractEntity insurance : activeInsurances){
-            if(insurance.getInsuranceStatus() != InsuranceStatus.EXPIRED){
+        for(InsuContractEntity insurance : todayPaymentInsurances){
+            if(!isAlreadyGeneratedThisMonth(insurance.getId(), today)){
                 generateInsuranceCost(insurance);
             }
         }
     }
 
+    // 이번 달에 이미 생성했는지 확인
+    private boolean isAlreadyGeneratedThisMonth(Long id, LocalDate today) {
+        YearMonth currentMonth = YearMonth.from(today);
+        LocalDate startOfMonth = currentMonth.atDay(1);
+        LocalDate endOfMonth = currentMonth.atEndOfMonth();
+
+        return actualCostRepository.existsByContractIdAndCostDateBetween(id, Date.valueOf(startOfMonth), Date.valueOf(endOfMonth));
+    }
+
+    // 리스
     private void generateLeaseCost(LeaseContract contract) {
         // 리스 총 주행거리 초과 여부 확인 후 계산
         CarEntity car = carRepository.findById(contract.getCar().getId()).orElseThrow(() -> new BusinessException(ErrorCode.CAR_NOT_FOUND));
@@ -114,6 +134,7 @@ public class ActualCostService {
         log.info("리스 비용 생성 - 계약ID: {}", contract.getId());
     }
 
+    // 렌트
     private void generateRentCost(RentContract contract) {
         CarEntity car = carRepository.findById(contract.getCar().getId()).orElseThrow(() -> new BusinessException(ErrorCode.CAR_NOT_FOUND));
         ContractCostType contractType = costTypeRepository.findByContractTypeName("렌탈");
@@ -133,27 +154,87 @@ public class ActualCostService {
 
     }
 
+    // 구매 - 대출금 있는 경우
     private void generatePurchaseCost(PurchaseContract contract) {
         CarEntity car = carRepository.findById(contract.getCar().getId()).orElseThrow(() -> new BusinessException(ErrorCode.CAR_NOT_FOUND));
         ContractCostType contractType = costTypeRepository.findByContractTypeName("대출");
         Long costType = contractType.getId();
 
-        if(contract.getLoanAmount() != null){
-            ActualCostRequestDTO costDTO = ActualCostRequestDTO.builder()
-                    .carId(car.getId())
-                    .contractId(contract.getId())
-                    .costTypeId(costType)
-                    .amount(contract.getMonthlyRepayment())
-                    .costDate(convertPaymentDayToDateSafe(contract.getPaymentDay()))
-                    .description(contractType.getDescription())
-                    .build();
-            ActualCost actualCost = convertDtoToEntity(costDTO, car, contract);
-            actualCostRepository.save(actualCost);
-            log.info("구매 비용 생성 - 계약ID: {}", contract.getId());
+        LocalDate today = LocalDate.now();
+        LocalDate firstPaymentDate = contract.getFirstPaymentDay().toLocalDate();
 
+        BigDecimal totalAmount;
+        String description;
+
+        // 첫 달인지 확인 (연-월이 같은지 비교)
+        if (today.getYear() == firstPaymentDate.getYear() && today.getMonth() == firstPaymentDate.getMonth()){
+
+            // 첫 달 : 계약금 + 월상환금
+            totalAmount = contract.getMonthlyRepayment();
+            if(contract.getDownPayment() != null){
+                totalAmount = totalAmount.add(contract.getDownPayment());
+                description = "대출 월 상환금 + 계약금";
+            } else {
+                description = "대출 월 상환금";
+            }
+            log.info("첫 달 구매 비용 생성 - 계약ID : {}, 계약금 포함: {}", contract.getId(), totalAmount);
+
+        // 두 번째 달 부터 : 월 상환금만
+        } else {
+            totalAmount = contract.getMonthlyRepayment();
+            description = "대출 월 상환금";
         }
+
+        ActualCostRequestDTO costDTO = ActualCostRequestDTO.builder()
+                .carId(car.getId())
+                .contractId(contract.getId())
+                .costTypeId(costType)
+                .amount(totalAmount)
+                .costDate(convertPaymentDayToDateSafe(contract.getPaymentDay()))
+                .description(contractType.getDescription())
+                .build();
+        ActualCost actualCost = convertDtoToEntity(costDTO, car, contract);
+        actualCostRepository.save(actualCost);
+        log.info("대출 구매 비용 생성 - 계약ID: {}, 금액: {}", contract.getId(), totalAmount);
+
     }
 
+    // 구매 - 대출금 없는 경우(일회성)
+    private void generatePurchaseOneTimeCost(PurchaseContract contract) {
+
+        // 이미 이번 달에 일회성 결제를 했는지 확인
+        LocalDate today = LocalDate.now();
+        if(!isAlreadyGeneratedThisMonth(contract.getId(), today)){
+            log.info("이미 일회성 구매 비용이 생성됨 - 계약ID: {}", contract.getId());
+        }
+
+        CarEntity car = carRepository.findById(contract.getCar().getId()).orElseThrow(() -> new BusinessException(ErrorCode.CAR_NOT_FOUND));
+        ContractCostType contractType = costTypeRepository.findByContractTypeName("대출");
+        Long costType = contractType.getId();
+
+        BigDecimal totalAmount = contract.getPurchasePrice();
+        String descriptiption = "구매 가격";
+
+        // 계약금이 있을 경우 - 합산
+        if(contract.getDownPayment() != null){
+            totalAmount = totalAmount.add(contract.getDownPayment());
+            descriptiption = "계약금 + 구매 가격";
+        }
+
+        ActualCostRequestDTO costDTO = ActualCostRequestDTO.builder()
+                .carId(car.getId())
+                .contractId(contract.getId())
+                .costTypeId(costType)
+                .amount(totalAmount)
+                .costDate(convertPaymentDayToDateSafe(contract.getPaymentDay()))
+                .description(descriptiption)
+                .build();
+        ActualCost actualCost = convertDtoToEntity(costDTO, car, contract);
+        actualCostRepository.save(actualCost);
+        log.info("일회성 구매 비용 생성 - 계약ID : {}", contract.getId());
+    }
+
+    // 보험
     private void generateInsuranceCost(InsuContractEntity insurance) {
         ContractCostType contractType = costTypeRepository.findByContractTypeName("보험료");
         Long costType = contractType.getId();
@@ -170,6 +251,7 @@ public class ActualCostService {
         actualCostRepository.save(actualCost);
     }
 
+    // 월말 처리 (29, 30, 31일 납부일 케이스)
     private Date convertPaymentDayToDateSafe(Integer paymentDay) {
         YearMonth currentMonth = YearMonth.now();
         int lastDayOfMonth = currentMonth.lengthOfMonth();
@@ -208,5 +290,44 @@ public class ActualCostService {
                 .costDate(dto.getCostDate())
                 .description(dto.getDescription())
                 .build();
+    }
+
+    // 보정 스케줄러 -> 누락된 건이 있을 경우
+    @Scheduled(cron = "0 0 3 1 * ?")
+    public void correctMissedCosts(){
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        YearMonth lastYearMonth = YearMonth.from(lastMonth);
+        LocalDate checkDate = lastYearMonth.atDay(1);
+
+        // 지날 달에 생성되지 않은 활성 계약들을 찾아서 보정
+        List<CarContract> activeContracts = contractRepository.findAllActive();
+        List<InsuContractEntity> activeInsurances = insuranceRepository.findAllActive();
+
+        for(CarContract contract : activeContracts){
+            if(!isAlreadyGeneratedThisMonth(contract.getId(), checkDate)){
+                log.warn("누락된 비용 발견 - 계약ID : {}, 대상월 : {}", contract.getId(), checkDate);
+                if (contract instanceof LeaseContract) {
+                    generateLeaseCost((LeaseContract) contract);
+                } else if (contract instanceof RentContract) {
+                    generateRentCost((RentContract)contract);
+                } else if (contract instanceof PurchaseContract){
+                    PurchaseContract purchaseContract = (PurchaseContract) contract;
+                    if(purchaseContract.getLoanAmount() != null){
+                        // 대출 있는 경우: 매월 상환금
+                        generatePurchaseCost(purchaseContract);
+                    } else {
+                        // 대출 없는 경우: firstPaymentDay에 구매가격 한번만
+                        generatePurchaseOneTimeCost(purchaseContract);
+                    }
+                }
+            }
+        }
+
+        for(InsuContractEntity insurance : activeInsurances){
+            if(!isAlreadyGeneratedThisMonth(insurance.getId(), checkDate)){
+                log.warn("누락된 비용 발견 - 보험ID : {}, 대상월 : {}", insurance.getId(), checkDate);
+                generateInsuranceCost(insurance);
+            }
+        }
     }
 }

@@ -28,4 +28,12 @@ public interface InsuContractRepository extends JpaRepository<InsuContractEntity
          WHERE ic.insuranceStatus IN ('NEW', 'RENEWED')
     """)
     List<InsuContractEntity> findAllActive();
+
+    @Query("""
+        SELECT ic
+          FROM InsuContractEntity ic
+         WHERE ic.insuranceStatus IN ('NEW', 'RENEWED')
+           AND ic.paymentDay = :todayDayOfMonth
+    """)
+    List<InsuContractEntity> findAllActiveInsurancesByPaymentDay(@Param("todayDayOfMonth") int todayDayOfMonth);
 }
