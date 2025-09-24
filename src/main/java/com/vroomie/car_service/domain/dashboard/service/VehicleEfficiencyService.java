@@ -207,8 +207,8 @@ public class VehicleEfficiencyService {
             .map(data -> {
                 String efficiencyGrade = (String) data[0];
                 Long vehicleCount = (Long) data[1];
-                BigDecimal avgInefficiencyScore = (BigDecimal) data[2];
-                BigDecimal avgCostPerKm = (BigDecimal) data[3];
+                BigDecimal avgInefficiencyScore = BigDecimal.valueOf((Double) data[2]);
+                BigDecimal avgCostPerKm = BigDecimal.valueOf((Double) data[3]);
                 Double percentage = vehicleCount.doubleValue(); // Will be calculated properly in a real implementation
 
                 return VehicleEfficiencyResponse.EfficiencyDistribution.builder()
