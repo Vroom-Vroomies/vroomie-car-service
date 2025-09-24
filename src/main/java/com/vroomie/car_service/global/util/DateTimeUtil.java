@@ -2,6 +2,7 @@ package com.vroomie.car_service.global.util;
 
 import java.time.LocalDateTime;
 import com.vroomie.car_service.domain.operation.reservation.exception.AdminReservationException;
+import com.vroomie.car_service.global.constants.BusinessConstants;
 
  
 // 날짜/시간 관련 유틸리티 클래스
@@ -33,12 +34,13 @@ public class DateTimeUtil {
         int hour = dateTime.getHour();
         int minute = dateTime.getMinute();
 
-        // 9:00 ~ 18:00, 30분 단위만 허용
+        // 업무시간(9:00 ~ 18:00), 30분 단위만 허용
         // 18시인 경우 정각(00분)만 허용 (18:00까지만)
-        if (hour == 18) {
+        if (hour == BusinessConstants.BUSINESS_END_HOUR) {
             return minute == 0;
         }
         
-        return hour >= 9 && hour < 18 && (minute == 0 || minute == 30);
+        return hour >= BusinessConstants.BUSINESS_START_HOUR && hour < BusinessConstants.BUSINESS_END_HOUR 
+                && (minute == 0 || minute == 30);
     }
 }
