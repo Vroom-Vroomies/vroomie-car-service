@@ -37,17 +37,14 @@ public class ReservedLogEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
-    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private CarEntity car;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_emp_email")
-    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private EmployeeEntity admin;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
-    @BatchSize(size = BusinessConstants.DEFAULT_BATCH_SIZE)
     private ReservationEntity reservation;
 
     private LocalDateTime startedAt;
